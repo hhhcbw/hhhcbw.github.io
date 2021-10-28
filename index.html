@@ -289,7 +289,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-10-28 09:57:08 / 修改时间：09:58:41" itemprop="dateCreated datePublished" datetime="2021-10-28T09:57:08+08:00">2021-10-28</time>
+              <time title="创建时间：2021-10-28 09:57:08 / 修改时间：10:01:28" itemprop="dateCreated datePublished" datetime="2021-10-28T09:57:08+08:00">2021-10-28</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -317,29 +317,14 @@
 </blockquote>
 <hr>
 <p>根据定义，字符串由一个 <code>NUL</code> 字节结尾，所以字符串内部不能包含任何 <code>NUL</code> 字符。但是，非字符串数据内部包含零值的情况并不罕见。我们无法使用字符串函数来处理这种类型的数据，因为当它们遇到第 <strong>1</strong> 个 <code>NUL</code> 字节时将停止工作。<br>不过，我们可以使用另外一组相关的函数，它们的操作与字符串函数类似，但这些函数能够处理任意的字节序列。下面是它们的原型：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memcpy</span><span class="params">( <span class="keyword">void</span> *dst, <span class="keyword">void</span> <span class="keyword">const</span> *src, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memmove</span><span class="params">( <span class="keyword">void</span> *dst, <span class="keyword">void</span> <span class="keyword">const</span> *src, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memcmp</span><span class="params">( <span class="keyword">void</span> <span class="keyword">const</span> *a, <span class="keyword">void</span> <span class="keyword">const</span> *b, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memchr</span><span class="params">( <span class="keyword">void</span> <span class="keyword">const</span> *a, <span class="keyword">int</span> ch, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memset</span><span class="params">( <span class="keyword">void</span> *a, <span class="keyword">int</span> ch, <span class="keyword">size_t</span> length )</span></span>;</span><br></pre></td></tr></table></figure>
-<p>每个原型都包含一个显式的参数来说明需要处理的字节数。但和 <code>strn</code> 带头的函数不同，它们在遇到 <code>NUL</code> 字节时并不会停止操作。</p>
-<hr>
-<h1 id="memcpy"><a href="#memcpy" class="headerlink" title="memcpy"></a>memcpy</h1><p><code>memcpy</code> 从 <code>src</code> 的起始位置复制 <code>length</code> 个字节到 <code>dst</code> 的内存起始位置。可以用这种方式复制任何类型的值，第 <strong>3</strong> 个参数指定复制值的长度（以字节计）。如果 <code>src</code> 和 <code>dst</code> 以任何形式出现了重叠，它的结果是未定义的。<br><strong>例如</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span> temp[SIZE], values[SIZE];</span><br><span class="line">...</span><br><span class="line"><span class="built_in">memcpy</span>( temp, values, SIZE );</span><br></pre></td></tr></table></figure>
-<p>它从数组 <code>values</code> 复制 <code>SIZE</code> 个字节到数组 <code>temp</code>。<br>但是，如果两个数组都是整型数组该怎么办呢？下面的语句可以完成这项任务：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">memcpy</span>( temp, values, <span class="keyword">sizeof</span>( valies ) );</span><br></pre></td></tr></table></figure>
-<p>前两个参数并不需要强制类型转换，因为在函数的原型中，参数的类型是 <code>void*</code> 型指针，而任何类型的指针都可以转换为 <code>void*</code> 型指针。<br>如果数组只有部分内容需要复制，那么需要复制的数量必须在第 <strong>3</strong> 个参数中指明。对于长度大于一个字节的数据，要确保把数量和数据类型的长度相乘，例如：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">memcpy</span>( saved_answers, answers, count * <span class="keyword">sizeof</span>( answers[<span class="number">0</span>] ) ); </span><br></pre></td></tr></table></figure>
-<p>也可以用这种技巧复制结构或结构数组。</p>
-<hr>
-<h1 id="memmove"><a href="#memmove" class="headerlink" title="memmove"></a>memmove</h1><p> <code>memmove</code> 函数的行为和 <code>memcpy</code> 差不多，只是它的源操作数和目标操作数可以重叠。虽然它并不需要以下面这种方法实现，但 <code>memmove</code> 的结果和这种方法的结果相同：<strong>把源操作数复制到一个临时位置，这个临时位置不会与源或目标操作数重叠，然后再把它从这个临时位置复制到目标操作数</strong>。<br> <code>memmove</code>通常无法使用某些机器所提供的特殊的字节-字符串处理指令来实现，所以它可能比 <code>memcpy</code> 慢一些。但是，如果源和目标参数真的可能存在重叠，就应该使用 <code>memmove</code>，如下例所示：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** Shift the values in the x array left one position.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">memmove( x, x + <span class="number">1</span>, ( count - <span class="number">1</span> ) * <span class="keyword">sizeof</span>( x[ <span class="number">0</span> ] ) );</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h1 id="memcmp"><a href="#memcmp" class="headerlink" title="memcmp"></a>memcmp</h1><p><code>memcmp</code> 对两段内存中的内容进行比较，这两段内存分别起始于 <code>a</code> 和 <code>b</code>，共比较 <code>length</code> 个字节。这些值按照无符号字符逐字节进行比较，函数的返回类型和 <code>strcmp</code> 函数一样——负值表示 <code>a</code> 小于 <code>b</code>，正值表示 <code>a</code> 大于 <code>b</code>，零表示 <code>a</code> 等于 <code>b</code>。由于这些值是根据一串无符号字节进行比较的，因此如果 <code>memcmp</code> 函数用于比较不是单字节的数据（如整数或浮点数），就可能给出不可预料的结果，</p>
-<hr>
-<h1 id="memchr"><a href="#memchr" class="headerlink" title="memchr"></a>memchr</h1><p><code>memchr</code> 从 <code>a</code> 的起始位置开始查找字符 <code>ch</code> 第 <strong>1</strong> 次出现的位置，并返回一个指向该位置的指针，它共查找 <code>length</code> 个字节。如果在这 <code>length</code> 个字节中未找到该字符，函数就返回一个 <code>NULL</code> 指针。</p>
-<hr>
-<h1 id="memset"><a href="#memset" class="headerlink" title="memset"></a>memset</h1><p><code>memset</code> 函数把从 <code>a</code> 开始的 <code>length</code> 个字节都设置为字符值 <code>ch</code>。例如:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">memset</span>( buffer, <span class="number">0</span>, SIZE );</span><br></pre></td></tr></table></figure>
-<p>把 <code>buffer</code>的前 <code>SIZE</code> 个字节都初始化为 <code>0</code>。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/10/28/C-note-4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -386,7 +371,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-10-28 09:56:08 / 修改时间：09:57:19" itemprop="dateCreated datePublished" datetime="2021-10-28T09:56:08+08:00">2021-10-28</time>
+              <time title="创建时间：2021-10-28 09:56:08 / 修改时间：10:02:34" itemprop="dateCreated datePublished" datetime="2021-10-28T09:56:08+08:00">2021-10-28</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">

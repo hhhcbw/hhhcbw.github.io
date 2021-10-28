@@ -30,7 +30,7 @@
 <meta property="og:description" content="这个系列主要是我学习《C和指针》这本书的一些笔记，主要关于一些小的细节，目的是供自己学习和参考，详细地部分建议大家可以阅读一下《C和指针》这本书   根据定义，字符串由一个 NUL 字节结尾，所以字符串内部不能包含任何 NUL 字符。但是，非字符串数据内部包含零值的情况并不罕见。我们无法使用字符串函数来处理这种类型的数据，因为当它们遇到第 1 个 NUL 字节时将停止工作。不过，我们可以使用另外">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-10-28T01:57:08.000Z">
-<meta property="article:modified_time" content="2021-10-28T01:58:41.289Z">
+<meta property="article:modified_time" content="2021-10-28T02:01:28.931Z">
 <meta property="article:author" content="zju_cbw">
 <meta property="article:tag" content="C">
 <meta property="article:tag" content="C++">
@@ -228,7 +228,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-10-28 09:57:08 / 修改时间：09:58:41" itemprop="dateCreated datePublished" datetime="2021-10-28T09:57:08+08:00">2021-10-28</time>
+              <time title="创建时间：2021-10-28 09:57:08 / 修改时间：10:01:28" itemprop="dateCreated datePublished" datetime="2021-10-28T09:57:08+08:00">2021-10-28</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -263,6 +263,8 @@
 </blockquote>
 <hr>
 <p>根据定义，字符串由一个 <code>NUL</code> 字节结尾，所以字符串内部不能包含任何 <code>NUL</code> 字符。但是，非字符串数据内部包含零值的情况并不罕见。我们无法使用字符串函数来处理这种类型的数据，因为当它们遇到第 <strong>1</strong> 个 <code>NUL</code> 字节时将停止工作。<br>不过，我们可以使用另外一组相关的函数，它们的操作与字符串函数类似，但这些函数能够处理任意的字节序列。下面是它们的原型：</p>
+<span id="more"></span>
+
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memcpy</span><span class="params">( <span class="keyword">void</span> *dst, <span class="keyword">void</span> <span class="keyword">const</span> *src, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memmove</span><span class="params">( <span class="keyword">void</span> *dst, <span class="keyword">void</span> <span class="keyword">const</span> *src, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memcmp</span><span class="params">( <span class="keyword">void</span> <span class="keyword">const</span> *a, <span class="keyword">void</span> <span class="keyword">const</span> *b, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memchr</span><span class="params">( <span class="keyword">void</span> <span class="keyword">const</span> *a, <span class="keyword">int</span> ch, <span class="keyword">size_t</span> length )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">memset</span><span class="params">( <span class="keyword">void</span> *a, <span class="keyword">int</span> ch, <span class="keyword">size_t</span> length )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>每个原型都包含一个显式的参数来说明需要处理的字节数。但和 <code>strn</code> 带头的函数不同，它们在遇到 <code>NUL</code> 字节时并不会停止操作。</p>
 <hr>
