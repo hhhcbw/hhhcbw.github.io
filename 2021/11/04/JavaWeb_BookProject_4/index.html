@@ -25,21 +25,28 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="这个系列主要是我学习《C和指针》这本书的一些笔记，主要关于一些小的细节，目的是供自己学习和参考，详细地部分建议大家可以阅读一下《C和指针》这本书   字符分类每个分类函数接受一个包含字符值的整型参数。函数测试这个字符并返回一个整型值，表示真或假。下表列出了这些字符分类函数以及它们每个所执行的测试。">
+  <meta name="description" content="前三部分我们已经完成了书城项目的登录与注册功能，第四部分我们对之前的代码进行优化。  合并Servlet在实际的开发中，一个模块，一般只使用一个 Servlet 程序，用户的注册与登录都属于用户模块，因此只需要一个 Servlet 程序即可，所以我们将 LoginServlet 与 RegistSerlet 程序合并为一个 UserServlet 程序。那么一个请求过来，如何知道他是注册还是登录">
 <meta property="og:type" content="article">
-<meta property="og:title" content="C和指针学习笔记(三)——字符操作">
-<meta property="og:url" content="http://example.com/2021/10/28/C-note-3/index.html">
+<meta property="og:title" content="JavaWeb书城项目(四)———代码优化">
+<meta property="og:url" content="http://example.com/2021/11/04/JavaWeb_BookProject_4/index.html">
 <meta property="og:site_name" content="cbw">
-<meta property="og:description" content="这个系列主要是我学习《C和指针》这本书的一些笔记，主要关于一些小的细节，目的是供自己学习和参考，详细地部分建议大家可以阅读一下《C和指针》这本书   字符分类每个分类函数接受一个包含字符值的整型参数。函数测试这个字符并返回一个整型值，表示真或假。下表列出了这些字符分类函数以及它们每个所执行的测试。">
+<meta property="og:description" content="前三部分我们已经完成了书城项目的登录与注册功能，第四部分我们对之前的代码进行优化。  合并Servlet在实际的开发中，一个模块，一般只使用一个 Servlet 程序，用户的注册与登录都属于用户模块，因此只需要一个 Servlet 程序即可，所以我们将 LoginServlet 与 RegistSerlet 程序合并为一个 UserServlet 程序。那么一个请求过来，如何知道他是注册还是登录">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-10-28T01:56:08.000Z">
-<meta property="article:modified_time" content="2021-10-28T02:02:34.002Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/00b66ca955184dfe971893d463e24dc4.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/071e8889d53e403cbe01779153920bf7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d763fd5ea8504513b8f8f12241725e60.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/59dd6bafc4f84a9cbbfdeac8cb4b2e0e.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2efa959e63324468a41ebbaffe4256fe.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/85354810ee0f4b11965c4735b49e7ae6.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/12a629fb600a45619e8ad35c63da5057.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2021-11-04T12:14:00.000Z">
+<meta property="article:modified_time" content="2021-11-04T12:15:04.049Z">
 <meta property="article:author" content="zju_cbw">
-<meta property="article:tag" content="C">
-<meta property="article:tag" content="C++">
+<meta property="article:tag" content="jsp">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/00b66ca955184dfe971893d463e24dc4.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
 
-<link rel="canonical" href="http://example.com/2021/10/28/C-note-3/">
+<link rel="canonical" href="http://example.com/2021/11/04/JavaWeb_BookProject_4/">
 
 
 <script id="page-configurations">
@@ -52,7 +59,7 @@
   };
 </script>
 
-  <title>C和指针学习笔记(三)——字符操作 | cbw</title>
+  <title>JavaWeb书城项目(四)———代码优化 | cbw</title>
   
 
 
@@ -206,7 +213,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/28/C-note-3/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/04/JavaWeb_BookProject_4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -219,7 +226,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          C和指针学习笔记(三)——字符操作
+          JavaWeb书城项目(四)———代码优化
         </h1>
 
         <div class="post-meta">
@@ -231,7 +238,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-10-28 09:56:08 / 修改时间：10:02:34" itemprop="dateCreated datePublished" datetime="2021-10-28T09:56:08+08:00">2021-10-28</time>
+              <time title="创建时间：2021-11-04 20:14:00 / 修改时间：20:15:04" itemprop="dateCreated datePublished" datetime="2021-11-04T20:14:00+08:00">2021-11-04</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -239,7 +246,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C</span></a>
+                  <a href="/categories/JavaWeb%E4%B9%A6%E5%9F%8E%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">JavaWeb书城项目</span></a>
                 </span>
             </span>
 
@@ -262,70 +269,29 @@
 
       
         <blockquote>
-<p>这个系列主要是我学习《C和指针》这本书的一些笔记，主要关于一些小的细节，目的是供自己学习和参考，详细地部分建议大家可以阅读一下《C和指针》这本书</p>
+<p>前三部分我们已经完成了书城项目的登录与注册功能，第四部分我们对之前的代码进行优化。</p>
 </blockquote>
-<hr>
-<h1 id="字符分类"><a href="#字符分类" class="headerlink" title="字符分类"></a>字符分类</h1><p>每个分类函数接受一个包含字符值的整型参数。函数测试这个字符并返回一个整型值，表示真或假。下表列出了这些字符分类函数以及它们每个所执行的测试。</p>
+<h1 id="合并Servlet"><a href="#合并Servlet" class="headerlink" title="合并Servlet"></a>合并Servlet</h1><p>在实际的开发中，一个模块，一般只使用一个 <code>Servlet</code> 程序，用户的注册与登录都属于用户模块，因此只需要一个 <code>Servlet</code> 程序即可，所以我们将 <code>LoginServlet</code> 与 <code>RegistSerlet</code> 程序合并为一个 <code>UserServlet</code> 程序。<br><strong>那么一个请求过来，如何知道他是注册还是登录呢？</strong></p>
 <span id="more"></span>
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>如果它的参数符合下列条件就返回真</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>iscntrl</td>
-<td>任何控制字符</td>
-</tr>
-<tr>
-<td>isspace</td>
-<td>空白字符：空格’ ‘、换页 ‘\f’、换行’\n’、回车’\r’、制表符’\t’ 或垂直制表符’\v’</td>
-</tr>
-<tr>
-<td>isdigit</td>
-<td>十进制数字 0~9</td>
-</tr>
-<tr>
-<td>isxdigit</td>
-<td>十六进制数字，包括所有十进制数字、小写字母 a~f、大写字母 A~F</td>
-</tr>
-<tr>
-<td>islower</td>
-<td>小写字母 a~z</td>
-</tr>
-<tr>
-<td>isupper</td>
-<td>大写字母 A~Z</td>
-</tr>
-<tr>
-<td>isalpha</td>
-<td>字母 a~z 或 A~Z</td>
-</tr>
-<tr>
-<td>isalnum</td>
-<td>字母或数字 (a~z、A~Z 或 0~9)</td>
-</tr>
-<tr>
-<td>ispunct</td>
-<td>标点符号，任何不属于数字或字母的图形字符（可打印字符）</td>
-</tr>
-<tr>
-<td>isgraph</td>
-<td>任何图形字符</td>
-</tr>
-<tr>
-<td>isprint</td>
-<td>任何可打印字符，包括图形字符和空白字符</td>
-</tr>
-</tbody></table>
-<h1 id="字符转换"><a href="#字符转换" class="headerlink" title="字符转换"></a>字符转换</h1><p>转换函数用于把大写字母转换为小写字母或者把小写字母转换为大写字母、</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">tolower</span><span class="params">( <span class="keyword">int</span> ch )</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">toupper</span><span class="params">( <span class="keyword">int</span> ch )</span></span>;</span><br></pre></td></tr></table></figure>
-<p><code>toupper</code> 函数返回其参数的对应大写形式，<code>tolower</code> 函数返回其参数的对应小写形式。如果函数的参数并不是一个处于适当大小写状态的字符（即 <code>toupper</code> 的参数不是小写字母或 <code>tolower</code>的参数不是个大写字母），函数将不修改参数，而是直接返回。<br><strong>注意</strong><br>直接测试或操作字符会降低程序的可移植性。例如，考虑下面这条语句，它试图测试 <code>ch</code>是否是一个大写字符。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>( ch &gt;= <span class="string">&#x27;A&#x27;</span> &amp;&amp; ch &lt;= <span class="string">&#x27;Z&#x27;</span> )</span><br></pre></td></tr></table></figure>
-<p>   这条语句在使用 <code>ASCII</code> 字符集的机器上能够运行，但在使用 <code>EBCDIC</code> 字符集的机器上将会失败。另外，下面这条语句</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>( <span class="built_in">isupper</span>( ch ) )</span><br></pre></td></tr></table></figure>
-<p>无论机器使用哪个字符集，它都能顺利运行。</p>
+<p>这时我们就要用到表单项的隐藏域来解决。<br><img src="https://img-blog.csdnimg.cn/00b66ca955184dfe971893d463e24dc4.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="登录表单隐藏域"><br><img src="https://img-blog.csdnimg.cn/071e8889d53e403cbe01779153920bf7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="注册表单隐藏域"><br>这样，我们在用 <code>Servlet</code> 程序接收请求时，就能根据 <code>name</code> 的 <code>value</code> 项来判断其是注册还是登录。</p>
+<hr>
+<h1 id="反射优化"><a href="#反射优化" class="headerlink" title="反射优化"></a>反射优化</h1><p>用户模块不止有登录和注册功能，还会有注销，修改密码等其它功能，如果这时都放在一个 <code>Servlet</code> 里，那么代码必定有很多 <code>if...else...</code>，这样代码就会显得很冗杂。我们可以使用反射优化 <code>if...else...</code>。<br><img src="https://img-blog.csdnimg.cn/d763fd5ea8504513b8f8f12241725e60.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="反射优化"><br>这样两行代码就能代替繁琐的 <code>if...else,,,</code>。</p>
+<hr>
+<h1 id="抽取BaseServlet程序"><a href="#抽取BaseServlet程序" class="headerlink" title="抽取BaseServlet程序"></a>抽取BaseServlet程序</h1><p><img src="https://img-blog.csdnimg.cn/59dd6bafc4f84a9cbbfdeac8cb4b2e0e.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="抽取BaseServlet"><br>因为我们不止一个模块，除了用户模块，还会有图书模块等，这样其反射优化都是一样的，那么我们可以抽取出父类 <code>BaseServlet</code> 程序，那么其它模块就可以继承这个模块，达到复用代码的目的。<br><code>BaseServlet</code>程序：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.web;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseServlet</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        String action = req.getParameter(<span class="string">&quot;action&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 获取action业务鉴别字符串，获得相应的业务 方法反射对象</span></span><br><span class="line">            Method method = <span class="keyword">this</span>.getClass().getDeclaredMethod(action, HttpServletRequest.class, HttpServletResponse.class);</span><br><span class="line">            <span class="comment">// 调用目标业务 方法</span></span><br><span class="line">            method.invoke(<span class="keyword">this</span>, req, resp);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="数据的封装和抽取BeanUtils的使用"><a href="#数据的封装和抽取BeanUtils的使用" class="headerlink" title="数据的封装和抽取BeanUtils的使用"></a>数据的封装和抽取BeanUtils的使用</h1><p>我们一般会将数据封装进<code>JavaBean</code>里，但如果通过调用 <code>Set</code> 方法会使代码很冗余，这时我们可以使用第三方工具类 <code>BeanUtils</code> ，它可以用于把 <code>Map</code> 中的值注入到 <code>JavaBean</code> 中。</p>
+<ol>
+<li>导入需要的 <code>jar</code> 包：<br> commons-beanutils-1.8.0.jar<br> commons-logging-1.1.1.jar</li>
+<li>编写 <code>WebUtils</code> 工具类使用<br><code>WebUtils</code>工具类:</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.utils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.beanutils.BeanUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebUtils</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 把Map中的值注入到JavaBean中</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> value</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bean</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">copyParamToBean</span><span class="params">(Map value , T bean )</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;注入之前：&quot;</span> + bean);</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 把所有请求的参数都注入到bean对象中</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            BeanUtils.populate(bean, value);</span><br><span class="line">            System.out.println(<span class="string">&quot;注入之后：&quot;</span> + bean);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>在程序中加入如下代码即可调用方法将请求参数注入到<code>JavaBean</code>中<br><img src="https://img-blog.csdnimg.cn/2efa959e63324468a41ebbaffe4256fe.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="调用方法"></li>
+</ol>
+<hr>
+<h1 id="使用EL表达式修改表单回显"><a href="#使用EL表达式修改表单回显" class="headerlink" title="使用EL表达式修改表单回显"></a>使用EL表达式修改表单回显</h1><p>我们可以使用<code>EL</code>表达式来修改表单回显，这样能使代码更简洁。<br><img src="https://img-blog.csdnimg.cn/85354810ee0f4b11965c4735b49e7ae6.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改login,jsp"><br><img src="https://img-blog.csdnimg.cn/12a629fb600a45619e8ad35c63da5057.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改regist.jsp"></p>
 
     </div>
 
@@ -351,7 +317,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2021/10/28/C-note-3/" title="C和指针学习笔记(三)——字符操作">http://example.com/2021/10/28/C-note-3/</a>
+    <a href="http://example.com/2021/11/04/JavaWeb_BookProject_4/" title="JavaWeb书城项目(四)———代码优化">http://example.com/2021/11/04/JavaWeb_BookProject_4/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -362,8 +328,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/C/" rel="tag"># C</a>
-              <a href="/tags/C/" rel="tag"># C++</a>
+              <a href="/tags/jsp/" rel="tag"># jsp</a>
           </div>
 
         
@@ -372,13 +337,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/10/28/C-note-2/" rel="prev" title="C和指针学习笔记(二)——字符串常用库函数">
-      <i class="fa fa-chevron-left"></i> C和指针学习笔记(二)——字符串常用库函数
+    <a href="/2021/11/04/JavaWeb_BookProject_3/" rel="prev" title="JavaWeb书城项目(三)———表单回显">
+      <i class="fa fa-chevron-left"></i> JavaWeb书城项目(三)———表单回显
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/10/28/C-note-4/" rel="next" title="C和指针学习笔记(四)——内存操作">
-      C和指针学习笔记(四)——内存操作 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -442,7 +404,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E5%88%86%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">字符分类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E8%BD%AC%E6%8D%A2"><span class="nav-number">2.</span> <span class="nav-text">字符转换</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%88%E5%B9%B6Servlet"><span class="nav-number">1.</span> <span class="nav-text">合并Servlet</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%B0%84%E4%BC%98%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">反射优化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%BD%E5%8F%96BaseServlet%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">抽取BaseServlet程序</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%9A%84%E5%B0%81%E8%A3%85%E5%92%8C%E6%8A%BD%E5%8F%96BeanUtils%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">数据的封装和抽取BeanUtils的使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8EL%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%BF%AE%E6%94%B9%E8%A1%A8%E5%8D%95%E5%9B%9E%E6%98%BE"><span class="nav-number">5.</span> <span class="nav-text">使用EL表达式修改表单回显</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
