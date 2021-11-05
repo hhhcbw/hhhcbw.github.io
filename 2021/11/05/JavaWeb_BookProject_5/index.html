@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前四个阶段我们完成了用户的注册与登录功能，并对代码进行了优化，第五阶段我们完成书城项目的图书模块，属于后台管理中的图书管理功能，主要包括图书的添加，删除，修改以及显示。  数据库表首先编写图书模块的数据库表，使用如下Sql语句创建t_book表，并插入初始化测试数据。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaWeb书城项目(五)———图书模块">
+<meta property="og:url" content="http://example.com/2021/11/05/JavaWeb_BookProject_5/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="前四个阶段我们完成了用户的注册与登录功能，并对代码进行了优化，第五阶段我们完成书城项目的图书模块，属于后台管理中的图书管理功能，主要包括图书的添加，删除，修改以及显示。  数据库表首先编写图书模块的数据库表，使用如下Sql语句创建t_book表，并插入初始化测试数据。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/0f0b9623abf64db5867b8b3b02d6e79c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/fdf3bd7458634afbbe802b3ecebff7c2.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_16,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f30bc392dd9247809ae2f560b55adab1.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d30835652dfd45b3b2bf05e9158a09ff.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/58546ca35a8f44fcb2a97babe722f1e2.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/826f8dd3e4b54e49a9bfc5e553ee0110.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a14b94c36bf348dfb7699139c4935c59.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/eb54af33c7a24b1b83317eb11f712721.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/577e296c79634466ab846f7662828c9a.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/204199d6089b489ab4dcee50b51b975f.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5ff89df479644432b087677b0c785cdc.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/369e13b37816414ea6d96c566a15bcd2.png">
+<meta property="article:published_time" content="2021-11-05T10:03:00.000Z">
+<meta property="article:modified_time" content="2021-11-05T10:04:43.368Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="jsp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/0f0b9623abf64db5867b8b3b02d6e79c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2021/11/05/JavaWeb_BookProject_5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JavaWeb书城项目(五)———图书模块 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/05/JavaWeb_BookProject_5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JavaWeb书城项目(五)———图书模块
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-11-05 18:03:00 / 修改时间：18:04:43" itemprop="dateCreated datePublished" datetime="2021-11-05T18:03:00+08:00">2021-11-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaWeb%E4%B9%A6%E5%9F%8E%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">JavaWeb书城项目</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>前四个阶段我们完成了用户的注册与登录功能，并对代码进行了优化，第五阶段我们完成书城项目的图书模块，属于后台管理中的图书管理功能，主要包括图书的添加，删除，修改以及显示。</p>
+</blockquote>
+<h1 id="数据库表"><a href="#数据库表" class="headerlink" title="数据库表"></a>数据库表</h1><p>首先编写图书模块的数据库表，使用如下<code>Sql</code>语句创建<code>t_book</code>表，并插入初始化测试数据。</p>
+<span id="more"></span>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_book(</span><br><span class="line">	`id` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">primary</span> key auto_increment, 	## 主键</span><br><span class="line">	`name` <span class="type">varchar</span>(<span class="number">50</span>) <span class="keyword">not</span> <span class="keyword">null</span>,				## 书名 </span><br><span class="line">	`author` <span class="type">varchar</span>(<span class="number">50</span>) <span class="keyword">not</span> <span class="keyword">null</span>,				## 作者</span><br><span class="line">	`price` <span class="type">decimal</span>(<span class="number">11</span>,<span class="number">2</span>) <span class="keyword">not</span> <span class="keyword">null</span>,				## 价格</span><br><span class="line">	`sales` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="keyword">null</span>,					## 销量</span><br><span class="line">	`stock` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="keyword">null</span>,					## 库存</span><br><span class="line">	`img_path` <span class="type">varchar</span>(<span class="number">200</span>) <span class="keyword">not</span> <span class="keyword">null</span>			## 书的图片路径</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">## 插入初始化测试数据</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;java从入门到放弃&#x27;</span> , <span class="string">&#x27;国哥&#x27;</span> , <span class="number">80</span> , <span class="number">9999</span> , <span class="number">9</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;数据结构与算法&#x27;</span> , <span class="string">&#x27;严敏君&#x27;</span> , <span class="number">78.5</span> , <span class="number">6</span> , <span class="number">13</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;怎样拐跑别人的媳妇&#x27;</span> , <span class="string">&#x27;龙伍&#x27;</span> , <span class="number">68</span>, <span class="number">99999</span> , <span class="number">52</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;木虚肉盖饭&#x27;</span> , <span class="string">&#x27;小胖&#x27;</span> , <span class="number">16</span>, <span class="number">1000</span> , <span class="number">50</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;C++编程思想&#x27;</span> , <span class="string">&#x27;刚哥&#x27;</span> , <span class="number">45.5</span> , <span class="number">14</span> , <span class="number">95</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;蛋炒饭&#x27;</span> , <span class="string">&#x27;周星星&#x27;</span> , <span class="number">9.9</span>, <span class="number">12</span> , <span class="number">53</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;赌神&#x27;</span> , <span class="string">&#x27;龙伍&#x27;</span> , <span class="number">66.5</span>, <span class="number">125</span> , <span class="number">535</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;Java编程思想&#x27;</span> , <span class="string">&#x27;阳哥&#x27;</span> , <span class="number">99.5</span> , <span class="number">47</span> , <span class="number">36</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;JavaScript从入门到精通&#x27;</span> , <span class="string">&#x27;婷姐&#x27;</span> , <span class="number">9.9</span> , <span class="number">85</span> , <span class="number">95</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;cocos2d-x游戏编程入门&#x27;</span> , <span class="string">&#x27;国哥&#x27;</span> , <span class="number">49</span>, <span class="number">52</span> , <span class="number">62</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;C语言程序设计&#x27;</span> , <span class="string">&#x27;谭浩强&#x27;</span> , <span class="number">28</span> , <span class="number">52</span> , <span class="number">74</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;Lua语言程序设计&#x27;</span> , <span class="string">&#x27;雷丰阳&#x27;</span> , <span class="number">51.5</span> , <span class="number">48</span> , <span class="number">82</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;西游记&#x27;</span> , <span class="string">&#x27;罗贯中&#x27;</span> , <span class="number">12</span>, <span class="number">19</span> , <span class="number">9999</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;水浒传&#x27;</span> , <span class="string">&#x27;华仔&#x27;</span> , <span class="number">33.05</span> , <span class="number">22</span> , <span class="number">88</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;操作系统原理&#x27;</span> , <span class="string">&#x27;刘优&#x27;</span> , <span class="number">133.05</span> , <span class="number">122</span> , <span class="number">188</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;数据结构 java版&#x27;</span> , <span class="string">&#x27;封大神&#x27;</span> , <span class="number">173.15</span> , <span class="number">21</span> , <span class="number">81</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;UNIX高级环境编程&#x27;</span> , <span class="string">&#x27;乐天&#x27;</span> , <span class="number">99.15</span> , <span class="number">210</span> , <span class="number">810</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;javaScript高级编程&#x27;</span> , <span class="string">&#x27;国哥&#x27;</span> , <span class="number">69.15</span> , <span class="number">210</span> , <span class="number">810</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;大话设计模式&#x27;</span> , <span class="string">&#x27;国哥&#x27;</span> , <span class="number">89.15</span> , <span class="number">20</span> , <span class="number">10</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_book(`id` , `name` , `author` , `price` , `sales` , `stock` , `img_path`) </span><br><span class="line"><span class="keyword">values</span>(<span class="keyword">null</span> , <span class="string">&#x27;人月神话&#x27;</span> , <span class="string">&#x27;刚哥&#x27;</span> , <span class="number">88.15</span> , <span class="number">20</span> , <span class="number">80</span> , <span class="string">&#x27;static/img/default.jpg&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<h1 id="编写图书模块的JavaBean"><a href="#编写图书模块的JavaBean" class="headerlink" title="编写图书模块的JavaBean"></a>编写图书模块的JavaBean</h1><p>我们在<code>pojo</code>目录下创建<code>Book</code>类，它的属性如下，并设置<code>get</code>,<code>set</code>,有参和无参构造方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Integer id;</span><br><span class="line"><span class="keyword">private</span> String name;</span><br><span class="line"><span class="keyword">private</span> String author;</span><br><span class="line"><span class="keyword">private</span> BigDecimal price;</span><br><span class="line"><span class="keyword">private</span> Integer sales;</span><br><span class="line"><span class="keyword">private</span> Integer stock;</span><br><span class="line"><span class="keyword">private</span> String imgPath = <span class="string">&quot;static/img/default.jpg&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，对于图片路径<code>imgPath</code>，我们初始化了一个默认图片路径，对于之后修改，如果传入图片路径为<code>null</code>或空串，我们就不对<code>imgPath</code>进行修改，因此我们需要对默认构造方法以及<code>setImgPath</code>方法做出如下修改。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 要求给定的图书封面图片路径不能为空</span></span><br><span class="line">       <span class="keyword">if</span> (imgPath != <span class="keyword">null</span> &amp;&amp; !<span class="string">&quot;&quot;</span>.equals(imgPath)) &#123;</span><br><span class="line">           <span class="keyword">this</span>.imgPath = imgPath;</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="编写图书模块的Dao和测试Dao"><a href="#编写图书模块的Dao和测试Dao" class="headerlink" title="编写图书模块的Dao和测试Dao"></a>编写图书模块的Dao和测试Dao</h1><p><code>Dao</code>接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.dao;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.atguigu.pojo.Book;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BookDao</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">addBook</span><span class="params">(Book book)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">deleteBookById</span><span class="params">(Integer id)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">updateBook</span><span class="params">(Book book)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Book <span class="title">queryBookById</span><span class="params">(Integer id)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Book&gt; <span class="title">queryBooks</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>BookDaoImpl</code>实现类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.dao.impl;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.atguigu.dao.BookDao;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.pojo.Book;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookDaoImpl</span> <span class="keyword">extends</span> <span class="title">BaseDao</span> <span class="keyword">implements</span> <span class="title">BookDao</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">addBook</span><span class="params">(Book book)</span> </span>&#123;</span><br><span class="line">        String sql = <span class="string">&quot;insert into t_book(`name`,`author`,`price`,`sales`,`stock`,`img_path`) values(?,?,?,?,?,?)&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> update(sql,book.getName(),book.getAuthor(),book.getPrice(),book.getSales(),book.getStock(),book.getImgPath());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">deleteBookById</span><span class="params">(Integer id)</span> </span>&#123;</span><br><span class="line">        String sql = <span class="string">&quot;delete from t_book where id = ?&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> update(sql, id);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">updateBook</span><span class="params">(Book book)</span> </span>&#123;</span><br><span class="line">        String sql = <span class="string">&quot;update t_book set `name`=?,`author`=?,`price`=?,`sales`=?,`stock`=?,`img_path`=? where id=?&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> update(sql,book.getName(),book.getAuthor(),book.getPrice(),book.getSales(),book.getStock(),book.getImgPath(),book.getId());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Book <span class="title">queryBookById</span><span class="params">(Integer id)</span> </span>&#123;</span><br><span class="line">        String sql = <span class="string">&quot;select `id`,`name`,`author`,`price`,`sales`,`stock`,`img_path` imgPath from t_book where id = ?&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> queryForOne(Book.class, sql, id);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Book&gt; <span class="title">queryBooks</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String sql = <span class="string">&quot;select `id`,`name`,`author`,`price`,`sales`,`stock`,`img_path` imgPath from t_book&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> queryForList(Book.class, sql);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>BookDao</code>的测试：<br>我们在<code>test</code>目录下创建<code>BookDaoTest</code>类进行测试。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.atguigu.dao.BookDao;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.dao.impl.BookDaoImpl;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.pojo.Book;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.math.BigDecimal;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookDaoTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BookDao bookDao = <span class="keyword">new</span> BookDaoImpl();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addBook</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        bookDao.addBook(<span class="keyword">new</span> Book(<span class="keyword">null</span>, <span class="string">&quot;博文为太帅了&quot;</span>, <span class="string">&quot;博文&quot;</span>, <span class="keyword">new</span> BigDecimal(<span class="number">199999</span>), <span class="number">1100000</span>, <span class="number">0</span>, <span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteBookById</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        bookDao.deleteBookById(<span class="number">21</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateBook</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        bookDao.updateBook(<span class="keyword">new</span> Book(<span class="number">22</span>, <span class="string">&quot;大家都很帅&quot;</span>, <span class="string">&quot;佳庆&quot;</span>,  <span class="keyword">new</span> BigDecimal(<span class="number">199999</span>), <span class="number">1100000</span>, <span class="number">0</span>, <span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">queryBookById</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println( bookDao.queryBookById(<span class="number">21</span>) );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">queryBooks</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Book queryBook : bookDao.queryBooks())&#123;</span><br><span class="line">            System.out.println(queryBook);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="编写图书模块的Service和测试Service"><a href="#编写图书模块的Service和测试Service" class="headerlink" title="编写图书模块的Service和测试Service"></a>编写图书模块的Service和测试Service</h1><p><code>BookService</code>接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.atguigu.pojo.Book;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BookService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addBook</span><span class="params">(Book book)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteBookById</span><span class="params">(Integer id)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateBook</span><span class="params">(Book book)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Book <span class="title">queryBookById</span><span class="params">(Integer id)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Book&gt; <span class="title">queryBooks</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>BookServiceImpl</code>实现类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.service.impl;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.atguigu.dao.BookDao;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.dao.impl.BookDaoImpl;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.pojo.Book;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.service.BookService;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookServiceImpl</span> <span class="keyword">implements</span> <span class="title">BookService</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> BookDao bookDao = <span class="keyword">new</span> BookDaoImpl();</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addBook</span><span class="params">(Book book)</span> </span>&#123;</span><br><span class="line">        bookDao.addBook(book);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteBookById</span><span class="params">(Integer id)</span> </span>&#123;</span><br><span class="line">        bookDao.deleteBookById(id);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateBook</span><span class="params">(Book book)</span> </span>&#123;</span><br><span class="line">        bookDao.updateBook(book);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Book <span class="title">queryBookById</span><span class="params">(Integer id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> bookDao.queryBookById(id);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Book&gt; <span class="title">queryBooks</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> bookDao.queryBooks();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>BookService</code>的测试：<br>在<code>test</code>目录下创建<code>BookServiceImplTest</code>测试类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.atguigu.pojo.Book;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.service.BookService;</span><br><span class="line"><span class="keyword">import</span> com.atguigu.service.impl.BookServiceImpl;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.math.BigDecimal;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookServiceImplTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BookService bookService = <span class="keyword">new</span> BookServiceImpl();</span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addBook</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        bookService.addBook(<span class="keyword">new</span> Book(<span class="keyword">null</span>, <span class="string">&quot;博文真是太帅了&quot;</span>, <span class="string">&quot;博文&quot;</span>, <span class="keyword">new</span> BigDecimal(<span class="number">1555555</span>), <span class="number">200000</span>, <span class="number">0</span>, <span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteBookById</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        bookService.deleteBookById(<span class="number">22</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateBook</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        bookService.updateBook(<span class="keyword">new</span> Book(<span class="number">21</span>, <span class="string">&quot;博文帅惨了&quot;</span>, <span class="string">&quot;博文&quot;</span>, <span class="keyword">new</span> BigDecimal(<span class="number">21313131</span>), <span class="number">100005</span>, <span class="number">0</span>, <span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">queryBookById</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(bookService.queryBookById(<span class="number">21</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">queryBooks</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(Book bookquery : bookService.queryBooks())</span><br><span class="line">            System.out.println(bookquery);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="编写图书模块的Web层，页面联调测试"><a href="#编写图书模块的Web层，页面联调测试" class="headerlink" title="编写图书模块的Web层，页面联调测试"></a>编写图书模块的Web层，页面联调测试</h1><h2 id="图书列表功能的实现"><a href="#图书列表功能的实现" class="headerlink" title="图书列表功能的实现"></a>图书列表功能的实现</h2><ol>
+<li><p>图解列表功能流程<br><img src="https://img-blog.csdnimg.cn/0f0b9623abf64db5867b8b3b02d6e79c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="列表功能流程"></p>
+</li>
+<li><p><code>BookServlet</code>程序中添加<code>list</code>方法<br>在<code>web</code>目录下创建<code>BookServlet</code>类，并让其继承<code>BaseServlet</code>，并实现<code>list</code>方法，需要注意的是，我们直接访问是通过<code>get</code>访问的，所以我们要实现<code>doGet</code>方法，让其调用<code>doPost</code>方法。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookServlet</span> <span class="keyword">extends</span> <span class="title">BaseServlet</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BookService bookService = <span class="keyword">new</span> BookServiceImpl();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        doPost(req, resp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">list</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        <span class="comment">//1 通过BookService查询全部图书</span></span><br><span class="line">        List&lt;Book&gt; books = bookService.queryBooks();</span><br><span class="line">        <span class="comment">//2 把全部图书保存到Request域中</span></span><br><span class="line">        req.setAttribute(<span class="string">&quot;books&quot;</span>, books);</span><br><span class="line">        <span class="comment">//3 请求转发到/pages/manager/book_manager.jsp页面</span></span><br><span class="line">        req.getRequestDispatcher(<span class="string">&quot;/pages/manager/book_manager.jsp&quot;</span>).forward(req, resp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在<code>web.xml</code>中添加映射</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>BookServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>com.atguigu.web.BookServlet<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>BookServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/manager/bookServlet<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>我们将其 <code>url</code> 放在 <code>/manager</code> 下是因为，图书管理属于后台管理，放在<code>/manager</code>下用于区别其是后台功能。<br><img src="https://img-blog.csdnimg.cn/fdf3bd7458634afbbe802b3ecebff7c2.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_16,color_FFFFFF,t_70,g_se,x_16" alt="前后台区分"><br>3. 修改图书管理请求地址<br>我们在<code>manager_menu.jsp</code>中修改图书管理请求地址<br><img src="https://img-blog.csdnimg.cn/f30bc392dd9247809ae2f560b55adab1.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改图书管理请求地址"><br>4. 修改 <code>pages/manager/book_manager.jsp</code> 页面的数据遍历输出<br>导入如下<code>jar</code>包</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">taglibs-standard-impl-1.2.1.jar</span><br><span class="line">taglibs-standard-spec-1.2.1.jar</span><br></pre></td></tr></table></figure>
+<p>修改<code>book_manager.jsp</code>，利用<code>JSTL</code>标签库遍历输出图书信息。<br><img src="https://img-blog.csdnimg.cn/d30835652dfd45b3b2bf05e9158a09ff.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="利用JSTL标签库遍历输出图书信息"></p>
+<hr>
+<h2 id="添加图书功能的实现"><a href="#添加图书功能的实现" class="headerlink" title="添加图书功能的实现"></a>添加图书功能的实现</h2><ol>
+<li>添加图书流程细节<br><img src="https://img-blog.csdnimg.cn/58546ca35a8f44fcb2a97babe722f1e2.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="添加图书流程"></li>
+<li>问题说明<br>如果像之前一样，通过<code>Servlet</code>的程序转发请求，那么前后算是同一个请求，而当用户提交完请求，浏览器会记录下最后一次请求的全部信息。当用户按下功能键 <code>F5</code>，就会发起浏览器记录的最后一次请求。那么就会重复添加图书项，所以这里要使用重定向，这样前后就是两次请求了，就算按<code>F5</code>也是展示图书列表。</li>
+<li><code>BookServlet</code>程序中添加<code>add</code>方法</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">    <span class="comment">//1 获取请求的参数==封装为Book对象</span></span><br><span class="line">    Book book = WebUtils.copyParamToBean(req.getParameterMap(), <span class="keyword">new</span> Book());</span><br><span class="line">    <span class="comment">//2 调用BookService.addBook()保存图书</span></span><br><span class="line">    bookService.addBook(book);</span><br><span class="line">    <span class="comment">//3 跳到图书列表页面</span></span><br><span class="line">    resp.sendRedirect(req.getContextPath() + <span class="string">&quot;/manager/bookServlet?action=list&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>修改<code>book_edit.jsp</code>页面<br><img src="https://img-blog.csdnimg.cn/826f8dd3e4b54e49a9bfc5e553ee0110.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改book_edit.jsp"><br>这里如果使用<code>post</code>方法提交会中文乱码，可以通过修改<code>post</code>的编码解决。</li>
+</ol>
+<hr>
+<h2 id="删除图书功能的实现"><a href="#删除图书功能的实现" class="headerlink" title="删除图书功能的实现"></a>删除图书功能的实现</h2><ol>
+<li>图解删除流程<br><img src="https://img-blog.csdnimg.cn/a14b94c36bf348dfb7699139c4935c59.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="删除流程"></li>
+<li><code>BookServlet</code>中添加<code>delete</code>方法<br>删除功能需要 <code>id</code> 项，我们通过 <code>getParameter</code> 方法获得的 <code>id</code> 是字符串类型，需要将其转换为 <code>Integer</code> 型。所以我们给 <code>WebUtils</code> 工具类添加转换 <code>Interger</code> 类型。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 将字符串转换成为 int 类型的数据</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> strInt</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> defaultValue</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">parseInt</span><span class="params">(String strInt,<span class="keyword">int</span> defaultValue)</span> </span>&#123;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line"><span class="keyword">return</span> Integer.parseInt(strInt);</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> defaultValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在<code>BookServlet</code>中添加 <code>delete</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">delete</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException,</span></span><br><span class="line"><span class="function">IOException </span>&#123;</span><br><span class="line"><span class="comment">// 1、获取请求的参数 id，图书编程</span></span><br><span class="line"><span class="keyword">int</span> id = WebUtils.parseInt(req.getParameter(<span class="string">&quot;id&quot;</span>), <span class="number">0</span>);</span><br><span class="line"><span class="comment">// 2、调用 bookService.deleteBookById();删除图书</span></span><br><span class="line">bookService.deleteBookById(id);</span><br><span class="line"><span class="comment">// 3、重定向回图书列表管理页面</span></span><br><span class="line"><span class="comment">// /book/manager/bookServlet?action=list</span></span><br><span class="line">resp.sendRedirect(req.getContextPath() + <span class="string">&quot;/manager/bookServlet?action=list&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><p>修改删除的连接地址<br><img src="https://img-blog.csdnimg.cn/eb54af33c7a24b1b83317eb11f712721.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改删除的连接地址"></p>
+</li>
+<li><p>给删除添加确认提示操作<br>删除属于危险项，所以我们需要添加确认操作，给删除的 <code>a</code> 标签绑定单击事件。</p>
+</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=<span class="string">&quot;text/javascript&quot;</span>&gt;</span><br><span class="line">		$( <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">			<span class="comment">// 给删除的a标签绑定单击事件，用于删除的确认提示操作</span></span><br><span class="line">			$(<span class="string">&quot;a.deleteClass&quot;</span>).click(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">				<span class="comment">// 在事件的 function 函数中，有一个 this 对象。这个 this 对象，是当前正在响应事件的 dom 对象。</span></span><br><span class="line">				<span class="comment">/**</span></span><br><span class="line"><span class="comment">				 * confirm 是确认提示框函数</span></span><br><span class="line"><span class="comment">				 * 参数是它的提示内容</span></span><br><span class="line"><span class="comment">				 * 它有两个按钮，一个确认，一个是取消。</span></span><br><span class="line"><span class="comment">				 * 返回 true 表示点击了，确认，返回 false 表示点击取消。</span></span><br><span class="line"><span class="comment">				 */</span></span><br><span class="line">				<span class="keyword">return</span> confirm(<span class="string">&quot;你确定要删除【&quot;</span> + $(<span class="built_in">this</span>).parent().parent().find(<span class="string">&quot;td:first&quot;</span>).text() + <span class="string">&quot;】?&quot;</span>);</span><br><span class="line">				<span class="comment">// return false// 阻止元素的默认行为===不提交请求</span></span><br><span class="line">			&#125;);</span><br><span class="line">		&#125;);</span><br><span class="line">	&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="修改图书功能的实现"><a href="#修改图书功能的实现" class="headerlink" title="修改图书功能的实现"></a>修改图书功能的实现</h2><ol>
+<li><p>图解修改图书细节<br><img src="https://img-blog.csdnimg.cn/577e296c79634466ab846f7662828c9a.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改图书"></p>
+</li>
+<li><p>更新修改的请求地址<br><img src="https://img-blog.csdnimg.cn/204199d6089b489ab4dcee50b51b975f.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="更新修改的请求地址"></p>
+</li>
+<li><p><code>BookServlet</code>程序中添加<code>getBook</code>方法</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">getBook</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException,</span></span><br><span class="line"><span class="function">IOException </span>&#123;</span><br><span class="line"><span class="comment">//1 获取请求的参数图书编号</span></span><br><span class="line"><span class="keyword">int</span> id = WebUtils.parseInt(req.getParameter(<span class="string">&quot;id&quot;</span>), <span class="number">0</span>);</span><br><span class="line"><span class="comment">//2 调用 bookService.queryBookById 查询图书</span></span><br><span class="line">Book book = bookService.queryBookById(id);</span><br><span class="line"><span class="comment">//3 保存到图书到 Request 域中</span></span><br><span class="line">req.setAttribute(<span class="string">&quot;book&quot;</span>, book) ;</span><br><span class="line"><span class="comment">//4 请求转发到。pages/manager/book_edit.jsp 页面</span></span><br><span class="line">req.getRequestDispatcher(<span class="string">&quot;/pages/manager/book_edit.jsp&quot;</span>).forward(req,resp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>在<code>book_edit.jsp</code>页面中显示修改的数据<br><img src="https://img-blog.csdnimg.cn/5ff89df479644432b087677b0c785cdc.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="显示修改的数据"></li>
+<li>在 <code>BookServlet</code>程序中添加<code>update</code>方法</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException,</span></span><br><span class="line"><span class="function">IOException </span>&#123;</span><br><span class="line"><span class="comment">// 1、获取请求的参数==封装成为 Book 对象</span></span><br><span class="line">Book book = WebUtils.copyParamToBean(req.getParameterMap(),<span class="keyword">new</span> Book());</span><br><span class="line"><span class="comment">// 2、调用 BookService.updateBook( book );修改图书</span></span><br><span class="line">bookService.updateBook(book);</span><br><span class="line"><span class="comment">// 3、重定向回图书列表管理页面</span></span><br><span class="line"><span class="comment">// 地址：/工程名/manager/bookServlet?action=list</span></span><br><span class="line">resp.sendRedirect(req.getContextPath() + <span class="string">&quot;/manager/bookServlet?action=list&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="6">
+<li>解决 <code>book_edit.jsp</code> 页面，既要实现添加，又要实现修改操作。<br><img src="https://img-blog.csdnimg.cn/369e13b37816414ea6d96c566a15bcd2.png" alt="实现添加与修改"></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2021/11/05/JavaWeb_BookProject_5/" title="JavaWeb书城项目(五)———图书模块">http://example.com/2021/11/05/JavaWeb_BookProject_5/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jsp/" rel="tag"># jsp</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/04/JavaWeb_BookProject_4/" rel="prev" title="JavaWeb书城项目(四)———代码优化">
+      <i class="fa fa-chevron-left"></i> JavaWeb书城项目(四)———代码优化
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">数据库表</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E5%9B%BE%E4%B9%A6%E6%A8%A1%E5%9D%97%E7%9A%84JavaBean"><span class="nav-number">2.</span> <span class="nav-text">编写图书模块的JavaBean</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E5%9B%BE%E4%B9%A6%E6%A8%A1%E5%9D%97%E7%9A%84Dao%E5%92%8C%E6%B5%8B%E8%AF%95Dao"><span class="nav-number">3.</span> <span class="nav-text">编写图书模块的Dao和测试Dao</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E5%9B%BE%E4%B9%A6%E6%A8%A1%E5%9D%97%E7%9A%84Service%E5%92%8C%E6%B5%8B%E8%AF%95Service"><span class="nav-number">4.</span> <span class="nav-text">编写图书模块的Service和测试Service</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E5%9B%BE%E4%B9%A6%E6%A8%A1%E5%9D%97%E7%9A%84Web%E5%B1%82%EF%BC%8C%E9%A1%B5%E9%9D%A2%E8%81%94%E8%B0%83%E6%B5%8B%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">编写图书模块的Web层，页面联调测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E4%B9%A6%E5%88%97%E8%A1%A8%E5%8A%9F%E8%83%BD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.1.</span> <span class="nav-text">图书列表功能的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%9B%BE%E4%B9%A6%E5%8A%9F%E8%83%BD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.2.</span> <span class="nav-text">添加图书功能的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%9B%BE%E4%B9%A6%E5%8A%9F%E8%83%BD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.3.</span> <span class="nav-text">删除图书功能的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E5%9B%BE%E4%B9%A6%E5%8A%9F%E8%83%BD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.4.</span> <span class="nav-text">修改图书功能的实现</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
