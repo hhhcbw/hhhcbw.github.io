@@ -25,28 +25,27 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="前三部分我们已经完成了书城项目的登录与注册功能，第四部分我们对之前的代码进行优化。  合并Servlet在实际的开发中，一个模块，一般只使用一个 Servlet 程序，用户的注册与登录都属于用户模块，因此只需要一个 Servlet 程序即可，所以我们将 LoginServlet 与 RegistSerlet 程序合并为一个 UserServlet 程序。那么一个请求过来，如何知道他是注册还是登录">
+  <meta name="description" content="之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用  登录显示用户名一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JavaWeb书城项目(四)———代码优化">
-<meta property="og:url" content="http://example.com/2021/11/04/JavaWeb_BookProject_4/index.html">
+<meta property="og:title" content="JavaWeb书城项目(七)———用户功能完善">
+<meta property="og:url" content="http://example.com/2021/11/10/JavaWeb_BookProject_7/index.html">
 <meta property="og:site_name" content="cbw">
-<meta property="og:description" content="前三部分我们已经完成了书城项目的登录与注册功能，第四部分我们对之前的代码进行优化。  合并Servlet在实际的开发中，一个模块，一般只使用一个 Servlet 程序，用户的注册与登录都属于用户模块，因此只需要一个 Servlet 程序即可，所以我们将 LoginServlet 与 RegistSerlet 程序合并为一个 UserServlet 程序。那么一个请求过来，如何知道他是注册还是登录">
+<meta property="og:description" content="之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用  登录显示用户名一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/00b66ca955184dfe971893d463e24dc4.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/071e8889d53e403cbe01779153920bf7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/d763fd5ea8504513b8f8f12241725e60.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/59dd6bafc4f84a9cbbfdeac8cb4b2e0e.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/2efa959e63324468a41ebbaffe4256fe.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/85354810ee0f4b11965c4735b49e7ae6.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/12a629fb600a45619e8ad35c63da5057.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="article:published_time" content="2021-11-04T12:14:00.000Z">
-<meta property="article:modified_time" content="2021-11-04T12:15:04.049Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/55f0ff711a5e470785333aca061f2086.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/515f4d64ef0a46258f909fde5d1e7115.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2e33e94694e94432a8d0f72b90db8c96.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8019390f37f24a0dab7465015333eb35.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a9d816a489f04b46ac3a6556f9d9bca5.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/bd8d876090d44865aaf4cb9631367829.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2021-11-10T03:43:00.000Z">
+<meta property="article:modified_time" content="2021-11-10T03:44:13.438Z">
 <meta property="article:author" content="zju_cbw">
 <meta property="article:tag" content="jsp">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://img-blog.csdnimg.cn/00b66ca955184dfe971893d463e24dc4.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/55f0ff711a5e470785333aca061f2086.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
 
-<link rel="canonical" href="http://example.com/2021/11/04/JavaWeb_BookProject_4/">
+<link rel="canonical" href="http://example.com/2021/11/10/JavaWeb_BookProject_7/">
 
 
 <script id="page-configurations">
@@ -59,7 +58,7 @@
   };
 </script>
 
-  <title>JavaWeb书城项目(四)———代码优化 | cbw</title>
+  <title>JavaWeb书城项目(七)———用户功能完善 | cbw</title>
   
 
 
@@ -213,7 +212,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/04/JavaWeb_BookProject_4/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/10/JavaWeb_BookProject_7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -226,7 +225,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          JavaWeb书城项目(四)———代码优化
+          JavaWeb书城项目(七)———用户功能完善
         </h1>
 
         <div class="post-meta">
@@ -238,7 +237,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-11-04 20:14:00 / 修改时间：20:15:04" itemprop="dateCreated datePublished" datetime="2021-11-04T20:14:00+08:00">2021-11-04</time>
+              <time title="创建时间：2021-11-10 11:43:00 / 修改时间：11:44:13" itemprop="dateCreated datePublished" datetime="2021-11-10T11:43:00+08:00">2021-11-10</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -269,29 +268,55 @@
 
       
         <blockquote>
-<p>前三部分我们已经完成了书城项目的登录与注册功能，第四部分我们对之前的代码进行优化。</p>
+<p>之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用</p>
 </blockquote>
-<h1 id="合并Servlet"><a href="#合并Servlet" class="headerlink" title="合并Servlet"></a>合并Servlet</h1><p>在实际的开发中，一个模块，一般只使用一个 <code>Servlet</code> 程序，用户的注册与登录都属于用户模块，因此只需要一个 <code>Servlet</code> 程序即可，所以我们将 <code>LoginServlet</code> 与 <code>RegistSerlet</code> 程序合并为一个 <code>UserServlet</code> 程序。<br><strong>那么一个请求过来，如何知道他是注册还是登录呢？</strong></p>
+<h1 id="登录显示用户名"><a href="#登录显示用户名" class="headerlink" title="登录显示用户名"></a>登录显示用户名</h1><p>一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。</p>
 <span id="more"></span>
-<p>这时我们就要用到表单项的隐藏域来解决。<br><img src="https://img-blog.csdnimg.cn/00b66ca955184dfe971893d463e24dc4.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="登录表单隐藏域"><br><img src="https://img-blog.csdnimg.cn/071e8889d53e403cbe01779153920bf7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="注册表单隐藏域"><br>这样，我们在用 <code>Servlet</code> 程序接收请求时，就能根据 <code>name</code> 的 <code>value</code> 项来判断其是注册还是登录。</p>
-<hr>
-<h1 id="反射优化"><a href="#反射优化" class="headerlink" title="反射优化"></a>反射优化</h1><p>用户模块不止有登录和注册功能，还会有注销，修改密码等其它功能，如果这时都放在一个 <code>Servlet</code> 里，那么代码必定有很多 <code>if...else...</code>，这样代码就会显得很冗杂。我们可以使用反射优化 <code>if...else...</code>。<br><img src="https://img-blog.csdnimg.cn/d763fd5ea8504513b8f8f12241725e60.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="反射优化"><br>这样两行代码就能代替繁琐的 <code>if...else,,,</code>。</p>
-<hr>
-<h1 id="抽取BaseServlet程序"><a href="#抽取BaseServlet程序" class="headerlink" title="抽取BaseServlet程序"></a>抽取BaseServlet程序</h1><p><img src="https://img-blog.csdnimg.cn/59dd6bafc4f84a9cbbfdeac8cb4b2e0e.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="抽取BaseServlet"><br>因为我们不止一个模块，除了用户模块，还会有图书模块等，这样其反射优化都是一样的，那么我们可以抽取出父类 <code>BaseServlet</code> 程序，那么其它模块就可以继承这个模块，达到复用代码的目的。<br><code>BaseServlet</code>程序：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.web;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseServlet</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        String action = req.getParameter(<span class="string">&quot;action&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 获取action业务鉴别字符串，获得相应的业务 方法反射对象</span></span><br><span class="line">            Method method = <span class="keyword">this</span>.getClass().getDeclaredMethod(action, HttpServletRequest.class, HttpServletResponse.class);</span><br><span class="line">            <span class="comment">// 调用目标业务 方法</span></span><br><span class="line">            method.invoke(<span class="keyword">this</span>, req, resp);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h1 id="数据的封装和抽取BeanUtils的使用"><a href="#数据的封装和抽取BeanUtils的使用" class="headerlink" title="数据的封装和抽取BeanUtils的使用"></a>数据的封装和抽取BeanUtils的使用</h1><p>我们一般会将数据封装进<code>JavaBean</code>里，但如果通过调用 <code>Set</code> 方法会使代码很冗余，这时我们可以使用第三方工具类 <code>BeanUtils</code> ，它可以用于把 <code>Map</code> 中的值注入到 <code>JavaBean</code> 中。</p>
 <ol>
-<li>导入需要的 <code>jar</code> 包：<br> commons-beanutils-1.8.0.jar<br> commons-logging-1.1.1.jar</li>
-<li>编写 <code>WebUtils</code> 工具类使用<br><code>WebUtils</code>工具类:</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.utils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.beanutils.BeanUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebUtils</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 把Map中的值注入到JavaBean中</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> value</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bean</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">copyParamToBean</span><span class="params">(Map value , T bean )</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;注入之前：&quot;</span> + bean);</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 把所有请求的参数都注入到bean对象中</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            BeanUtils.populate(bean, value);</span><br><span class="line">            System.out.println(<span class="string">&quot;注入之后：&quot;</span> + bean);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<ol start="3">
-<li>在程序中加入如下代码即可调用方法将请求参数注入到<code>JavaBean</code>中<br><img src="https://img-blog.csdnimg.cn/2efa959e63324468a41ebbaffe4256fe.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="调用方法"></li>
+<li><code>UserServlet</code>程序中保存用户登录的信息。因为我们登录之后的所有网页都是要显示用户名的，所以不能保存到<code>request</code>域，而是要保存到<code>session</code>域。</li>
+<li>修改<code>login_success_menu.jsp</code>,，因为我们之前把登录成功之后的菜单信息提取出一个<code>jsp</code>文件，所以只需要修改这个公共的部分。<br><img src="https://img-blog.csdnimg.cn/55f0ff711a5e470785333aca061f2086.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改login_success_menu.jsp"></li>
+<li>修改首页<code>index.jsp</code>页面的菜单，使其在登录之后也能显示用户信息。<br><img src="https://img-blog.csdnimg.cn/515f4d64ef0a46258f909fde5d1e7115.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改首页index.jsp"></li>
 </ol>
 <hr>
-<h1 id="使用EL表达式修改表单回显"><a href="#使用EL表达式修改表单回显" class="headerlink" title="使用EL表达式修改表单回显"></a>使用EL表达式修改表单回显</h1><p>我们可以使用<code>EL</code>表达式来修改表单回显，这样能使代码更简洁。<br><img src="https://img-blog.csdnimg.cn/85354810ee0f4b11965c4735b49e7ae6.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改login,jsp"><br><img src="https://img-blog.csdnimg.cn/12a629fb600a45619e8ad35c63da5057.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="修改regist.jsp"></p>
+<h1 id="登出注销用户"><a href="#登出注销用户" class="headerlink" title="登出注销用户"></a>登出注销用户</h1><ol>
+<li><code>UserServlet</code>程序中添加<code>logout</code>方法</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 注销</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> req</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> resp</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> ServletException</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">logout</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">    <span class="comment">// 1. 销毁Session中用户登录的信息（或者销毁Session）</span></span><br><span class="line">    req.getSession().invalidate();</span><br><span class="line">    <span class="comment">// 2. 重定向到首页（或登录页面）。</span></span><br><span class="line">    resp.sendRedirect(req.getContextPath());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li> 修改注销的菜单地址<br><img src="https://img-blog.csdnimg.cn/2e33e94694e94432a8d0f72b90db8c96.png" alt="修改注销菜单的地址"></li>
+</ol>
+<hr>
+<h1 id="使用验证码的原因及原理"><a href="#使用验证码的原因及原理" class="headerlink" title="使用验证码的原因及原理"></a>使用验证码的原因及原理</h1><p>之前验证码一直是写死的，这次我们实现动态的验证码。使用验证码的原因之一是为了防止用户重复提交表单而产生错误。<br>表单重复提交有以下三种情况。</p>
+<ol>
+<li>提交完表单。服务器使用请求转来进行页面跳转。这个时候，用户按下功能键 F5，就会发起最后一次的请求。造成表单重复提交问题。解决方法：这个可以使用重定向来进行跳转</li>
+<li>用户正常提交服务器，但是由于网络延迟等原因，迟迟未收到服务器的响应，这个时候，用户以为提交失败，就会着急，然后多点了几次提交操作，也会造成表单重复提交。</li>
+<li>用户正常提交服务器。服务器也没有延迟，但是提交完成后，用户回退浏览器。重新提交。也会造成表单重复提交。</li>
+</ol>
+<p>最后两种情况无法通过重定向解决，所以我们可以使用验证码解决。<br><img src="https://img-blog.csdnimg.cn/8019390f37f24a0dab7465015333eb35.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="验证码解决表单重复提交的底层原理"></p>
+<hr>
+<h1 id="谷歌-kaptcha-图片验证码的使用"><a href="#谷歌-kaptcha-图片验证码的使用" class="headerlink" title="谷歌 kaptcha 图片验证码的使用"></a>谷歌 kaptcha 图片验证码的使用</h1><p>我们使用现有的 <code>jar</code> 包来完成我们的验证码功能。</p>
+<ol>
+<li>导入谷歌验证码的 <code>jar</code> 包</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kaptcha-<span class="number">2.3</span><span class="number">.2</span>.jar</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>在 <code>web.xml</code> 中去配置用于生成验证码的 <code>Servlet</code> 程序，因为 <code>kaptcha</code> 提供的也是 <code>Servlet</code> 程序，所以要在 <code>web.xml</code> 中配置完成才能使用。</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>KaptchaServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>com.google.code.kaptcha.servlet.KaptchaServlet<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>KaptchaServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/kaptcha.jpg<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><p>在表单中使用 <code>img</code> 标签去显示验证码图片并使用它<br><img src="https://img-blog.csdnimg.cn/a9d816a489f04b46ac3a6556f9d9bca5.png" alt="使用验证码图片"></p>
+</li>
+<li><p>在服务器获取谷歌生成的验证码和客户端发送过来的验证码比较使用<br><img src="https://img-blog.csdnimg.cn/bd8d876090d44865aaf4cb9631367829.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="服务器比较验证码"></p>
+</li>
+<li><p>切换验证码，用户有时候可能看不清验证码，所以我们还要提供点击图片替换的功能。</p>
+</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 给验证码图片绑定单击事件</span></span><br><span class="line">$(<span class="string">&quot;#code_img&quot;</span>).click(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="comment">// 在事件响应的function函数中有一个this对象，这个this对象，是当前正在响应事件的dom对象</span></span><br><span class="line">	<span class="comment">// src 属性表示验证码img标签的图片路径。它可读可写</span></span><br><span class="line">	<span class="comment">// 添加随机变量，防止调用缓存</span></span><br><span class="line">	<span class="built_in">this</span>.src = <span class="string">&quot;$&#123;basePath&#125;kaptcha.jpg?d=&quot;</span> + <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
 
     </div>
 
@@ -317,7 +342,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2021/11/04/JavaWeb_BookProject_4/" title="JavaWeb书城项目(四)———代码优化">http://example.com/2021/11/04/JavaWeb_BookProject_4/</a>
+    <a href="http://example.com/2021/11/10/JavaWeb_BookProject_7/" title="JavaWeb书城项目(七)———用户功能完善">http://example.com/2021/11/10/JavaWeb_BookProject_7/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -337,13 +362,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/11/04/JavaWeb_BookProject_3/" rel="prev" title="JavaWeb书城项目(三)———表单回显">
-      <i class="fa fa-chevron-left"></i> JavaWeb书城项目(三)———表单回显
+    <a href="/2021/11/08/JavaWeb_BookProject_6/" rel="prev" title="JavaWeb书城项目(六)———图书分页">
+      <i class="fa fa-chevron-left"></i> JavaWeb书城项目(六)———图书分页
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/11/05/JavaWeb_BookProject_5/" rel="next" title="JavaWeb书城项目(五)———图书模块">
-      JavaWeb书城项目(五)———图书模块 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -407,7 +429,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%88%E5%B9%B6Servlet"><span class="nav-number">1.</span> <span class="nav-text">合并Servlet</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%B0%84%E4%BC%98%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">反射优化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%BD%E5%8F%96BaseServlet%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">抽取BaseServlet程序</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%9A%84%E5%B0%81%E8%A3%85%E5%92%8C%E6%8A%BD%E5%8F%96BeanUtils%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">数据的封装和抽取BeanUtils的使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8EL%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%BF%AE%E6%94%B9%E8%A1%A8%E5%8D%95%E5%9B%9E%E6%98%BE"><span class="nav-number">5.</span> <span class="nav-text">使用EL表达式修改表单回显</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%99%BB%E5%BD%95%E6%98%BE%E7%A4%BA%E7%94%A8%E6%88%B7%E5%90%8D"><span class="nav-number">1.</span> <span class="nav-text">登录显示用户名</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%99%BB%E5%87%BA%E6%B3%A8%E9%94%80%E7%94%A8%E6%88%B7"><span class="nav-number">2.</span> <span class="nav-text">登出注销用户</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E5%8E%9F%E5%9B%A0%E5%8F%8A%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">使用验证码的原因及原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%B7%E6%AD%8C-kaptcha-%E5%9B%BE%E7%89%87%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">谷歌 kaptcha 图片验证码的使用</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
