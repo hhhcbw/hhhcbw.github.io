@@ -25,12 +25,12 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用  登录显示用户名一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。">
+  <meta name="description" content="整个项目源代码可以到我的github上下载。之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用  登录显示用户名一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JavaWeb书城项目(七)———用户功能完善">
 <meta property="og:url" content="http://example.com/2021/11/10/JavaWeb_BookProject_7/index.html">
 <meta property="og:site_name" content="cbw">
-<meta property="og:description" content="之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用  登录显示用户名一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。">
+<meta property="og:description" content="整个项目源代码可以到我的github上下载。之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用  登录显示用户名一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/55f0ff711a5e470785333aca061f2086.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/515f4d64ef0a46258f909fde5d1e7115.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://img-blog.csdnimg.cn/a9d816a489f04b46ac3a6556f9d9bca5.png">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/bd8d876090d44865aaf4cb9631367829.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
 <meta property="article:published_time" content="2021-11-10T03:43:00.000Z">
-<meta property="article:modified_time" content="2021-11-10T03:44:13.438Z">
+<meta property="article:modified_time" content="2021-11-12T10:16:15.554Z">
 <meta property="article:author" content="zju_cbw">
 <meta property="article:tag" content="jsp">
 <meta name="twitter:card" content="summary">
@@ -235,10 +235,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-11-10 11:43:00 / 修改时间：11:44:13" itemprop="dateCreated datePublished" datetime="2021-11-10T11:43:00+08:00">2021-11-10</time>
+              <time title="创建时间：2021-11-10 11:43:00" itemprop="dateCreated datePublished" datetime="2021-11-10T11:43:00+08:00">2021-11-10</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-12 18:16:15" itemprop="dateModified" datetime="2021-11-12T18:16:15+08:00">2021-11-12</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -268,7 +274,7 @@
 
       
         <blockquote>
-<p>之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用</p>
+<p>整个项目源代码可以到我的github上下载。之前我们做出了用户功能的注册与登录功能，这次我们将用户功能完善，包括用户登录显示用户名，注销用户，以及验证码的使用</p>
 </blockquote>
 <h1 id="登录显示用户名"><a href="#登录显示用户名" class="headerlink" title="登录显示用户名"></a>登录显示用户名</h1><p>一般来说，我们登录之后会显示用户名，我们之前是写死的，这次改成动态的。</p>
 <span id="more"></span>
