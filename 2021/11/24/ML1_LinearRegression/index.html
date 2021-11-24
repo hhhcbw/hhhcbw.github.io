@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在详细了解线性回归的所有知识点之前，我们先来了解一下线性回归的重要性。  理论层面的重要性   Linear Regression：是回归问题的基础 Logistic Regression：是分类问题的基础 可扩展性：使用基函数来解决非线性问题   应用层面的重要性——在工业中最广泛应用的模型   高效易用（简单、易训练） 可解释性强（参数直接反应特征强弱） 适合预估（概率形式） 资源丰富（开源资">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习(一)——线性回归">
+<meta property="og:url" content="http://example.com/2021/11/24/ML1_LinearRegression/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="在详细了解线性回归的所有知识点之前，我们先来了解一下线性回归的重要性。  理论层面的重要性   Linear Regression：是回归问题的基础 Logistic Regression：是分类问题的基础 可扩展性：使用基函数来解决非线性问题   应用层面的重要性——在工业中最广泛应用的模型   高效易用（简单、易训练） 可解释性强（参数直接反应特征强弱） 适合预估（概率形式） 资源丰富（开源资">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/40ded2b41ef44d928ad07e0ba055e40c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/0d037a84693d4a94938b925919411561.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f680c6d813be4045a00d97001e756c3b.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7d444c6588df45cc90f4c7bc2b5872c5.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5104b542d5fe47b29792d75849b8ae02.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e338ed20bb354c1db1e52dbc8a69a785.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2f0fb589e47640b5af9ecb2ef4653b7a.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/44d9407899584b73ae4ff0a00dc88b82.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/c97db4c82bd948728d99c196e6dd42a4.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/64bf9d2d4912491fa4c8bcc617498a66.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a1794543a951457fafdb5e4ad2f525a0.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b42f5a348e764853a19daf688f3a6501.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d752df33d5f6421684d5441e7725fecb.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/ceb609f0c0b841f4939521711754645d.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5e47e5fe23e04f27977644b52c7d2aff.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5047b9a537e84ce29eaeffa68f9207cc.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1563d7468c31492ea64b03959a344c17.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/962666509c9c41d9a526a04c5b80c753.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/857864ca4b6d476c9054c829218d8848.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/42254c5d02844bb08b20a50da78ddc2d.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1a13a09a01ef4f888e21ec92632efbe7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f74d0373d2fa478fa3e996ccb0b368d7.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3a4110da3c574acc807711f303457316.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b20337d5605846a39a6f661403499c22.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f2c67543412042c9af8e6ffdaa516111.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f20ac462d0b743c689da54a8d0184448.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6865a94de6714850896b55538ba4a672.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d076081f8d504f7a83ec69a8b8178f3d.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/93683bba20a74521bb83d8e6049487c6.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/fde5df2f501b492bbfad375bd2911a1a.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6a49e8bdecac4dcbb17cd6430d199630.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d3bbe9ce1eb842bb854716839ed99619.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d54d1e2338824d49a80d5651c3b96c30.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d8d2b09c08fb4d2b838ac59e088d6554.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7061110562984b49af318d789e2b93cf.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/9a770458360343dfbc754fb42a1c8a5b.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f34363cda1e84b108fe9962dbfa2ccca.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1194dc8f081646ec882c669824c88368.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/018d9ef51ea84144b416d635d29b8d65.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_17,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/06963518a64847f6b81d7fb515e367d8.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2021-11-24T10:40:00.000Z">
+<meta property="article:modified_time" content="2021-11-24T10:42:51.305Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="线性回归">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/40ded2b41ef44d928ad07e0ba055e40c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2021/11/24/ML1_LinearRegression/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>机器学习(一)——线性回归 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/24/ML1_LinearRegression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          机器学习(一)——线性回归
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-11-24 18:40:00 / 修改时间：18:42:51" itemprop="dateCreated datePublished" datetime="2021-11-24T18:40:00+08:00">2021-11-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在详细了解线性回归的所有知识点之前，我们先来了解一下线性回归的重要性。</p>
+<ul>
+<li>理论层面的重要性</li>
+</ul>
+<ol>
+<li>Linear Regression：是回归问题的基础</li>
+<li>Logistic Regression：是分类问题的基础</li>
+<li>可扩展性：使用基函数来解决非线性问题</li>
+</ol>
+<ul>
+<li>应用层面的重要性——在工业中最广泛应用的模型</li>
+</ul>
+<ol>
+<li>高效易用（简单、易训练）</li>
+<li>可解释性强（参数直接反应特征强弱）</li>
+<li>适合预估（概率形式）</li>
+<li>资源丰富（开源资料、文档、文献、论文）<span id="more"></span></li>
+</ol>
+<hr>
+<h1 id="建立模型基本形式"><a href="#建立模型基本形式" class="headerlink" title="建立模型基本形式"></a>建立模型基本形式</h1><p>数据集一共有 <code>p</code> 个数据点，每个数据点有 <code>d</code> 个描述的维度 <code>xi=(xi1,xi2,xi3...xid)</code> 其中 <code>xi</code> 是第 <code>i</code> 个数据点。线性模型试图学习到一个通过属性的线性组合来进行预测的函数。<br><img src="https://img-blog.csdnimg.cn/40ded2b41ef44d928ad07e0ba055e40c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAbmVmdV9jYnc=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="模型基本形式"><br>一般写成向量形式：f(x)=W^T^x+b，其中参数 <code>W</code> 和 <code>b</code> 通过训练得出。</p>
+<hr>
+<h1 id="衡量预测值与真实值的距离"><a href="#衡量预测值与真实值的距离" class="headerlink" title="衡量预测值与真实值的距离"></a>衡量预测值与真实值的距离</h1><p>我们的目标肯定是模型预测出来的结果和真实结果越接近越好，即 <code>f(xi)≈yi</code>。这里解释一下为什么只能无限接近，因为我们只能拿某一类事件所有数据中抽样出来的部分数据进行学习，抽样出来的数据不可能涵盖事件的所有的可能性，所以只能学习到总体的规律。</p>
+<p><strong>问题：如何衡量预测的准确性，即衡量f(x)与真实值y之间的差异？</strong></p>
+<ol>
+<li>   误差平方和<code>SSE</code>判别<br><img src="https://img-blog.csdnimg.cn/0d037a84693d4a94938b925919411561.png" alt="误差平方和">    <strong>解释</strong>：由于误差有正有负，故使用平方和来抵消正负    <strong>问题</strong>：一是使用平方后会放大(差&gt;1)部分的误差，同时缩小(-1&lt;差&lt;1)部分的误差；<br>二是当不同维度之间的度量差异很大时无法处理。例如：衡量一个人有年龄和收入两个维度，两个维度相差100倍以上，模型会严重受到收入大小的影响，要求在建模前对数据进行归一化处理；</li>
+<li>   欧式距离判别<br><img src="https://img-blog.csdnimg.cn/f680c6d813be4045a00d97001e756c3b.png" alt="欧式距离判别"></li>
+</ol>
+<p><strong>问题</strong>：一是带根号，求解麻烦；<br>二是当不同维度之间的度量差异很大时无法处理；<br>3.    曼哈顿距离判别<br><img src="https://img-blog.csdnimg.cn/7d444c6588df45cc90f4c7bc2b5872c5.png" alt="曼哈顿距离"><br><strong>问题</strong>：不是连续函数，求导很麻烦，计算不方便，只能计算垂直、水平距离<br><strong>适用场景</strong>：数据稀疏（自带归一化处理）<br>4.    马氏距离判别<br><img src="https://img-blog.csdnimg.cn/5104b542d5fe47b29792d75849b8ae02.png" alt="马氏距离"><br><strong>问题</strong>：带根号，求解麻烦<br><strong>适用场景</strong>：多维数据（流形学习），解决不同维度之间的度量差异很大时的问题<br>5. 其他距离判别方式：汉明距离（Hamming dist）、编辑距离（Levenshtein dist）……</p>
+<hr>
+<h1 id="建立目标函数"><a href="#建立目标函数" class="headerlink" title="建立目标函数"></a>建立目标函数</h1><blockquote>
+<p>我们先讨论一元线性回归。</p>
+</blockquote>
+<p>这里使用均方误差<code>MSE</code>来判定距离，并限定损失函数为<strong>平方损失函数，也就是普通最小二乘法</strong>（Ordinary Least Square，OLS），得到目标函数。其中 “二乘” 表示取平方，”最小” 表示损失函数最小。<br><img src="https://img-blog.csdnimg.cn/e338ed20bb354c1db1e52dbc8a69a785.png" alt="最小二乘法"><br>接下来通过调整参数使得模型能够更加贴合真实数据<br><img src="https://img-blog.csdnimg.cn/2f0fb589e47640b5af9ecb2ef4653b7a.png"><br><img src="https://img-blog.csdnimg.cn/44d9407899584b73ae4ff0a00dc88b82.png"><br><strong>延伸问题：为什么可以用误差平方和来表示线性回归问题的损失函数</strong><br>线性回归有这样的假设：对于给定的 y^(i)^ 总能找到 ε^(i)^ 使得如下等式成立：<br><img src="https://img-blog.csdnimg.cn/c97db4c82bd948728d99c196e6dd42a4.png"><br>ε^(i)^ 代表真实值和预测值之间的误差且服从正态分布 ε^(i)^ ~ Ν(0,σ^2^)</p>
+<p><strong>为什么要加 ε：</strong> 房价可能由 100 种特征共同组成，但是通常我们建模的时候不可能把所有可能性都考虑完全，所以把剩下的特征及噪声统一放到 ε 中考虑。</p>
+<p><strong>为什么误差服从正态分布：</strong> 误差的产生有很多种因素的影响，误差可以看作是这些因素(随机变量)之和共同作用而产生的，由中心极限定理可知随机变量和的分布近似的服从正态分布。</p>
+<p>随机变量 ε^(i)^ 的概率密度函数为：<br><img src="https://img-blog.csdnimg.cn/64bf9d2d4912491fa4c8bcc617498a66.png"><br>代入  ε^(i)^ = y^(i)^-h<del>θ</del>(x^(i)^)则：<br><img src="https://img-blog.csdnimg.cn/a1794543a951457fafdb5e4ad2f525a0.png"><br>这里的 p(y^(i)^|x^(i)^;θ) 并不代表条件概率，只是一个记号，它表示给定 x^(i)^,y^(i)^和一组θ后的概率密度函数。由<strong>最大似然估计</strong>可知：<br><img src="https://img-blog.csdnimg.cn/b42f5a348e764853a19daf688f3a6501.png"><br>对 <code>L(θ)</code> 取对数从而得到对数化最大似然估计函数：<br><img src="https://img-blog.csdnimg.cn/d752df33d5f6421684d5441e7725fecb.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>求解最大化对数似然函数可得：<br><img src="https://img-blog.csdnimg.cn/ceb609f0c0b841f4939521711754645d.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>可以发现两种方法推导出的损失函数都是一样的，我们把这种损失函数叫做<strong>最小二乘法</strong>。<br><img src="https://img-blog.csdnimg.cn/5e47e5fe23e04f27977644b52c7d2aff.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="最小二乘法"></p>
+<hr>
+<h1 id="求w和b的参数"><a href="#求w和b的参数" class="headerlink" title="求w和b的参数"></a>求w和b的参数</h1><p>可以看出最小二乘法得到的cost function是一个凸函数，可以看作一元二次方程，目标是求该方程的最小值，即求一元二次方程导数逼近0的点。介绍两种方法，一种通过矩阵运算得到精确解的方法，另一种在数据量巨大数据情况复杂时使用的逼近最优解的方法：梯度下降法</p>
+<h2 id="方法1-解析解"><a href="#方法1-解析解" class="headerlink" title="方法1. 解析解"></a>方法1. 解析解</h2><ol>
+<li>一元线性回归<br><img src="https://img-blog.csdnimg.cn/5047b9a537e84ce29eaeffa68f9207cc.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="一元线性回归"><br>E<del>(w,b)</del> 是关于 w 和 b 的凸函数，当它关于 w 和 b 的导数均为0时，得到 w 和 b 的最优解<br><img src="https://img-blog.csdnimg.cn/1563d7468c31492ea64b03959a344c17.png"><br><img src="https://img-blog.csdnimg.cn/962666509c9c41d9a526a04c5b80c753.png"></li>
+</ol>
+<p><strong>解得</strong><br><img src="https://img-blog.csdnimg.cn/857864ca4b6d476c9054c829218d8848.png"><br><img src="https://img-blog.csdnimg.cn/42254c5d02844bb08b20a50da78ddc2d.png"></p>
+<ol start="2">
+<li>多元线性回归<br>比一元线性回归复杂的是，多元线性回归组成的不是直线，是一个多维空间中的超平面，数据点散落在超平面两侧。<br><img src="https://img-blog.csdnimg.cn/1a13a09a01ef4f888e21ec92632efbe7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="二元线性回归"><br>将偏置项 b 放入参数矩阵 W 中，并在自变量 X 矩阵中增加一列 value 为 1 的列向量<br>用 W 表示 (w,b)，求具体的参数：<br><img src="https://img-blog.csdnimg.cn/f74d0373d2fa478fa3e996ccb0b368d7.png"><br><img src="https://img-blog.csdnimg.cn/3a4110da3c574acc807711f303457316.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/b20337d5605846a39a6f661403499c22.png"></li>
+</ol>
+<p><strong>问题：X^T^X 在现实任务中往往不是满秩矩阵，所以无法求解矩阵的逆，故无法求得唯一的解</strong><br><strong>解决方法：引入正则化(regularization)将矩阵补成满秩</strong><br><strong>I2正则(ridge regression)：</strong><br><img src="https://img-blog.csdnimg.cn/f2c67543412042c9af8e6ffdaa516111.png"><br>使用了正则化后，X 被补成了满秩矩阵，即使3个变量拥有3个方程，使n个变量拥有n个方程，使得 W^*^  变得唯一：<br><img src="https://img-blog.csdnimg.cn/f20ac462d0b743c689da54a8d0184448.png"><br><strong>正则化其它作用：限制模型复杂度，取效果最好但是模型最简单的参数组合</strong><br><strong>其它正则化方式：</strong> 岭回归、lasso回归、弹性网络（l1、l2的结合）<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/jinping_shi/article/details/52433975">补充：I1正则与I2正则对比</a></p>
+<h2 id="方法2-梯度下降法"><a href="#方法2-梯度下降法" class="headerlink" title="方法2. 梯度下降法"></a>方法2. 梯度下降法</h2><p>梯度下降：随机初始化 w 和 b，通过逼近的方式来求解。<br><img src="https://img-blog.csdnimg.cn/6865a94de6714850896b55538ba4a672.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="梯度下降"><br>损失函数回顾：<br><img src="https://img-blog.csdnimg.cn/d076081f8d504f7a83ec69a8b8178f3d.png"><br>梯度下降参数优化方法：<br><img src="https://img-blog.csdnimg.cn/93683bba20a74521bb83d8e6049487c6.png"><br><strong>梯度下降形象解释：</strong> 把损失函数想象成一个山坡，目标是找到山坡最低的点。则随便选一个起点，计算损失函数对于参数矩阵在该点的偏导数，每次往偏导数的反向向走一步，步长通过 [公式] 来控制，直到走到最低点，即导数趋近于0的点为止。<br><strong>缺点：</strong> 最小点时候收敛速度变慢，并且对初始点的选择极为敏感。</p>
+<blockquote>
+<p>梯度下降有时会陷入局部最优解的问题中，即下山的路上有好多小坑，运气不好掉进坑里，但是由于底部梯度(导数)也为0，故以为找到了山的底部<br>同时，步长选择的过大或者过小，都会影响模型的计算精度及计算效率</p>
+</blockquote>
+<p><strong>解决方法：</strong> 随机梯度下降、批量梯度下降、动量梯度下降</p>
+<h2 id="方法对比"><a href="#方法对比" class="headerlink" title="方法对比"></a>方法对比</h2><h3 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h3><ol>
+<li>本质相同：两种方法都是在给定已知数据（independent &amp; dependent variables）的前提下对dependent variables算出出一个一般性的估值函数。然后对给定新数据的dependent variables进行估算。</li>
+<li>目标相同：都是在已知数据的框架内，使得估算值与实际值的总平方差尽量更小（事实上未必一定要使用平方）<h3 id="不同点"><a href="#不同点" class="headerlink" title="不同点"></a>不同点</h3></li>
+</ol>
+<p><strong>解析解</strong></p>
+<ol>
+<li>不需要选择 α。</li>
+<li>不需要迭代。</li>
+<li>但是需要计算 (X^T^X)^-1^，如果 X 是个 (n,p) 矩阵，则求逆的算法的时间复杂度为 O(np^2^) ≈ O(n^3^)，n 是特征的数量，如果特征很多，运算就会很慢。</li>
+<li>不适用于更加复杂的算法，比如 <code>logistic回归</code>。</li>
+</ol>
+<p><strong>梯度下降</strong></p>
+<ol>
+<li>需要选择 α（学习率）。</li>
+<li>需要多次迭代。</li>
+<li>特征很多的情况下也能良好运行。</li>
+</ol>
+<hr>
+<h1 id="评价指标"><a href="#评价指标" class="headerlink" title="评价指标"></a>评价指标</h1><p>模型建好了，我们需要设计相关的指标来检验模型的表现。有人会问，最小二乘法不就是评价指标吗，和这里的评价指标有什么区别？</p>
+<p>从概念上讲，两者都是评价指标没什么区别。但是从使用场景上讲，我们在上文提到的最小二乘法，是我们在用训练数据集训练建模时，为了调整模型参数而确定的评价指标，目的是为了优化模型参数。而这里我们要讲的评价指标，是衡量模型建立好以后，使用别的数据集时（测试数据集、真实数据集）这组模型参数的表现效果，目的是为了选择模型参数</p>
+<p><strong>这里给出准确定义：评价指标是针对将相同的数据，输入不同的算法模型，或者输入不同参数的同一种算法模型，而给出这个算法或者参数好坏的定量指标</strong></p>
+<ol>
+<li>均方误差（SSE）<br>真实值-预测值 然后平方之后求和平均<br><img src="https://img-blog.csdnimg.cn/fde5df2f501b492bbfad375bd2911a1a.png"><br>同样的数据集的情况下，SSE越小，误差越小，模型效果越好</li>
+</ol>
+<p><strong>缺点：</strong> SSE数值大小本身没有意义，随着样本增加，SSE必然增加，也就是说，不同的数据集的情况下，SSE比较没有意义。<br><strong>改进：</strong> MSE 对SSE求平均。是线性回归中最常用的损失函数，线性回归过程中尽量让该损失函数最小。那么模型之间的对比也可以用它来比较<br><img src="https://img-blog.csdnimg.cn/6a49e8bdecac4dcbb17cd6430d199630.png"><br>2. 均方根误差（标准误差 RMSE）<br>MSE是用来衡量一组数自身的离散程度，而RMSE是用来衡量观测值同真值之间的偏差，它们的研究对象和研究目的不同。它的意义在于开个根号后，误差的结果就与数据是一个级别的，可以更好地来描述数据。标准误差对一组测量中的特大或特小误差反映非常敏感，所以，标准误差能够很好地反映出测量的精密度。这正是标准误差在工程测量中广泛被采用的原因<br><img src="https://img-blog.csdnimg.cn/d3bbe9ce1eb842bb854716839ed99619.png"><br>当数据集中有一个特别大的异常值，这种情况下，data会被skew，RMSE会被明显拉大。所以对RMSE低估值（under-predicted）的判罚明显小于估值过高(over-predicted)的情况</p>
+<ol start="3">
+<li>平均绝对误差（MAE）<br>平均绝对误差是绝对误差的平均值，平均绝对误差能更好地反映预测值误差的实际情况<br><img src="https://img-blog.csdnimg.cn/d54d1e2338824d49a80d5651c3b96c30.png"><br>MAE是一个线性的指标，所有个体差异在平均值上均等加权，所以它更加凸显出异常值。MSE和MAE适用于误差相对明显的时候，此时大的误差也有比较高的权重</li>
+<li>R-square（决定系数）<br>对于回归类算法而言，只探索数据预测是否准确是不足够的。除了数据本身的数值大小之外，我们还希望模型能够捕捉到数据的”规律“，比如数据的分布规律，单调性等等，而是否捕获了这些信息并无法使用MSE或者MAE来衡量<img src="https://img-blog.csdnimg.cn/d8d2b09c08fb4d2b838ac59e088d6554.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"><br>其中红色线是我们的真实标签，而蓝色线是我们的拟合模型。这是一种比较极端，但的确可能发生的情况。这张图前半部分的拟合非常成功，看上去真实标签和预测结果几乎重合，但后半部分的拟合却非常糟糕，模型向着与真实标签完全相反的方向去了<br>对于这样的一个拟合模型，如果我们使用MSE来对它 进行判断，它的MSE会很小，因为大部分样本其实都被完美拟合了，少数样本的真实值和预测值的巨大差异在被均分到每个样本上之后，MSE就会很小。但这样的拟合结果必然不是一个好结果，因为一旦新样本是处于拟合曲线的后半段的，预测结果必然会有巨大的偏差。所以，我们希望找到新的指标，除了判断预测的数值是否正确之外，还能够判断我们的模型是否拟合了足够多的，数值之外的信息。<br><img src="https://img-blog.csdnimg.cn/7061110562984b49af318d789e2b93cf.png"></li>
+</ol>
+<p><strong>数学理解：分母理解为原始数据的离散程度，分子为预测数据和原始数据的误差，二者相除可以消除原始数据离散程度的影响</strong>    </p>
+<pre><code>1、上面分子就是我们训练出的模型预测的误差和
+2.、下面分母就是瞎猜的误差和。（通常取观测值的平均值）
+3.、如果结果是0，就说明我们的模型跟瞎猜差不多
+4.、如果结果是1。就说明我们模型无错误
+5.、介于0~1之间，越接近1，回归拟合效果越好，一般认为超过0.8的模型拟合优度比较高
+</code></pre>
+<p><strong>化简上面的公式</strong><br>分子分母同时除以m，那么分子就变成了我们的均方误差MSE，下面分母就变成了方差。<br><img src="https://img-blog.csdnimg.cn/9a770458360343dfbc754fb42a1c8a5b.png"><br><img src="https://img-blog.csdnimg.cn/f34363cda1e84b108fe9962dbfa2ccca.png"><br>方差的本质是任意一个值和样本均值的差异，差异越大，这些值所带的信息越多<br>在 <code>R2</code> 中，分子是真实值和预测值之差的差值，也就是我们的模型没有捕获到的信息总量，分母是真实标签所带的信息量，所以两者都衡量 <strong>1 - 我们的模型没有捕获到的信息量占真实标签中所带的信息量的比例</strong>，所以，两者都是越接近1越好<br>缺点：数据集的样本越大，R²越大，因此，不同数据集的模型结果比较会有一定的误差<br>5. Adjusted R-square（校正决定系数）<br><img src="https://img-blog.csdnimg.cn/1194dc8f081646ec882c669824c88368.png"><br>n为样本数量，p为特征数量。同时消除了样本数量和特征数量的影响。</p>
+<hr>
+<h1 id="从Bias和Variance角度看模型复杂度问题"><a href="#从Bias和Variance角度看模型复杂度问题" class="headerlink" title="从Bias和Variance角度看模型复杂度问题"></a>从Bias和Variance角度看模型复杂度问题</h1><p>复杂度高的模型通常对训练数据有很好的拟合能力，但是对测试数据就不一定了。而复杂度太低的模型又不能很好的拟合训练数据，更不能很好的拟合测试数据。因此，模型复杂度和模型偏差和方差具有如下图所示关系。<br><img src="https://img-blog.csdnimg.cn/018d9ef51ea84144b416d635d29b8d65.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="偏差方差窘境"><br>更多偏差，方差细节可以看<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/38853908">这篇文章</a>。</p>
+<hr>
+<h1 id="线性回归的适用场景及前提假设"><a href="#线性回归的适用场景及前提假设" class="headerlink" title="线性回归的适用场景及前提假设"></a>线性回归的适用场景及前提假设</h1><p><img src="https://img-blog.csdnimg.cn/06963518a64847f6b81d7fb515e367d8.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="安斯库姆四重奏"><br>那到底什么时候可以使用线性回归呢？统计学家安斯库姆给出了四个数据集，被称为安斯库姆四重奏，从这四个数据集的分布可以看出，并不是所有的数据集都可以用一元线性回归来建模。现实世界中的问题往往更复杂，变量几乎不可能非常理想化地符合线性模型的要求。因此使用线性回归，需要遵守下面几个假设：</p>
+<ul>
+<li>线性回归是一个回归问题（regression）。</li>
+<li>要预测的变量y与自变量x的关系是线性的。</li>
+<li>各项误差服从正太分布，均值为0，与x同方差。</li>
+<li>变量 x 的分布要有变异性。</li>
+<li> 多元线性回归中不同特征之间应该相互独立，避免线性相关。</li>
+</ul>
+<h2 id="回归问题和分类问题"><a href="#回归问题和分类问题" class="headerlink" title="回归问题和分类问题"></a>回归问题和分类问题</h2><p>与回归相对的是分类问题（classification），分类问题要预测的变量y输出集合是有限的，预测值只能是有限集合内的一个。当要预测的变量y输出集合是无限且连续，我们称之为回归。比如，天气预报预测明天是否下雨，是一个二分类问题；预测明天的降雨量多少，就是一个回归问题。</p>
+<h2 id="变量之间是线性关系"><a href="#变量之间是线性关系" class="headerlink" title="变量之间是线性关系"></a>变量之间是线性关系</h2><p>线性通常是指变量之间保持等比例的关系，从图形上来看，变量之间的形状为直线，斜率是常数。这是一个非常强的假设，数据点的分布呈现复杂的曲线，则不能使用线性回归来建模。可以看出，四重奏右上角的数据就不太适合用线性回归的方式进行建模。</p>
+<h2 id="误差服从均值为零的正态分布"><a href="#误差服从均值为零的正态分布" class="headerlink" title="误差服从均值为零的正态分布"></a>误差服从均值为零的正态分布</h2><p>前面最小二乘法求解过程已经提到了误差的概念，误差可以表示为 <code>误差 = 实际值 - 预测值</code>。</p>
+<p>可以这样理解这个假设：线性回归允许预测值与真实值之间存在误差，随着数据量的增多，这些数据的误差平均值为0；从图形上来看，各个真实值可能在直线上方，也可能在直线下方，当数据足够多时，各个数据上上下下相互抵消。如果误差不服从均值为零的正太分布，那么很有可能是出现了一些异常值，数据的分布很可能是安斯库姆四重奏右下角的情况。</p>
+<p>这也是一个非常强的假设，如果要使用线性回归模型，那么必须假设数据的误差均值为零的正太分布。</p>
+<h2 id="变量-x-的分布要有变异性"><a href="#变量-x-的分布要有变异性" class="headerlink" title="变量 x 的分布要有变异性"></a>变量 x 的分布要有变异性</h2><p>线性回归对变量 <code>x </code> 也有要求，要有一定变化，不能像安斯库姆四重奏右下角的数据那样，绝大多数数据都分布在一条竖线上。</p>
+<h2 id="多元线性回归不同特征之间相互独立"><a href="#多元线性回归不同特征之间相互独立" class="headerlink" title="多元线性回归不同特征之间相互独立"></a>多元线性回归不同特征之间相互独立</h2><p>如果不同特征不是相互独立，那么可能导致特征间产生共线性，进而导致模型不准确。举一个比较极端的例子，预测房价时使用多个特征：<code>房间数量</code>，<code>房间数量*2</code>，<code>-房间数量</code>等，特征之间是线性相关的，如果模型只有这些特征，缺少其他有效特征，虽然可以训练出一个模型，但是模型不准确，预测性差。</p>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2021/11/24/ML1_LinearRegression/" title="机器学习(一)——线性回归">http://example.com/2021/11/24/ML1_LinearRegression/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/" rel="tag"># 线性回归</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/19/Leetcode542/" rel="prev" title="Leetcode542.01矩阵">
+      <i class="fa fa-chevron-left"></i> Leetcode542.01矩阵
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E6%A8%A1%E5%9E%8B%E5%9F%BA%E6%9C%AC%E5%BD%A2%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">建立模型基本形式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%A1%E9%87%8F%E9%A2%84%E6%B5%8B%E5%80%BC%E4%B8%8E%E7%9C%9F%E5%AE%9E%E5%80%BC%E7%9A%84%E8%B7%9D%E7%A6%BB"><span class="nav-number">2.</span> <span class="nav-text">衡量预测值与真实值的距离</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%9B%AE%E6%A0%87%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">建立目标函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B1%82w%E5%92%8Cb%E7%9A%84%E5%8F%82%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">求w和b的参数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%951-%E8%A7%A3%E6%9E%90%E8%A7%A3"><span class="nav-number">4.1.</span> <span class="nav-text">方法1. 解析解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%952-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">方法2. 梯度下降法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%AF%B9%E6%AF%94"><span class="nav-number">4.3.</span> <span class="nav-text">方法对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%90%8C%E7%82%B9"><span class="nav-number">4.3.1.</span> <span class="nav-text">相同点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E7%82%B9"><span class="nav-number">4.3.2.</span> <span class="nav-text">不同点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87"><span class="nav-number">5.</span> <span class="nav-text">评价指标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%8EBias%E5%92%8CVariance%E8%A7%92%E5%BA%A6%E7%9C%8B%E6%A8%A1%E5%9E%8B%E5%A4%8D%E6%9D%82%E5%BA%A6%E9%97%AE%E9%A2%98"><span class="nav-number">6.</span> <span class="nav-text">从Bias和Variance角度看模型复杂度问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E7%9A%84%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E5%8F%8A%E5%89%8D%E6%8F%90%E5%81%87%E8%AE%BE"><span class="nav-number">7.</span> <span class="nav-text">线性回归的适用场景及前提假设</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%E5%92%8C%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98"><span class="nav-number">7.1.</span> <span class="nav-text">回归问题和分类问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E4%B9%8B%E9%97%B4%E6%98%AF%E7%BA%BF%E6%80%A7%E5%85%B3%E7%B3%BB"><span class="nav-number">7.2.</span> <span class="nav-text">变量之间是线性关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AF%E5%B7%AE%E6%9C%8D%E4%BB%8E%E5%9D%87%E5%80%BC%E4%B8%BA%E9%9B%B6%E7%9A%84%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83"><span class="nav-number">7.3.</span> <span class="nav-text">误差服从均值为零的正态分布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E9%87%8F-x-%E7%9A%84%E5%88%86%E5%B8%83%E8%A6%81%E6%9C%89%E5%8F%98%E5%BC%82%E6%80%A7"><span class="nav-number">7.4.</span> <span class="nav-text">变量 x 的分布要有变异性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E4%B8%8D%E5%90%8C%E7%89%B9%E5%BE%81%E4%B9%8B%E9%97%B4%E7%9B%B8%E4%BA%92%E7%8B%AC%E7%AB%8B"><span class="nav-number">7.5.</span> <span class="nav-text">多元线性回归不同特征之间相互独立</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
