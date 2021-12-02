@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="引言众所周知，考试前会刷题。但是考试大部分又不是原题，那考前刷题有什么用？我们考前做的题目的当然不是为了赌考试有一模一样的题（有可能也是。。。），我们是为了从题目中学到一般的知识，这样我们在遇到新题目的时候也可以根据知识来做出题目。其实在机器学习中，考前刷的题就是训练集，考试中的题就是我们模型之后遇到的新样本，而泛化就是我们的模型遇到新样本的表现（也就对应着考试的分数）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习(五)——模型泛化">
+<meta property="og:url" content="http://example.com/2021/12/02/ML5_%E6%A8%A1%E5%9E%8B%E6%B3%9B%E5%8C%96/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="引言众所周知，考试前会刷题。但是考试大部分又不是原题，那考前刷题有什么用？我们考前做的题目的当然不是为了赌考试有一模一样的题（有可能也是。。。），我们是为了从题目中学到一般的知识，这样我们在遇到新题目的时候也可以根据知识来做出题目。其实在机器学习中，考前刷的题就是训练集，考试中的题就是我们模型之后遇到的新样本，而泛化就是我们的模型遇到新样本的表现（也就对应着考试的分数）。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/88e2b96315a948728c1be45da5eac9c9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a789149c47dc4593a40024f096ab13bc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e6cb60c50a274fc6bb6484b31389ff9d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/023f2f98afb54e7f924dbf4f65c10411.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/915bd3a61f4248c286861b2625cc3cff.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/88fc0ddfe5d9456faefda0a237676c09.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/85d27c23008042acbed7d5b393d3953b.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b1aa132c365c4aceb4a6017c71feaa5f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/c9836b94dd7847658d42e93df349d9b2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2badbea0090b4d46990a48f2dc7d46ba.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b8cd8e0a33ac4ef4b620e7d5ee20374e.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/545f2db0fe004e4e95cf9fdc7105c039.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/c621ca76f4f24f1e80b5e57a2bcde7e3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b4cf8e44eb594b3899751dd118198317.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8c89e8cb8a984341989870c0a2018604.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/513a47b8a5104538a1db046eced2e9e9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/57883b6ad285444b8955135b02be6214.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/eb19c49b39e24af0b5d14a00dad8c57a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d4b6e79d28d6427aa215ce0a1e1878a1.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/27238b86bf3942a3a2aa983e4b66fd1d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/12c4349c4444416594a5125566b9d9e6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/63ad8e7101ee43d5a7740b983142c05b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/9f5e71646a094c09884c7a17dedbdb51.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/de9d4586c2af4d5ab092fa37a56a0d1e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_17,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a1d9313e17424fdeb30d14caf763db9e.png">
+<meta property="article:published_time" content="2021-12-02T06:24:00.000Z">
+<meta property="article:modified_time" content="2021-12-02T06:25:25.765Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="模型泛化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/88e2b96315a948728c1be45da5eac9c9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2021/12/02/ML5_%E6%A8%A1%E5%9E%8B%E6%B3%9B%E5%8C%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>机器学习(五)——模型泛化 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/02/ML5_%E6%A8%A1%E5%9E%8B%E6%B3%9B%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          机器学习(五)——模型泛化
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-02 14:24:00 / 修改时间：14:25:25" itemprop="dateCreated datePublished" datetime="2021-12-02T14:24:00+08:00">2021-12-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>众所周知，考试前会刷题。但是考试大部分又不是原题，那考前刷题有什么用？我们考前做的题目的当然不是为了赌考试有一模一样的题（有可能也是。。。），我们是为了从题目中学到一般的知识，这样我们在遇到新题目的时候也可以根据知识来做出题目。其实在机器学习中，考前刷的题就是训练集，考试中的题就是我们模型之后遇到的新样本，而泛化就是我们的模型遇到新样本的表现（也就对应着考试的分数）。</p>
+<span id="more"></span>
+<hr>
+<h1 id="交叉验证"><a href="#交叉验证" class="headerlink" title="交叉验证"></a>交叉验证</h1><p>在我们训练完模型之后，我们肯定是想看模型的泛化是怎么样的。一般的做法就是把数据集分为训练集和测试集，我们用训练集训练模型，用测试集测试模型的泛化能力。我们还会根据测试集的准确率来调整模型。<br><img src="https://img-blog.csdnimg.cn/88e2b96315a948728c1be45da5eac9c9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>但这样又遇到一个问题，那就是如果根据测试集来调整模型，那么模型很可能就会在测试集上过拟合，或者说这样做的话，就无法体现模型的泛化能力了。<br>所以更多的做法，是将数据集分为训练集、验证集、测试集。通过训练集训练模型，验证集调整模型，测试集测试模型的泛化能力。<br><img src="https://img-blog.csdnimg.cn/a789149c47dc4593a40024f096ab13bc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>但是验证集也有随机性，很可能因为这一份验证集而产生过拟合，所以又产生了交叉验证。<br><img src="https://img-blog.csdnimg.cn/e6cb60c50a274fc6bb6484b31389ff9d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="交叉验证"><br> 我们将训练数据随机分为k份，上图中分为k=3份，将任意两种组合作为训练集，剩下的一组作为验证集，这样就得到k个模型，然后在将k个模型的均值作为结果调参。显然这种方式要比随机只用一份数据集作为验证集要靠谱的多。<br>下面用实际的例子，来了解一下如何使用交叉验证调参：</p>
+<ul>
+<li>第一种情况：只使用训练集测试集测试：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.neighbors <span class="keyword">import</span> KNeighborsClassifier</span><br><span class="line"></span><br><span class="line">digits = datasets.load_digits()</span><br><span class="line">x = digits.data</span><br><span class="line">y = digits.target</span><br><span class="line"></span><br><span class="line">x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=<span class="number">0.4</span>, random_state=<span class="number">666</span>)</span><br><span class="line"></span><br><span class="line">best_score, best_p, best_k = <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span> </span><br><span class="line"><span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">2</span>, <span class="number">11</span>):</span><br><span class="line">    <span class="keyword">for</span>  p <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">6</span>):</span><br><span class="line">        knn_clf = KNeighborsClassifier(weights=<span class="string">&quot;distance&quot;</span>, n_neighbors=k, p=p)</span><br><span class="line">        knn_clf.fit(x_train, y_train)</span><br><span class="line">        score = knn_clf.score(x_test, y_test)</span><br><span class="line">        <span class="keyword">if</span> score &gt; best_score:</span><br><span class="line">            best_score, best_p, best_k = score, p, k</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Best K=&quot;</span>, best_k)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Best P=&quot;</span>, best_p)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Best score=&quot;</span>, best_score)</span><br></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Best K= 3</span><br><span class="line">Best P= 2</span><br><span class="line">Best score= 0.9860917941585535</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>第二种情况：使用交叉验证</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> cross_val_score</span><br><span class="line"></span><br><span class="line">knn_clf = KNeighborsClassifier()</span><br><span class="line">cross_val_score(knn_clf, x_train, y_train)</span><br><span class="line"><span class="comment"># array([0.99537037, 0.98148148, 0.97685185, 0.97674419, 0.97209302])</span></span><br></pre></td></tr></table></figure>
+<p>根据输出结果，默认情况下 <code>sklearn</code> 包的交叉验证是分为 <code>5</code> 份，也可以通过 <code>cv</code> 参数修改。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">best_score, best_p, best_k = <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span> </span><br><span class="line"><span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">2</span>, <span class="number">11</span>):</span><br><span class="line">    <span class="keyword">for</span>  p <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">6</span>):</span><br><span class="line">        knn_clf = KNeighborsClassifier(weights=<span class="string">&quot;distance&quot;</span>, n_neighbors=k, p=p)</span><br><span class="line">        scores = cross_val_score(knn_clf, x_train, y_train)</span><br><span class="line">        score = np.mean(scores)</span><br><span class="line">        <span class="keyword">if</span> score &gt; best_score:</span><br><span class="line">            best_score, best_p, best_k = score, p, k</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Best K=&quot;</span>, best_k)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Best P=&quot;</span>, best_p)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Best score=&quot;</span>, best_score)</span><br></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Best K= 2</span><br><span class="line">Best P= 2</span><br><span class="line">Best score= 0.9851507321274763</span><br></pre></td></tr></table></figure>
+<p>从输出结果可以看出，选择的参数和之前不一样了，虽然分数下降了点，但使用交叉验证的更可靠。当然这里不是模型的测试分数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">best_knn_clf = KNeighborsClassifier(weights=<span class="string">&#x27;distance&#x27;</span>, n_neighbors=<span class="number">2</span>, p=<span class="number">2</span>)</span><br><span class="line">best_knn_clf.fit(x_train, y_train)</span><br><span class="line">best_knn_clf.score(x_test, y_test)</span><br></pre></td></tr></table></figure>
+<p>输出结果 <code>0.980528511821975</code> 才是测试分数。</p>
+<hr>
+<h1 id="偏差方差权衡"><a href="#偏差方差权衡" class="headerlink" title="偏差方差权衡"></a>偏差方差权衡</h1><blockquote>
+<p>偏差方差权衡（Bias Variance Trade off），当我们的模型表现不佳时，通常是出现两种问题，一种是 高偏差 问题，另一种是<br>高方差 问题。识别它们有助于选择正确的优化方式，所以我们先来看下 偏差 与 方差 的意义。</p>
+</blockquote>
+<ul>
+<li><strong>偏差</strong>: 描述模型输出结果的期望与样本真实结果的差距。</li>
+<li><strong>方差</strong>: 描述模型对于给定值的输出稳定性。 方差越大模型的泛华能力越弱。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/023f2f98afb54e7f924dbf4f65c10411.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>就像打靶一样，偏差描述了我们的射击总体是否偏离了我们的目标，而方差描述了射击准不准。左一是方差跟偏差都很小，都比较靠近中心且集中，右一分散在中心附近，但比较散，因此方差较大。这样结合下面这两幅图就可以大概理解，偏差描述的是描述模型输出结果的期望与样本真实结果的差距。而方差则是对于输出结果是否集中，描述模型对于给定值的输出稳定性。</p>
+<p><strong>模型误差 = 偏差 + 方差 + 不可避免的误差</strong></p>
+<ul>
+<li>导致偏差大的原因：对问题本身的假设不正确！如非线性数据使用线性回归。或者特征对应标记高度不相关也会导致高偏差，不过这是对应着特征选择，跟算法没有关系，对于算法而言基本属于欠拟合问题<code>underfitting</code>。</li>
+<li>导致方差大的原因：数据的一点点扰动都会极大地影响模型。通常原因就是使用的模型太复杂，如高阶多项式回归。这就是所说的过拟合（<code>overfitting</code>）</li>
+<li>总结：有些算法天生就是高方差的算法，如KNN，非参数学习的算法通常都是高方差的，因为不对数据进行任何假设。还有一些算法天生就是高偏差的，如线性回归。参数学习通常都是高偏差算法，因为对数据具有极强的假设。大多数算法具有相应的算法可以调整偏差和方差，如KNN中的k，如线性回归中使用多项式回归中的degree，偏差和方差通常是矛盾的，降低偏差，会提高方差，降低方差，会提高偏差，因此在实际应用中需要进行权衡。机器学习的主要挑战，在于方差。这句话只针对算法，并不针对实际问题。因为大多数机器学习需要解决过拟合问题。</li>
+</ul>
+<p><strong>解决手段</strong>：</p>
+<ul>
+<li>降低模型复杂度</li>
+<li>减少数据维度；降噪</li>
+<li>增加样本数量</li>
+<li>使用验证集</li>
+<li><strong>模型正则化</strong></li>
+</ul>
+<hr>
+<h1 id="模型正则化"><a href="#模型正则化" class="headerlink" title="模型正则化"></a>模型正则化</h1><p>模型正则化（<code>Regularization</code>）：限制参数的大小。常常用来解决过拟合问题。<br>先看一下多项式回归过拟合的情况：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LinearRegression</span><br><span class="line"><span class="keyword">from</span> sklearn.pipeline <span class="keyword">import</span> Pipeline</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> PolynomialFeatures</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> mean_squared_error</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">PolynomiaRegression</span>(<span class="params">degree</span>):</span></span><br><span class="line">    <span class="keyword">return</span> Pipeline([</span><br><span class="line">        (<span class="string">&#x27;poly&#x27;</span>, PolynomialFeatures(degree=degree)),</span><br><span class="line">        (<span class="string">&#x27;std_scale&#x27;</span>, StandardScaler()),</span><br><span class="line">        (<span class="string">&#x27;lin_reg&#x27;</span>, LinearRegression()),</span><br><span class="line">    ])</span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">666</span>)</span><br><span class="line">x = np.random.uniform(-<span class="number">3.0</span>, <span class="number">3.0</span>, size=<span class="number">100</span>)</span><br><span class="line">X = x.reshape(-<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">y = <span class="number">0.5</span> * x**<span class="number">2</span> + x + <span class="number">2</span> + np.random.normal(<span class="number">0</span>, <span class="number">1</span>, size=<span class="number">100</span>)</span><br><span class="line"></span><br><span class="line">poly100_reg = PolynomiaRegression(degree=<span class="number">100</span>)</span><br><span class="line">poly100_reg.fit(X, y)</span><br><span class="line">y100_predict = poly100_reg.predict(X)</span><br><span class="line">mean_squared_error(y, y100_predict)</span><br><span class="line"><span class="comment"># 0.687293250556113</span></span><br><span class="line">x_plot = np.linspace(-<span class="number">3</span>, <span class="number">3</span>, <span class="number">100</span>).reshape(<span class="number">100</span>, <span class="number">1</span>)</span><br><span class="line">y_plot = poly100_reg.predict(x_plot)</span><br><span class="line"></span><br><span class="line">plt.scatter(x, y)</span><br><span class="line">plt.plot(x_plot[:,<span class="number">0</span>], y_plot, color=<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">plt.axis([-<span class="number">3</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">10</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/915bd3a61f4248c286861b2625cc3cff.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16" alt="过拟合"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">lin_reg.coef_</span><br><span class="line">array([ 1.21093453e+12,  1.19203091e+01,  1.78867645e+02, -2.95982349e+02,</span><br><span class="line">       -1.79531458e+04, -1.54155027e+04,  8.34383276e+05,  8.19774042e+05,</span><br><span class="line">       -2.23627851e+07, -1.44771550e+07,  3.87211418e+08,  1.13421075e+08,</span><br><span class="line">       -4.61600312e+09, -1.25081501e+08,  3.93150405e+10, -5.47576783e+09,</span><br><span class="line">       -2.44176251e+11,  5.46288687e+10,  1.11421043e+12, -2.76406464e+11,</span><br><span class="line">       -3.71329259e+12,  8.55454910e+11,  8.80960804e+12, -1.60748867e+12,</span><br><span class="line">       -1.39204160e+13,  1.49444708e+12,  1.19236879e+13,  2.47473079e+11,</span><br><span class="line">        4.42409192e+11, -1.64280931e+12, -1.05153597e+13, -1.80898849e+11,</span><br><span class="line">        3.00205050e+12,  2.75573418e+12,  8.74124346e+12, -1.36695399e+12,</span><br><span class="line">       -1.22671920e+12, -7.00432918e+11, -8.24895441e+12, -8.66296096e+11,</span><br><span class="line">       -2.75689092e+12,  1.39625207e+12,  6.26145077e+12, -3.47996080e+11,</span><br><span class="line">        6.29123725e+12,  1.33768276e+12, -6.11902468e+11,  2.92339251e+11,</span><br><span class="line">       -6.59758587e+12, -1.85663192e+12, -4.13408727e+12, -9.72012430e+11,</span><br><span class="line">       -3.99030817e+11, -7.53702123e+11,  5.49214630e+12,  2.18518119e+12,</span><br><span class="line">        5.24341931e+12,  7.50251523e+11,  5.50252585e+11,  1.70649474e+12,</span><br><span class="line">       -2.26789998e+12, -1.84570078e+11, -5.47302714e+12, -2.86219945e+12,</span><br><span class="line">       -3.88076411e+12, -1.19593780e+12,  1.16315909e+12, -1.41082803e+12,</span><br><span class="line">        3.56349186e+12,  7.12308678e+11,  4.76397106e+12,  2.60002465e+12,</span><br><span class="line">        1.84222952e+12,  3.06319895e+12, -1.33316498e+12,  6.18544545e+11,</span><br><span class="line">       -2.64567691e+12, -1.01424838e+12, -4.76743525e+12, -3.59230293e+12,</span><br><span class="line">       -1.68055178e+12, -3.57480827e+12,  2.06629318e+12, -6.07564696e+11,</span><br><span class="line">        3.40446395e+12,  3.42181387e+12,  3.31399498e+12,  4.92290870e+12,</span><br><span class="line">        3.79985951e+11,  1.34189037e+12, -3.34878352e+12, -2.07865615e+12,</span><br><span class="line">       -3.24634078e+12, -5.48903768e+12,  5.87242630e+11, -2.27318874e+12,</span><br><span class="line">        2.60023097e+12,  8.21820883e+12,  4.79532121e+10, -3.11436610e+12,</span><br><span class="line">       -6.27736909e+11])</span><br></pre></td></tr></table></figure>
+<p>通过查看多项式回归的系数可以发现，有些系数能差13个数量级，其实这就是过拟合了！而模型正则化就是为了解决这个问题。先来回顾一下多项式回归的目标。<br><img src="https://img-blog.csdnimg.cn/88fc0ddfe5d9456faefda0a237676c09.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>通过加入的正则项来控制系数不要太大，从而使曲线不要那么陡峭，变化的那么剧烈。在这里有几个细节需要注意。</p>
+<ul>
+<li>第一点：θ从1开始，只包含系数不包括截距，这是因为截距只决定曲线的高低，并不会影响曲线的陡峭和缓和。</li>
+<li>第2点：就是这个 <code>1/2</code>，是为了求导之后能够将2消去，为了方便计算。不过其实这个有没有都是可以的，因为在正则化前有一个系数，我们可以把这个 <code>1/2</code> 可以考虑到 <code>ɑ</code>中去。</li>
+<li>第3点：系数<code>ɑ</code>，它表示正则化项在整个损失函数中所占的比例。极端一下，<code>ɑ</code>=0时，相当于模型没有加入正则化，但如果<code>ɑ</code>= 正无穷，此时其实主要的优化任务就变成了需要所有的<code>ɑ</code>都尽可能的小，最优的情况就是全为0。至于<code>ɑ</code>的取值就需要尝试了。</li>
+</ul>
+<h2 id="岭回归（Ridege-Regression）"><a href="#岭回归（Ridege-Regression）" class="headerlink" title="岭回归（Ridege Regression）"></a>岭回归（Ridege Regression）</h2><p><img src="https://img-blog.csdnimg.cn/85d27c23008042acbed7d5b393d3953b.png"><br>测试用例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">42</span>)</span><br><span class="line">x = np.random.uniform(-<span class="number">3.0</span>, <span class="number">3.0</span>, size=<span class="number">100</span>)</span><br><span class="line">X = x.reshape(-<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">y = <span class="number">0.5</span> * x + <span class="number">3</span> + np.random.normal(<span class="number">0</span>, <span class="number">1</span>, size=<span class="number">100</span>)</span><br><span class="line"></span><br><span class="line">plt.scatter(x, y)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/b1aa132c365c4aceb4a6017c71feaa5f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LinearRegression</span><br><span class="line"><span class="keyword">from</span> sklearn.pipeline <span class="keyword">import</span> Pipeline</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> PolynomialFeatures</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> mean_squared_error</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">PolynomiaRegression</span>(<span class="params">degree</span>):</span></span><br><span class="line">    <span class="keyword">return</span> Pipeline([</span><br><span class="line">        (<span class="string">&#x27;poly&#x27;</span>, PolynomialFeatures(degree=degree)),</span><br><span class="line">        (<span class="string">&#x27;std_scale&#x27;</span>, StandardScaler()),</span><br><span class="line">        (<span class="string">&#x27;lin_reg&#x27;</span>, LinearRegression()),</span><br><span class="line">    ])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">666</span>)</span><br><span class="line">x_train, x_test, y_train, y_test = train_test_split(X, y)</span><br><span class="line"></span><br><span class="line">poly_reg = PolynomiaRegression(degree=<span class="number">20</span>)</span><br><span class="line">poly_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y_poly_predict = poly_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y_poly_predict)</span><br><span class="line"><span class="comment"># 167.9401085999025</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">x_plot = np.linspace(-<span class="number">3</span>, <span class="number">3</span>, <span class="number">100</span>).reshape(<span class="number">100</span>, <span class="number">1</span>)</span><br><span class="line">y_plot = poly_reg.predict(x_plot)</span><br><span class="line"></span><br><span class="line">plt.scatter(x, y)</span><br><span class="line">plt.plot(x_plot[:,<span class="number">0</span>], y_plot, color=<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">plt.axis([-<span class="number">3</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">6</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/c9836b94dd7847658d42e93df349d9b2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"><br>把画图这些操作封装成一个函数，方便后面调用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_model</span>(<span class="params">model</span>):</span></span><br><span class="line">    x_plot = np.linspace(-<span class="number">3</span>, <span class="number">3</span>, <span class="number">100</span>).reshape(<span class="number">100</span>, <span class="number">1</span>)</span><br><span class="line">    y_plot = model.predict(x_plot)</span><br><span class="line"></span><br><span class="line">    plt.scatter(x, y)</span><br><span class="line">    plt.plot(x_plot[:,<span class="number">0</span>], y_plot, color=<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    plt.axis([-<span class="number">3</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">6</span>])</span><br><span class="line">    plt.show()</span><br></pre></td></tr></table></figure>
+<p><strong>使用岭回归：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> Ridge</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">RidgeRegression</span>(<span class="params">degree, alpha</span>):</span></span><br><span class="line">    <span class="keyword">return</span> Pipeline([</span><br><span class="line">        (<span class="string">&#x27;poly&#x27;</span>, PolynomialFeatures(degree=degree)),</span><br><span class="line">        (<span class="string">&#x27;std_scale&#x27;</span>, StandardScaler()),</span><br><span class="line">        (<span class="string">&#x27;lin_reg&#x27;</span>, Ridge(alpha=alpha)),</span><br><span class="line">    ])</span><br><span class="line"></span><br><span class="line">ridege1_reg = RidgeRegression(<span class="number">20</span>, alpha=<span class="number">0.0001</span>)</span><br><span class="line">ridege1_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y1_predict = ridege1_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y1_predict)</span><br><span class="line"><span class="comment"># 1.3233492754136291</span></span><br><span class="line"><span class="comment"># 跟之前的136.相比小了很多</span></span><br><span class="line">plot_model(ridege1_reg)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2badbea0090b4d46990a48f2dc7d46ba.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/b8cd8e0a33ac4ef4b620e7d5ee20374e.png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ridege2_reg = RidgeRegression(<span class="number">20</span>, alpha=<span class="number">1</span>)</span><br><span class="line">ridege2_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y2_predict = ridege2_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y2_predict)</span><br><span class="line"><span class="comment"># 1.1888759304218461</span></span><br><span class="line">plot_model(ridege2_reg)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/545f2db0fe004e4e95cf9fdc7105c039.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ridege3_reg = RidgeRegression(<span class="number">20</span>, alpha=<span class="number">100</span>)</span><br><span class="line">ridege3_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y3_predict = ridege3_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y3_predict)</span><br><span class="line"><span class="comment"># 1.3196456113086197</span></span><br><span class="line"><span class="comment"># 此时相比alpha=1时均方误差上升了，说明可能正则过头了</span></span><br><span class="line">plot_model(ridege3_reg)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/c621ca76f4f24f1e80b5e57a2bcde7e3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ridege4_reg = RidgeRegression(<span class="number">20</span>, alpha=<span class="number">1000000</span>)</span><br><span class="line">ridege4_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y4_predict = ridege4_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y4_predict)</span><br><span class="line"><span class="comment"># 1.8404103153255003</span></span><br><span class="line">plot_model(ridege4_reg)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/b4cf8e44eb594b3899751dd118198317.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"><br>​ 这也跟之前分析，如果 <code>ɑ</code>=正无穷 时，为了使损失函数最小，就需要所有的系数的平方和最小，即 <code>θ</code> 都趋于0。通过上面几种alpha的取值可以看出我们可以在1-100进行更加细致的搜索，找到最合适的一条相对比较平滑的曲线去拟合。这就是L2正则。</p>
+<h2 id="LASSO-Regularization"><a href="#LASSO-Regularization" class="headerlink" title="LASSO Regularization"></a>LASSO Regularization</h2><p><img src="https://img-blog.csdnimg.cn/8c89e8cb8a984341989870c0a2018604.png"></p>
+<blockquote>
+<p>LASSO: Least Absolute Shrinkage and Selection Operator Regression<br>Shrinkage:收缩，缩小，收缩量。特征缩减。重点在于Selection Operator</p>
+</blockquote>
+<p><strong>使用lasso回归：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> Lasso</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">LassoRegression</span>(<span class="params">degree, alpha</span>):</span></span><br><span class="line">    <span class="keyword">return</span> Pipeline([</span><br><span class="line">        (<span class="string">&#x27;poly&#x27;</span>, PolynomialFeatures(degree=degree)),</span><br><span class="line">        (<span class="string">&#x27;std_scale&#x27;</span>, StandardScaler()),</span><br><span class="line">        (<span class="string">&#x27;lin_reg&#x27;</span>, Lasso(alpha=alpha)),</span><br><span class="line">    ])</span><br><span class="line"></span><br><span class="line">lasso1_reg = LassoRegression(<span class="number">20</span>, <span class="number">0.01</span>) </span><br><span class="line"><span class="comment">#这里相比Ridge的alpha小了很多，这是因为在Ridge中是平方项</span></span><br><span class="line">lasso1_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y1_predict = lasso1_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y1_predict)</span><br><span class="line"><span class="comment"># 1.149608084325997</span></span><br><span class="line">plot_model(lasso1_reg)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/513a47b8a5104538a1db046eced2e9e9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">lasso2_reg = LassoRegression(<span class="number">20</span>, <span class="number">0.1</span>) </span><br><span class="line">lasso2_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y2_predict = lasso2_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y2_predict)</span><br><span class="line"><span class="comment"># 1.1213911351818648</span></span><br><span class="line">plot_model(lasso2_reg)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/57883b6ad285444b8955135b02be6214.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">lasso3_reg = LassoRegression(<span class="number">20</span>, <span class="number">1</span>) </span><br><span class="line">lasso3_reg.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">y3_predict = lasso3_reg.predict(x_test)</span><br><span class="line">mean_squared_error(y_test, y3_predict)</span><br><span class="line"><span class="comment"># 1.8408939659515595</span></span><br><span class="line">plot_model(lasso3_reg)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/eb19c49b39e24af0b5d14a00dad8c57a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+<h2 id="解释Ridge和LASSO"><a href="#解释Ridge和LASSO" class="headerlink" title="解释Ridge和LASSO"></a>解释Ridge和LASSO</h2><p><img src="https://img-blog.csdnimg.cn/d4b6e79d28d6427aa215ce0a1e1878a1.png"><br><img src="https://img-blog.csdnimg.cn/27238b86bf3942a3a2aa983e4b66fd1d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>通过这两幅图进行对比发现，<code>LASSO</code>拟合的模型更倾向于是一条直线，而<code>Ridge</code>拟合的模型更趋向与一条曲线。这是因为两个正则的本质不同，<code>Ridge</code>是趋向于使所有 <code>θ</code> 的加和尽可能的小，而 <code>Lasso</code> 则是趋向于使得一部分  <code>θ</code>  的值变为0，因此可作为特征选择用，这也是为什么叫 <code>Selection Operation</code> 的原因。<br>下面就对上面这两句话尝试着进行一下解释：<br><img src="https://img-blog.csdnimg.cn/12c4349c4444416594a5125566b9d9e6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/63ad8e7101ee43d5a7740b983142c05b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>导数中的 <code>θ</code> 都是有值的，顺着梯度方向下降。<code>Ridge</code>是趋向于使所有 <code>θ</code> 的加和尽可能的小，而不是像<code>lasso</code> 一样直接为0。<br><img src="https://img-blog.csdnimg.cn/9f5e71646a094c09884c7a17dedbdb51.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/de9d4586c2af4d5ab092fa37a56a0d1e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_17,color_FFFFFF,t_70,g_se,x_16"><br>所以，当如果从上图的一点开始进行梯度下降的话，就不能想 <code>Ridge</code> 一样曲线地去逼近 <code>0</code>，而是只能使用这些非常规则的方式去逼近零点。在这种路径的梯度下降中，就会达到某些轴的零点，<code>Lasso</code> 则是趋向于使得一部分 <code>θ</code> 的值变为 <code>0</code>。所以可以作为特征选择用。不过也正是因为这样的特性，使得 <code>Lasso</code>这种方法有可能会错误将原来有用的特征的系数变为 <code>0</code>，所以相对 <code>Ridge</code> 来说，准确率还是 <code>Ridge</code> 相对较好一些，但是当特征特别大时候，此时使用 <code>Lasso</code> 也能将模型的特征变少的作用。</p>
+<h2 id="弹性网"><a href="#弹性网" class="headerlink" title="弹性网"></a>弹性网</h2><p><img src="https://img-blog.csdnimg.cn/a1d9313e17424fdeb30d14caf763db9e.png"><br>既然两者各有优势，就把他们结合起来，这就是弹性网（Elastic Net）。</p>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2021/12/02/ML5_%E6%A8%A1%E5%9E%8B%E6%B3%9B%E5%8C%96/" title="机器学习(五)——模型泛化">http://example.com/2021/12/02/ML5_模型泛化/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E6%B3%9B%E5%8C%96/" rel="tag"># 模型泛化</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/01/ML4_PCA/" rel="prev" title="机器学习(四)——PCA主成分分析">
+      <i class="fa fa-chevron-left"></i> 机器学习(四)——PCA主成分分析
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81"><span class="nav-number">2.</span> <span class="nav-text">交叉验证</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%81%8F%E5%B7%AE%E6%96%B9%E5%B7%AE%E6%9D%83%E8%A1%A1"><span class="nav-number">3.</span> <span class="nav-text">偏差方差权衡</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E6%AD%A3%E5%88%99%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">模型正则化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B2%AD%E5%9B%9E%E5%BD%92%EF%BC%88Ridege-Regression%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">岭回归（Ridege Regression）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LASSO-Regularization"><span class="nav-number">4.2.</span> <span class="nav-text">LASSO Regularization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E9%87%8ARidge%E5%92%8CLASSO"><span class="nav-number">4.3.</span> <span class="nav-text">解释Ridge和LASSO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%B9%E6%80%A7%E7%BD%91"><span class="nav-number">4.4.</span> <span class="nav-text">弹性网</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
