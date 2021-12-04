@@ -266,6 +266,84 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/04/ML7_%E5%88%86%E7%B1%BB%E7%AE%97%E6%B3%95%E7%9A%84%E8%AF%84%E4%BB%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/12/04/ML7_%E5%88%86%E7%B1%BB%E7%AE%97%E6%B3%95%E7%9A%84%E8%AF%84%E4%BB%B7/" class="post-title-link" itemprop="url">机器学习(七)——分类算法的评价</a>
+        </h2>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-04 12:22:00 / 修改时间：12:22:41" itemprop="dateCreated datePublished" datetime="2021-12-04T12:22:00+08:00">2021-12-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="分类准确度存在的问题"><a href="#分类准确度存在的问题" class="headerlink" title="分类准确度存在的问题"></a>分类准确度存在的问题</h1><p>如果现在有一个癌症预测系统，输入患者的信息，可以判断是否有癌症。如果只使用分类准确度来评价模型的好坏是否合理？假如此时模型的预测准确度是99.9%，那么是否能认为模型是好的呢？如果癌症产生的概率只有0.1%，那就意味着这个癌症预测系统只有预测所有人都是健康，即可达到99.9%的准确率。那么此时还认为模型是好的嘛？假如更加极端一点，如果癌症产生的概率只有0.01%，那就意味着这个癌症预测系统只有预测所有人都是健康，即可达到99.99%的准确率。到这里，就能大概理解分类准确度评价模型存在的问题。什么时候才会出现这样的问题呢？这就是对于<strong>极度偏斜的数据（Skewed Data）</strong>，也就样本数据极度不平衡的情况下，只使用分类准确度是远远不够的。因此需要引进更多的指标。<br>首先使用<strong>混淆矩阵（Confusion Matrix）</strong> 做进一步的分析。首先针对二分类问题，进行混淆矩阵分析。我们通过样本的采集，能够直接知道真实情况下，哪些数据结果是 <strong>positive</strong>，哪些结果是 <strong>negative</strong>。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/12/04/ML7_%E5%88%86%E7%B1%BB%E7%AE%97%E6%B3%95%E7%9A%84%E8%AF%84%E4%BB%B7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/03/ML6_LogisticRegression/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -917,86 +995,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/19/Leetcode542/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="zju_cbw">
-      <meta itemprop="description" content="努力才配拥有正茂风华">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="cbw">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/19/Leetcode542/" class="post-title-link" itemprop="url">Leetcode542.01矩阵</a>
-        </h2>
-
-        <div class="post-meta">
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-11-19 16:12:00 / 修改时间：16:12:54" itemprop="dateCreated datePublished" datetime="2021-11-19T16:12:00+08:00">2021-11-19</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8A%9B%E6%89%A3%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">力扣刷题笔记</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="题目链接"><a href="#题目链接" class="headerlink" title="题目链接"></a>题目链接</h1><p><a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/01-matrix/">点我(^_^)</a></p>
-<h1 id="题目大意"><a href="#题目大意" class="headerlink" title="题目大意"></a>题目大意</h1><p>求矩阵中每个位置到最近0的距离（曼哈顿距离）</p>
-<h1 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h1>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/19/Leetcode542/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1068,7 +1066,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-count">28</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1081,7 +1079,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
