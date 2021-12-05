@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="决策树是基于树结构进行决策的。决策树(Decision Tree）是在已知各种情况发生概率的基础上，通过构成决策树来求取净现值的期望值大于等于零的概率。它是一种非参数学习算法，既可以解决分类问题，也可以解决回归问题。  在学习决策树前需要先对熵的概念进行了解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习(八)——决策树">
+<meta property="og:url" content="http://example.com/2021/12/05/ML8_%E5%86%B3%E7%AD%96%E6%A0%91/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="决策树是基于树结构进行决策的。决策树(Decision Tree）是在已知各种情况发生概率的基础上，通过构成决策树来求取净现值的期望值大于等于零的概率。它是一种非参数学习算法，既可以解决分类问题，也可以解决回归问题。  在学习决策树前需要先对熵的概念进行了解。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d5bd9398a97049a6bf79a5a078a1ebb0.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1606fd967c4342d5a7d8957648ea5085.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/639728b181044f3f8d33492b8bc51743.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3ff16e75b737464bac668382e75b0601.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/28d96171936749349056d1f5d86021cf.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8fc5cf130cc04a579904676b5475cb87.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/35ebace0c3cf4e11b2cfc9cbd4fb6466.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/ebfd6c79e8134f92a45cc2dc67a3e0d2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/cd83a1c2d50c4c3e9579f9671f068760.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e4e286d02d284f7480b9d83cc0510922.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b13158e88bc34ca28bf93ec02fbe8f24.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/972e3f862eb14fb89021a698ae78e5d2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/100ab5b6270c4dff8ba83b86f6a8c53a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/dce88b7de3a348d89e42388b5119957e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f9327c8d7cc94add9e647c52c589b66a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2021-12-05T04:31:00.000Z">
+<meta property="article:modified_time" content="2021-12-05T04:31:47.258Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="决策树">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/d5bd9398a97049a6bf79a5a078a1ebb0.png">
+
+<link rel="canonical" href="http://example.com/2021/12/05/ML8_%E5%86%B3%E7%AD%96%E6%A0%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>机器学习(八)——决策树 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/05/ML8_%E5%86%B3%E7%AD%96%E6%A0%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          机器学习(八)——决策树
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-05 12:31:00 / 修改时间：12:31:47" itemprop="dateCreated datePublished" datetime="2021-12-05T12:31:00+08:00">2021-12-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>决策树是基于树结构进行决策的。决策树(Decision Tree）是在已知各种情况发生概率的基础上，通过构成决策树来求取净现值的期望值大于等于零的概率。它是一种非参数学习算法，既可以解决分类问题，也可以解决回归问题。</p>
+</blockquote>
+<p>在学习决策树前需要先对熵的概念进行了解。</p>
+<span id="more"></span>
+<h1 id="信息熵"><a href="#信息熵" class="headerlink" title="信息熵"></a>信息熵</h1><p>熵：用来描述事物的混乱程度，是对平均不确定性的度量。<br><img src="https://img-blog.csdnimg.cn/d5bd9398a97049a6bf79a5a078a1ebb0.png"><br>信息熵：由香农提出，。是度量样本集合纯度的最常用的指标。熵在信息论中代表随机变量不确定度的度量。一条信息大小和它的不确定性有直接关系，要搞清楚一件非常不确定的事情，或者是我们一无所知的事情，需要了解大量信息==&gt;信息的度量就等于不确定的多少。</p>
+<p>熵越大，数据不确定性越高，熵越低，数据的不确定性越低。假定当前样本集合D中k类样本所占比例为 p<sub>i</sub>，则信息熵的定义：<br><img src="https://img-blog.csdnimg.cn/1606fd967c4342d5a7d8957648ea5085.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">entropy</span>(<span class="params">p</span>):</span></span><br><span class="line">    <span class="keyword">return</span> -p * np.log(p) - (<span class="number">1</span>-p) * np.log(<span class="number">1</span>-p)</span><br><span class="line"></span><br><span class="line">x = np.linspace(<span class="number">0.01</span>, <span class="number">0.99</span>, <span class="number">200</span>)</span><br><span class="line">plt.plot(x, entropy(x))</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/639728b181044f3f8d33492b8bc51743.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"></p>
+<hr>
+<h1 id="基于信息熵的决策树"><a href="#基于信息熵的决策树" class="headerlink" title="基于信息熵的决策树"></a>基于信息熵的决策树</h1><p>决策树的生成是一个递归过程，在决策树基本算法中有三种形式会导致递归结束并返回：<br>（1）当前结点包含所有的样本属于同一级别，无需划分；<br>（2）当前属性及为空，或是所有样本在所有属性上取值相同，无法划分；<br>（3）当前结点包含的样本集合为空，不能划分。<br>模拟信息熵进行划分：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">iris = datasets.load_iris()</span><br><span class="line">x = iris.data[:, <span class="number">2</span>:]</span><br><span class="line">y = iris.target</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">split</span>(<span class="params">x, y, d, value</span>):</span></span><br><span class="line">    index_a = (x[:, d] &lt;= value)</span><br><span class="line">    index_b = (x[:, d] &gt; value)</span><br><span class="line">    <span class="keyword">return</span> x[index_a], x[index_b], y[index_a], y[index_b]</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Counter</span><br><span class="line"><span class="keyword">from</span> math <span class="keyword">import</span> log </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">entropy</span>(<span class="params">y</span>):</span></span><br><span class="line">    counter = Counter(y)</span><br><span class="line">    res = <span class="number">0.0</span></span><br><span class="line">    <span class="keyword">for</span> num <span class="keyword">in</span> counter.values():</span><br><span class="line">        p = num / <span class="built_in">len</span>(y)</span><br><span class="line">        res += -p * log(p)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">try_split</span>(<span class="params">x, y</span>):</span></span><br><span class="line">    </span><br><span class="line">    best_entropy = <span class="built_in">float</span>(<span class="string">&#x27;inf&#x27;</span>)</span><br><span class="line">    best_d, best_v = -<span class="number">1</span>, -<span class="number">1</span></span><br><span class="line">    <span class="comment"># 在使用的鸢尾花数据中只用了后两维，x.shape=(150, 2)</span></span><br><span class="line">    <span class="comment"># 首先将数据进行排序</span></span><br><span class="line">    <span class="keyword">for</span> d <span class="keyword">in</span> <span class="built_in">range</span>(x.shape[<span class="number">1</span>]):</span><br><span class="line">        sorted_index = np.argsort(x[:,d])</span><br><span class="line">        <span class="comment"># 经过排序后，遍历每个划分点，比较划分后的信息熵，从而选择信息增益最大的那个节点</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(x)):</span><br><span class="line">            <span class="keyword">if</span> x[sorted_index[i-<span class="number">1</span>], d] != x[sorted_index[i], d]:</span><br><span class="line">                v = (x[sorted_index[i-<span class="number">1</span>], d] + x[sorted_index[i], d]) / <span class="number">2</span></span><br><span class="line">                x_l, x_r, y_l, y_r = split(x, y, d, v)</span><br><span class="line">                e = entropy(y_l) + entropy(y_r)</span><br><span class="line">                <span class="keyword">if</span> e &lt; best_entropy:</span><br><span class="line">                    best_entropy, best_d, best_v = e, d, v</span><br><span class="line">                    </span><br><span class="line">    <span class="keyword">return</span> best_entropy, best_d, best_v</span><br><span class="line"></span><br><span class="line">best_entropy, best_d, best_v = try_split(x, y)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_entropy=&#x27;</span>, best_entropy)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_d=&#x27;</span>, best_d)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_v2&#x27;</span>,best_v)</span><br><span class="line"><span class="comment"># best_entropy= 0.6931471805599453</span></span><br><span class="line"><span class="comment"># best_d= 0</span></span><br><span class="line"><span class="comment"># best_v2 2.45</span></span><br><span class="line">x1_l, x1_r, y1_l, y1_r = split(x, y, best_d, best_v)</span><br><span class="line">entropy(y1_l)</span><br><span class="line"><span class="comment"># 0.0</span></span><br><span class="line">entropy(y1_r)</span><br><span class="line"><span class="comment"># 0.6931471805599453</span></span><br><span class="line">best_entropy2, best_d2, best_v2 = try_split(x1_r, y1_r)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_entropy2=&#x27;</span>, best_entropy2)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_d2=&#x27;</span>, best_d2)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_v2=&#x27;</span>,best_v2)</span><br><span class="line"><span class="comment"># best_entropy2= 0.4132278899361904</span></span><br><span class="line"><span class="comment"># best_d2= 1</span></span><br><span class="line"><span class="comment"># best_v2= 1.75</span></span><br><span class="line"></span><br><span class="line">x2_l, x2_r, y2_l, y2_r = split(x1_r, y1_r, best_d2, best_v2)</span><br><span class="line">entropy(y2_l)</span><br><span class="line"><span class="comment"># 0.30849545083110386</span></span><br><span class="line">entropy(y2_r)</span><br><span class="line"><span class="comment"># 0.10473243910508653</span></span><br></pre></td></tr></table></figure>
+<p>根据输出结果，第一次分割节点在（d=0）第一个维度的2.45处。第二次分割节点（d2=1）在第二个维度的1.75处。<br>基于信息熵的划分有有两种：<br><img src="https://img-blog.csdnimg.cn/3ff16e75b737464bac668382e75b0601.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<hr>
+<h1 id="基尼指数"><a href="#基尼指数" class="headerlink" title="基尼指数"></a>基尼指数</h1><p><code>CART（Classification and Regression Tree）</code> 决策树使用基尼指数来选择划分属性，数据集D的纯度可以使用基尼值来度量：<br><img src="https://img-blog.csdnimg.cn/28d96171936749349056d1f5d86021cf.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">x = np.linspace(<span class="number">0.01</span>, <span class="number">0.99</span>, <span class="number">200</span>)</span><br><span class="line">y = -<span class="number">2</span> * x**<span class="number">2</span> + <span class="number">2</span>*x </span><br><span class="line"></span><br><span class="line">plt.plot(x, y)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/8fc5cf130cc04a579904676b5475cb87.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"><br>接下来模拟gini指数进行划分：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Counter</span><br><span class="line"><span class="keyword">from</span> math <span class="keyword">import</span> log </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">split</span>(<span class="params">x, y, d, value</span>):</span></span><br><span class="line">    index_a = (x[:, d] &lt;= value)</span><br><span class="line">    index_b = (x[:, d] &gt; value)</span><br><span class="line">    <span class="keyword">return</span> x[index_a], x[index_b], y[index_a], y[index_b]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gini</span>(<span class="params">y</span>):</span></span><br><span class="line">    counter = Counter(y)</span><br><span class="line">    res = <span class="number">1.0</span></span><br><span class="line">    <span class="keyword">for</span> num <span class="keyword">in</span> counter.values():</span><br><span class="line">        p = num / <span class="built_in">len</span>(y)</span><br><span class="line">        res += -p ** <span class="number">2</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">try_split</span>(<span class="params">x, y</span>):</span></span><br><span class="line">    </span><br><span class="line">    best_g = <span class="built_in">float</span>(<span class="string">&#x27;inf&#x27;</span>)</span><br><span class="line">    best_d, best_v = -<span class="number">1</span>, -<span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> d <span class="keyword">in</span> <span class="built_in">range</span>(x.shape[<span class="number">1</span>]):</span><br><span class="line">        sorted_index = np.argsort(x[:,d])</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(x)):</span><br><span class="line">            <span class="keyword">if</span> x[sorted_index[i-<span class="number">1</span>], d] != x[sorted_index[i], d]:</span><br><span class="line">                v = (x[sorted_index[i-<span class="number">1</span>], d] + x[sorted_index[i], d]) / <span class="number">2</span></span><br><span class="line">                x_l, x_r, y_l, y_r = split(x, y, d, v)</span><br><span class="line">                g = gini(y_l) + gini(y_r)</span><br><span class="line">                <span class="keyword">if</span> g &lt; best_g:</span><br><span class="line">                    best_g, best_d, best_v = g, d, v</span><br><span class="line">                    </span><br><span class="line">    <span class="keyword">return</span> best_g, best_d, best_v</span><br><span class="line"></span><br><span class="line">best_g, best_d, best_v = try_split(x, y)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_g=&#x27;</span>, best_g)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_d=&#x27;</span>, best_d)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_v=&#x27;</span>, best_v)</span><br><span class="line"><span class="comment"># best_g= 0.5</span></span><br><span class="line"><span class="comment"># best_d= 0</span></span><br><span class="line"><span class="comment"># best_v= 2.45</span></span><br><span class="line"></span><br><span class="line">x1_l, x1_r, y1_l, y1_r = split(x, y, best_d, best_v)</span><br><span class="line">gini(y1_l)</span><br><span class="line"><span class="comment"># 0.0</span></span><br><span class="line">gini(y1_r)</span><br><span class="line"><span class="comment"># 0.5</span></span><br><span class="line">best_g2, best_d2, best_v2 = try_split(x1_r, y1_r)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_g2=&#x27;</span>, best_g2)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_d2=&#x27;</span>, best_d2)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;best_v2=&#x27;</span>, best_v2)</span><br><span class="line"><span class="comment"># best_g2= 0.2105714900645938</span></span><br><span class="line"><span class="comment"># best_d2= 1</span></span><br><span class="line"><span class="comment"># best_v2= 1.75</span></span><br><span class="line"></span><br><span class="line">x2_l, x2_r, y2_l, y2_r = split(x1_r, y1_r, best_d2, best_v2)</span><br><span class="line">gini(y2_l)</span><br><span class="line"><span class="comment"># 0.1680384087791495</span></span><br><span class="line">gini(y2_r)</span><br><span class="line"><span class="comment"># 0.04253308128544431</span></span><br></pre></td></tr></table></figure>
+<p>在实际使用的过程中信息熵的计算比基尼系数稍微慢，所以 <code>sklearn</code> 中默认为基尼系数。对比前面的内容也能发现，大多数情况这二者并没有特别的效果优劣。</p>
+<hr>
+<h1 id="sklearn中的决策树"><a href="#sklearn中的决策树" class="headerlink" title="sklearn中的决策树"></a>sklearn中的决策树</h1><p>使用鸢尾花数据集</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">iris = datasets.load_iris()</span><br><span class="line">x = iris.data[:, <span class="number">2</span>:]</span><br><span class="line">y = iris.target</span><br><span class="line"></span><br><span class="line">plt.scatter(x[y==<span class="number">0</span>, <span class="number">0</span>], x[y==<span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">1</span>, <span class="number">0</span>], x[y==<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">2</span>, <span class="number">0</span>], x[y==<span class="number">2</span>, <span class="number">1</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/35ebace0c3cf4e11b2cfc9cbd4fb6466.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"><br>使用基于信息熵的决策树</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.tree <span class="keyword">import</span> DecisionTreeClassifier</span><br><span class="line"></span><br><span class="line">dt_clf = DecisionTreeClassifier(max_depth=<span class="number">2</span>, criterion=<span class="string">&#x27;entropy&#x27;</span>)</span><br><span class="line">dt_clf.fit(x, y)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_decision_boundary</span>(<span class="params">model, axis</span>):</span></span><br><span class="line">    x0, x1 = np.meshgrid(np.linspace(axis[<span class="number">0</span>], axis[<span class="number">1</span>], <span class="built_in">int</span>((axis[<span class="number">1</span>] - axis[<span class="number">0</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),</span><br><span class="line">                         np.linspace(axis[<span class="number">2</span>], axis[<span class="number">3</span>], <span class="built_in">int</span>((axis[<span class="number">3</span>] - axis[<span class="number">2</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),)</span><br><span class="line">    x_new = np.c_[x0.ravel(), x1.ravel()]</span><br><span class="line">    y_predict = model.predict(x_new)</span><br><span class="line">    zz = y_predict.reshape(x0.shape)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> matplotlib.colors <span class="keyword">import</span> ListedColormap</span><br><span class="line">    custom_cmap = ListedColormap([<span class="string">&#x27;#EF9A9A&#x27;</span>, <span class="string">&#x27;#FFF59D&#x27;</span>, <span class="string">&#x27;#90CAF9&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    plt.contourf(x0, x1, zz, linewidth=<span class="number">5</span>, cmap=custom_cmap)</span><br><span class="line"></span><br><span class="line">plot_decision_boundary(dt_clf, axis=[<span class="number">0.5</span>, <span class="number">7.5</span>, <span class="number">0</span>, <span class="number">3</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">0</span>, <span class="number">0</span>], x[y==<span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">1</span>, <span class="number">0</span>], x[y==<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">2</span>, <span class="number">0</span>], x[y==<span class="number">2</span>, <span class="number">1</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/ebfd6c79e8134f92a45cc2dc67a3e0d2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"><br>使用基于基尼指数的决策树</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">iris = datasets.load_iris()</span><br><span class="line">x = iris.data[:, <span class="number">2</span>:]</span><br><span class="line">y = iris.target</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.tree <span class="keyword">import</span> DecisionTreeClassifier</span><br><span class="line"></span><br><span class="line">dt_clf = DecisionTreeClassifier(max_depth=<span class="number">2</span>, criterion=<span class="string">&#x27;gini&#x27;</span>)</span><br><span class="line">dt_clf.fit(x, y)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_decision_boundary</span>(<span class="params">model, axis</span>):</span></span><br><span class="line">    x0, x1 = np.meshgrid(np.linspace(axis[<span class="number">0</span>], axis[<span class="number">1</span>], <span class="built_in">int</span>((axis[<span class="number">1</span>] - axis[<span class="number">0</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),</span><br><span class="line">                         np.linspace(axis[<span class="number">2</span>], axis[<span class="number">3</span>], <span class="built_in">int</span>((axis[<span class="number">3</span>] - axis[<span class="number">2</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),)</span><br><span class="line">    x_new = np.c_[x0.ravel(), x1.ravel()]</span><br><span class="line">    y_predict = model.predict(x_new)</span><br><span class="line">    zz = y_predict.reshape(x0.shape)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> matplotlib.colors <span class="keyword">import</span> ListedColormap</span><br><span class="line">    custom_cmap = ListedColormap([<span class="string">&#x27;#EF9A9A&#x27;</span>, <span class="string">&#x27;#FFF59D&#x27;</span>, <span class="string">&#x27;#90CAF9&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    plt.contourf(x0, x1, zz, linewidth=<span class="number">5</span>, cmap=custom_cmap)</span><br><span class="line"></span><br><span class="line">plot_decision_boundary(dt_clf, axis=[<span class="number">0.5</span>, <span class="number">7.5</span>, <span class="number">0</span>, <span class="number">3</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">0</span>, <span class="number">0</span>], x[y==<span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">1</span>, <span class="number">0</span>], x[y==<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">2</span>, <span class="number">0</span>], x[y==<span class="number">2</span>, <span class="number">1</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/cd83a1c2d50c4c3e9579f9671f068760.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+<hr>
+<h1 id="决策树解决回归问题"><a href="#决策树解决回归问题" class="headerlink" title="决策树解决回归问题"></a>决策树解决回归问题</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">boston = datasets.load_boston()</span><br><span class="line">x = boston.data</span><br><span class="line">y = boston.target</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"></span><br><span class="line">x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=<span class="number">666</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.tree <span class="keyword">import</span> DecisionTreeRegressor</span><br><span class="line"></span><br><span class="line">dt_reg = DecisionTreeRegressor()</span><br><span class="line">dt_reg.fit(x_train, y_train)</span><br><span class="line">dt_reg.score(x_test, y_test)</span><br><span class="line"><span class="comment"># 0.6074066452266129</span></span><br><span class="line">dt_reg.score(x_train, y_train)</span><br><span class="line"><span class="comment"># 1.0</span></span><br></pre></td></tr></table></figure>
+<p>训练分数很高，测试分数比较低，明显是发生了过拟合。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">param_grid = [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">&#x27;max_depth&#x27;</span>:[i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">10</span>)],</span><br><span class="line">        <span class="string">&#x27;min_samples_leaf&#x27;</span>:[i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">20</span>)],</span><br><span class="line">        <span class="string">&#x27;min_samples_split&#x27;</span>:[i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>, <span class="number">30</span>)],</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> GridSearchCV</span><br><span class="line"><span class="keyword">from</span> sklearn.tree <span class="keyword">import</span> DecisionTreeRegressor</span><br><span class="line"></span><br><span class="line">dt_reg3 = DecisionTreeRegressor()</span><br><span class="line">grid_search = GridSearchCV(dt_reg3, param_grid)</span><br><span class="line">grid_search.fit(x_train, y_train)</span><br><span class="line"></span><br><span class="line">grid_search.best_params_</span><br><span class="line"><span class="comment"># &#123;&#x27;max_depth&#x27;: 9, &#x27;min_samples_leaf&#x27;: 1, &#x27;min_samples_split&#x27;: 23&#125;</span></span><br><span class="line">dt_reg4 = DecisionTreeRegressor(max_depth=<span class="number">9</span>, min_samples_leaf=<span class="number">1</span>, min_samples_split=<span class="number">23</span>)</span><br><span class="line">dt_reg4.fit(x_train, y_train)</span><br><span class="line">dt_reg4.score(x_train, y_train)</span><br><span class="line"><span class="comment"># 0.9095986627498869</span></span><br><span class="line">dt_reg4.score(x_test, y_test)</span><br><span class="line"><span class="comment"># 0.7748706184452597</span></span><br></pre></td></tr></table></figure>
+<p>透过学习曲线了解模型过拟合情况：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> mean_squared_error</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_learning_curve</span>(<span class="params">algo, x_train, x_test, y_train, y_test</span>):</span></span><br><span class="line"></span><br><span class="line">    train_score = []</span><br><span class="line">    test_score = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(x_train)+<span class="number">1</span>):</span><br><span class="line">        algo.fit(x_train[:i], y_train[:i])</span><br><span class="line"></span><br><span class="line">        y_train_predict = algo.predict(x_train[:i])</span><br><span class="line">        train_score.append(mean_squared_error(y_train[:i], y_train_predict))</span><br><span class="line"></span><br><span class="line">        y_test_predict = algo.predict(x_test)</span><br><span class="line">        test_score.append(mean_squared_error(y_test, y_test_predict))</span><br><span class="line"></span><br><span class="line">    plt.plot([i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(x_train)+<span class="number">1</span>)], np.sqrt(train_score), label=<span class="string">&#x27;train&#x27;</span>)</span><br><span class="line">    plt.plot([i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(x_train)+<span class="number">1</span>)], np.sqrt(test_score), label=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">    plt.legend()</span><br><span class="line">    <span class="comment"># plt.axis([0, len(x_train)+1, 0, 4])</span></span><br><span class="line">    plt.show()</span><br><span class="line"></span><br><span class="line">plot_learning_curve(DecisionTreeRegressor(max_depth=<span class="number">9</span>, min_samples_leaf=<span class="number">1</span>, min_samples_split=<span class="number">23</span>), x_train, x_test, y_train, y_test)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/e4e286d02d284f7480b9d83cc0510922.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_18,color_FFFFFF,t_70,g_se,x_16"><br>绘制模型复杂度曲线：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.tree <span class="keyword">import</span> DecisionTreeRegressor</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> r2_score</span><br><span class="line"></span><br><span class="line">maxSampleLeaf = <span class="number">506</span></span><br><span class="line">train_scores = []</span><br><span class="line">test_scores = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, maxSampleLeaf+<span class="number">1</span>):</span><br><span class="line">    dt_reg = DecisionTreeRegressor(min_samples_leaf=i)</span><br><span class="line">    dt_reg.fit(x_train, y_train)</span><br><span class="line">    y_train_predict = dt_reg.predict(x_train)</span><br><span class="line">    train_scores.append(r2_score(y_train, y_train_predict))</span><br><span class="line">    test_scores.append(dt_reg.score(x_test, y_test))</span><br><span class="line">    </span><br><span class="line">plt.plot([i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, maxSampleLeaf+<span class="number">1</span>)], train_scores, label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">plt.plot([i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, maxSampleLeaf+<span class="number">1</span>)], test_scores, label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">plt.xlim(<span class="number">506</span>, <span class="number">1</span>)</span><br><span class="line">plt.legend()</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/b13158e88bc34ca28bf93ec02fbe8f24.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">maxSampleLeaf = <span class="number">100</span></span><br><span class="line">train_scores = []</span><br><span class="line">test_scores = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, maxSampleLeaf+<span class="number">1</span>):</span><br><span class="line">    dt_reg = DecisionTreeRegressor(min_samples_leaf=i)</span><br><span class="line">    dt_reg.fit(x_train, y_train)</span><br><span class="line">    y_train_predict = dt_reg.predict(x_train)</span><br><span class="line">    train_scores.append(r2_score(y_train, y_train_predict))</span><br><span class="line">    test_scores.append(dt_reg.score(x_test, y_test))</span><br><span class="line">    </span><br><span class="line">plt.plot([i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, maxSampleLeaf+<span class="number">1</span>)], train_scores, label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">plt.plot([i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, maxSampleLeaf+<span class="number">1</span>)], test_scores, label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">plt.xlim(maxSampleLeaf, <span class="number">1</span>)</span><br><span class="line">plt.legend()</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/972e3f862eb14fb89021a698ae78e5d2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+<hr>
+<h1 id="决策树的局限性"><a href="#决策树的局限性" class="headerlink" title="决策树的局限性"></a>决策树的局限性</h1><p>局限性1：横平竖直的直线划分，并不是能使用斜线。因此并不是最好的划分方式。<br><img src="https://img-blog.csdnimg.cn/100ab5b6270c4dff8ba83b86f6a8c53a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>局限性2：对个别数据敏感。这也是非参数学习的一个共性。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">iris = datasets.load_iris()</span><br><span class="line">x = iris.data[:, <span class="number">2</span>:]</span><br><span class="line">y = iris.target</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.tree <span class="keyword">import</span> DecisionTreeClassifier</span><br><span class="line"></span><br><span class="line">dt_clf = DecisionTreeClassifier(max_depth=<span class="number">2</span>, criterion=<span class="string">&#x27;entropy&#x27;</span>)</span><br><span class="line">dt_clf.fit(x, y)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_decision_boundary</span>(<span class="params">model, axis</span>):</span></span><br><span class="line">    x0, x1 = np.meshgrid(np.linspace(axis[<span class="number">0</span>], axis[<span class="number">1</span>], <span class="built_in">int</span>((axis[<span class="number">1</span>] - axis[<span class="number">0</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),</span><br><span class="line">                         np.linspace(axis[<span class="number">2</span>], axis[<span class="number">3</span>], <span class="built_in">int</span>((axis[<span class="number">3</span>] - axis[<span class="number">2</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),)</span><br><span class="line">    x_new = np.c_[x0.ravel(), x1.ravel()]</span><br><span class="line">    y_predict = model.predict(x_new)</span><br><span class="line">    zz = y_predict.reshape(x0.shape)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> matplotlib.colors <span class="keyword">import</span> ListedColormap</span><br><span class="line">    custom_cmap = ListedColormap([<span class="string">&#x27;#EF9A9A&#x27;</span>, <span class="string">&#x27;#FFF59D&#x27;</span>, <span class="string">&#x27;#90CAF9&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    plt.contourf(x0, x1, zz, linewidth=<span class="number">5</span>, cmap=custom_cmap)</span><br><span class="line"></span><br><span class="line">plot_decision_boundary(dt_clf, axis=[<span class="number">0.5</span>, <span class="number">7.5</span>, <span class="number">0</span>, <span class="number">3</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">0</span>, <span class="number">0</span>], x[y==<span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">1</span>, <span class="number">0</span>], x[y==<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">2</span>, <span class="number">0</span>], x[y==<span class="number">2</span>, <span class="number">1</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/dce88b7de3a348d89e42388b5119957e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">x_new = np.delete(x, <span class="number">138</span>, axis=<span class="number">0</span>)</span><br><span class="line">y_new = np.delete(y, <span class="number">138</span>)</span><br><span class="line"></span><br><span class="line">dt_clf2 = DecisionTreeClassifier(max_depth=<span class="number">2</span>, criterion=<span class="string">&#x27;entropy&#x27;</span>)</span><br><span class="line">dt_clf2.fit(x_new, y_new)</span><br><span class="line"></span><br><span class="line">plot_decision_boundary(dt_clf2, axis=[<span class="number">0.5</span>, <span class="number">7.5</span>, <span class="number">0</span>, <span class="number">3</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">0</span>, <span class="number">0</span>], x[y==<span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">1</span>, <span class="number">0</span>], x[y==<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">2</span>, <span class="number">0</span>], x[y==<span class="number">2</span>, <span class="number">1</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/f9327c8d7cc94add9e647c52c589b66a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"><br>删除了x中的一个数据，最终的到模型就大不相同，这是因为对于非参数学习来说对于个别数据十分敏感，而且非常依赖于调参才能得到一个比较好的模型。因此一般不会单独使用决策树建立模型。</p>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2021/12/05/ML8_%E5%86%B3%E7%AD%96%E6%A0%91/" title="机器学习(八)——决策树">http://example.com/2021/12/05/ML8_决策树/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/%E5%86%B3%E7%AD%96%E6%A0%91/" rel="tag"># 决策树</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/04/ML7_%E5%88%86%E7%B1%BB%E7%AE%97%E6%B3%95%E7%9A%84%E8%AF%84%E4%BB%B7/" rel="prev" title="机器学习(七)——分类算法的评价">
+      <i class="fa fa-chevron-left"></i> 机器学习(七)——分类算法的评价
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E7%86%B5"><span class="nav-number">1.</span> <span class="nav-text">信息熵</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E4%BF%A1%E6%81%AF%E7%86%B5%E7%9A%84%E5%86%B3%E7%AD%96%E6%A0%91"><span class="nav-number">2.</span> <span class="nav-text">基于信息熵的决策树</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E5%B0%BC%E6%8C%87%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">基尼指数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#sklearn%E4%B8%AD%E7%9A%84%E5%86%B3%E7%AD%96%E6%A0%91"><span class="nav-number">4.</span> <span class="nav-text">sklearn中的决策树</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%B3%E7%AD%96%E6%A0%91%E8%A7%A3%E5%86%B3%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">决策树解决回归问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%B3%E7%AD%96%E6%A0%91%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">6.</span> <span class="nav-text">决策树的局限性</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
