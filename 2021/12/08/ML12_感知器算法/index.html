@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="感知器算法是一种可以直接得到线性判别函数的线性分类方法，它是基于样本线性可分的要求下使用的   线性可分与线性不可分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习(十二)——感知器算法">
+<meta property="og:url" content="http://example.com/2021/12/08/ML12_%E6%84%9F%E7%9F%A5%E5%99%A8%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="感知器算法是一种可以直接得到线性判别函数的线性分类方法，它是基于样本线性可分的要求下使用的   线性可分与线性不可分">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/19bb8f3cb86b4384b4ff913d3afc8167.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/28af7a9bbd7c44e5991157cb4aceb8fc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/60a0c45e394d4bf8a03d5b5e56657faa.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/266152aef90a49b2b17fa08953acd65e.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b0547859bc654635abaea0c6bfd92321.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6d493c99f79b4235b4e98dff18751a4c.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8b6bcbd3d36847b1a3adde932020a12b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e1c7aeb5cf924c4b909f500ce9e8c1e4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/68972bd785e94757948dddc2ea1cd78b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2021-12-08T06:35:00.000Z">
+<meta property="article:modified_time" content="2021-12-08T06:37:08.407Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="感知器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/19bb8f3cb86b4384b4ff913d3afc8167.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2021/12/08/ML12_%E6%84%9F%E7%9F%A5%E5%99%A8%E7%AE%97%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>机器学习(十二)——感知器算法 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/08/ML12_%E6%84%9F%E7%9F%A5%E5%99%A8%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          机器学习(十二)——感知器算法
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-08 14:35:00 / 修改时间：14:37:08" itemprop="dateCreated datePublished" datetime="2021-12-08T14:35:00+08:00">2021-12-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>感知器算法是一种可以直接得到线性判别函数的线性分类方法，它是基于样本线性可分的要求下使用的</p>
+</blockquote>
+<hr>
+<h1 id="线性可分与线性不可分"><a href="#线性可分与线性不可分" class="headerlink" title="线性可分与线性不可分"></a>线性可分与线性不可分</h1><p><img src="https://img-blog.csdnimg.cn/19bb8f3cb86b4384b4ff913d3afc8167.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<span id="more"></span>
+<p><img src="https://img-blog.csdnimg.cn/28af7a9bbd7c44e5991157cb4aceb8fc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<hr>
+<h1 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h1><p>感知器作为人工神经网络中最基本的单元，有多个输入和一个输出组成。虽然我们的目的是学习很多神经单元互连的网络，但是我们还是需要先对单个的神经单元进行研究。<br>感知器算法的主要流程：</p>
+<p>　　首先得到n个输入，再将每个输入值加权，然后判断感知器输入的加权和最否达到某一阀值v，若达到，则通过sign函数输出1，否则输出-1。<br><img src="https://img-blog.csdnimg.cn/60a0c45e394d4bf8a03d5b5e56657faa.png"><br>为了统一表达式，我们将上面的阀值<code>v</code>设为<code>0</code>，新增变量x<sub>0</sub>=1,这样就可以使用w<sub>0</sub>x<sub>0</sub>+w<sub>1</sub>x<sub>1</sub>+w<sub>2</sub>x<sub>2</sub>+…+w<sub>n</sub>x<sub>n</sub>。于是有：<br><img src="https://img-blog.csdnimg.cn/266152aef90a49b2b17fa08953acd65e.png"><br>从上面的公式可知，当权值向量确定时，就可以利用感知器来做分类。</p>
+<p>那么我们如何获得感知器的权值呢？这需要根据训练集是否可分来采用不同的方法：</p>
+<p>1、训练集线性可分时 –&gt; 感知器训练法则</p>
+<p>　　为了得到可接受的权值，通常从随机的权值开始，然后利用训练集反复训练权值，最后得到能够正确分类所有样例的权向量。</p>
+<p>具体算法过程如下：</p>
+<p>A）初始化权向量w=(w<sub>0</sub>,w<sub>1</sub>,…,w<sub>n</sub>)，将权向量的每个值赋一个随机值。<br>B）对于每个训练样例，首先计算其预测输出：<br><img src="https://img-blog.csdnimg.cn/b0547859bc654635abaea0c6bfd92321.png"><br>C）当预测值不等于真实值时则利用如下公式修改权向量：<br><img src="https://img-blog.csdnimg.cn/6d493c99f79b4235b4e98dff18751a4c.png"><br>D）重复B）和C），直到训练集中没有被错分的样例。</p>
+<p>算法分析：</p>
+<p>　　若某个样例被错分了，假如目标输出t为-1，结果感知器o输出为1，此时为了让感知器输出-1，需要将wx减小以输出-1，而在x的值不变的情况下只能减小w的值，这时通过在原来w后面添加(t-o)x=即可减小w的值（t-o&lt;0, x&gt;0）。</p>
+<p>　　通过逐步调整w的值，最终感知器将会收敛到能够将所有训练集正确分类的程度，但前提条件是训练集线性可分。若训练集线性不可分，则上述过程不会收敛，将无限循环下去。</p>
+<hr>
+<h1 id="实现算法"><a href="#实现算法" class="headerlink" title="实现算法"></a>实现算法</h1><ol>
+<li><strong>生成数据</strong></li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">iris = datasets.load_iris()</span><br><span class="line"></span><br><span class="line">x = iris.data</span><br><span class="line">y = iris.target</span><br><span class="line"><span class="comment"># 只做一个简单的二分类</span></span><br><span class="line">x = x[y&lt;<span class="number">2</span>, :<span class="number">2</span>]</span><br><span class="line">y = y[y&lt;<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">plt.scatter(x[y==<span class="number">0</span>, <span class="number">0</span>], x[y==<span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(x[y==<span class="number">1</span>, <span class="number">0</span>], x[y==<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/8b6bcbd3d36847b1a3adde932020a12b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<ol start="2">
+<li><strong>实现算法</strong></li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check</span>(<span class="params">w, x, y</span>):</span></span><br><span class="line">    <span class="keyword">return</span> ((w.dot(x.T)&gt;<span class="number">0</span>).astype(<span class="built_in">int</span>)==y).<span class="built_in">all</span>() </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span>(<span class="params">w, train_x, train_y, learn=<span class="number">1</span>, max_iter=<span class="number">200</span></span>):</span></span><br><span class="line">    <span class="built_in">iter</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> ~check(w, train_x, train_y) <span class="keyword">and</span> <span class="built_in">iter</span>&lt;=max_iter:</span><br><span class="line">        <span class="built_in">iter</span> += <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(train_y.size):</span><br><span class="line">            predict_y = (w.dot(train_x[i].T)&gt;<span class="number">0</span>).astype(<span class="built_in">int</span>)</span><br><span class="line">            <span class="keyword">if</span> predict_y != train_y[i]:</span><br><span class="line">                w += learn*(train_y[i] - predict_y)*train_x[i]</span><br><span class="line">    <span class="keyword">return</span> w</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">normalize</span>(<span class="params">x</span>):</span></span><br><span class="line">    max_x = np.<span class="built_in">max</span>(x, axis=<span class="number">0</span>)</span><br><span class="line">    min_x = np.<span class="built_in">min</span>(x, axis=<span class="number">0</span>)</span><br><span class="line">    norm_x = (max_x - x) / (max_x - min_x)</span><br><span class="line">    <span class="keyword">return</span> norm_x</span><br><span class="line"></span><br><span class="line">norm_x = normalize(x)</span><br><span class="line">train_x = np.insert(norm_x, <span class="number">0</span>, values=np.ones(<span class="number">100</span>).T, axis=<span class="number">1</span>)</span><br><span class="line">w = np.random.random(<span class="number">3</span>)</span><br><span class="line">w = train(w, train_x, y)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>绘制决策边界</strong></li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">plot_decision_boundary</span>(<span class="params">w, axis</span>):</span></span><br><span class="line">    x0, x1 = np.meshgrid(np.linspace(axis[<span class="number">0</span>], axis[<span class="number">1</span>], <span class="built_in">int</span>((axis[<span class="number">1</span>] - axis[<span class="number">0</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),</span><br><span class="line">                         np.linspace(axis[<span class="number">2</span>], axis[<span class="number">3</span>], <span class="built_in">int</span>((axis[<span class="number">3</span>] - axis[<span class="number">2</span>])*<span class="number">100</span>)).reshape(<span class="number">1</span>, -<span class="number">1</span>),)</span><br><span class="line">    x_new = np.c_[x0.ravel(), x1.ravel()]</span><br><span class="line">    x_new = np.insert(x_new, <span class="number">0</span>, np.ones(x_new.shape[<span class="number">0</span>]), axis=<span class="number">1</span>)</span><br><span class="line">    y_predict = (w.dot(x_new.T)&gt;<span class="number">0</span>).astype(<span class="built_in">int</span>)</span><br><span class="line">    zz = y_predict.reshape(x0.shape)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> matplotlib.colors <span class="keyword">import</span> ListedColormap</span><br><span class="line">    custom_cmap = ListedColormap([<span class="string">&#x27;#EF9A9A&#x27;</span>, <span class="string">&#x27;#FFF59D&#x27;</span>, <span class="string">&#x27;#90CAF9&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    plt.contourf(x0, x1, zz, linewidth=<span class="number">5</span>, cmap=custom_cmap)</span><br><span class="line"></span><br><span class="line">plot_decision_boundary(w, axis=[-<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">plt.scatter(norm_x[y==<span class="number">0</span>, <span class="number">0</span>], norm_x[y==<span class="number">0</span>, <span class="number">1</span>], color=<span class="string">&#x27;red&#x27;</span>)</span><br><span class="line">plt.scatter(norm_x[y==<span class="number">1</span>, <span class="number">0</span>], norm_x[y==<span class="number">1</span>, <span class="number">1</span>], color=<span class="string">&#x27;blue&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/e1c7aeb5cf924c4b909f500ce9e8c1e4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>4. <strong>使用sklearn包完成感知器算法</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> make_classification</span><br><span class="line"> </span><br><span class="line">x,y = make_classification(n_samples=<span class="number">1000</span>, n_features=<span class="number">2</span>,n_redundant=<span class="number">0</span>,n_informative=<span class="number">1</span>,n_clusters_per_class=<span class="number">1</span>)</span><br><span class="line"> </span><br><span class="line"><span class="comment">#n_samples:生成样本的数量</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#n_features=2:生成样本的特征数，特征数=n_informative（） + n_redundant + n_repeated</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#n_informative：多信息特征的个数</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#n_redundant：冗余信息，informative特征的随机线性组合</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#n_clusters_per_class ：某一个类别是由几个cluster构成的 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">#训练数据和测试数据</span></span><br><span class="line">x_data_train = x[:<span class="number">800</span>,:]</span><br><span class="line">x_data_test = x[<span class="number">800</span>:,:]</span><br><span class="line">y_data_train = y[:<span class="number">800</span>]</span><br><span class="line">y_data_test = y[<span class="number">800</span>:]</span><br><span class="line"> </span><br><span class="line"><span class="comment">#正例和反例</span></span><br><span class="line">positive_x1 = [x[i,<span class="number">0</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>) <span class="keyword">if</span> y[i] == <span class="number">1</span>]</span><br><span class="line">positive_x2 = [x[i,<span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>) <span class="keyword">if</span> y[i] == <span class="number">1</span>]</span><br><span class="line">negetive_x1 = [x[i,<span class="number">0</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>) <span class="keyword">if</span> y[i] == <span class="number">0</span>]</span><br><span class="line">negetive_x2 = [x[i,<span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>) <span class="keyword">if</span> y[i] == <span class="number">0</span>]</span><br><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> Perceptron</span><br><span class="line"><span class="comment">#定义感知机</span></span><br><span class="line">clf = Perceptron(fit_intercept=<span class="literal">False</span>,shuffle=<span class="literal">False</span>)</span><br><span class="line"><span class="comment">#使用训练数据进行训练</span></span><br><span class="line">clf.fit(x_data_train,y_data_train)</span><br><span class="line"><span class="comment">#得到训练结果，权重矩阵</span></span><br><span class="line"><span class="built_in">print</span>(clf.coef_)</span><br><span class="line"><span class="comment">#输出为：[[-0.38478876,4.41537463]]</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#超平面的截距，此处输出为：[0.]</span></span><br><span class="line"><span class="built_in">print</span>(clf.intercept_)</span><br><span class="line"></span><br><span class="line"><span class="comment">#利用测试数据进行验证</span></span><br><span class="line">acc = clf.score(x_data_test,y_data_test)</span><br><span class="line"><span class="built_in">print</span>(acc)</span><br><span class="line"><span class="comment">#得到的输出结果为0.98，这个结果还不错吧。</span></span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="comment">#画出正例和反例的散点图</span></span><br><span class="line">plt.scatter(positive_x1,positive_x2,c=<span class="string">&#x27;red&#x27;</span>)</span><br><span class="line">plt.scatter(negetive_x1,negetive_x2,c=<span class="string">&#x27;blue&#x27;</span>)</span><br><span class="line"><span class="comment">#画出超平面（在本例中即是一条直线）</span></span><br><span class="line">line_x = np.arange(-<span class="number">4</span>,<span class="number">4</span>)</span><br><span class="line">line_y = line_x * (-clf.coef_[<span class="number">0</span>][<span class="number">0</span>] / clf.coef_[<span class="number">0</span>][<span class="number">1</span>]) - clf.intercept_</span><br><span class="line">plt.plot(line_x,line_y)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/68972bd785e94757948dddc2ea1cd78b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16"></p>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2021/12/08/ML12_%E6%84%9F%E7%9F%A5%E5%99%A8%E7%AE%97%E6%B3%95/" title="机器学习(十二)——感知器算法">http://example.com/2021/12/08/ML12_感知器算法/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/%E6%84%9F%E7%9F%A5%E5%99%A8/" rel="tag"># 感知器</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/07/ML11_%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0/" rel="prev" title="机器学习(十一)——集成学习">
+      <i class="fa fa-chevron-left"></i> 机器学习(十一)——集成学习
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%8F%AF%E5%88%86%E4%B8%8E%E7%BA%BF%E6%80%A7%E4%B8%8D%E5%8F%AF%E5%88%86"><span class="nav-number">1.</span> <span class="nav-text">线性可分与线性不可分</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">算法流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%AE%97%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">实现算法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
