@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这篇文章主要讲述用 pytorch 完成简单 CNN 图片分类任务，如果想对 CNN 的理论知识进行了解，可以看我的这篇文章，深度学习(一)——CNN卷积神经网络。 图片分类我们以美食图片分类为例，有testing、training、validation文件夹。下载链接放下面。点击提取， 提取码：nefu前面的 0 表示其为 0 类，后面为其编号。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CNN图片分类(Pytorch)">
+<meta property="og:url" content="http://example.com/2021/12/12/DLPJ_CNN%E9%A3%9F%E7%89%A9%E5%9B%BE%E7%89%87%E5%88%86%E7%B1%BB/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="这篇文章主要讲述用 pytorch 完成简单 CNN 图片分类任务，如果想对 CNN 的理论知识进行了解，可以看我的这篇文章，深度学习(一)——CNN卷积神经网络。 图片分类我们以美食图片分类为例，有testing、training、validation文件夹。下载链接放下面。点击提取， 提取码：nefu前面的 0 表示其为 0 类，后面为其编号。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e9e9d70dabfa4907a2f8e147a09abc1e.png">
+<meta property="article:published_time" content="2021-12-12T15:07:00.860Z">
+<meta property="article:modified_time" content="2021-12-12T15:09:17.730Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="CNN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/e9e9d70dabfa4907a2f8e147a09abc1e.png">
+
+<link rel="canonical" href="http://example.com/2021/12/12/DLPJ_CNN%E9%A3%9F%E7%89%A9%E5%9B%BE%E7%89%87%E5%88%86%E7%B1%BB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CNN图片分类(Pytorch) | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/DLPJ_CNN%E9%A3%9F%E7%89%A9%E5%9B%BE%E7%89%87%E5%88%86%E7%B1%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CNN图片分类(Pytorch)
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-12 23:07:00 / 修改时间：23:09:17" itemprop="dateCreated datePublished" datetime="2021-12-12T23:07:00+08:00">2021-12-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这篇文章主要讲述用 pytorch 完成简单 CNN 图片分类任务，如果想对 CNN 的理论知识进行了解，可以看我的这篇文章，<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44491423/article/details/121876333?spm=1001.2014.3001.5501">深度学习(一)——CNN卷积神经网络</a>。</p>
+<h1 id="图片分类"><a href="#图片分类" class="headerlink" title="图片分类"></a>图片分类</h1><p>我们以美食图片分类为例，有<code>testing</code>、<code>training</code>、<code>validation</code>文件夹。下载链接放下面。<br><a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1qQvYQ5AAPsw9kb7IaWy21w">点击提取</a>， 提取码：nefu<br><img src="https://img-blog.csdnimg.cn/e9e9d70dabfa4907a2f8e147a09abc1e.png"><br>前面的 0 表示其为 0 类，后面为其编号。</p>
+<span id="more"></span>
+<hr>
+<h1 id="导入必要的包"><a href="#导入必要的包" class="headerlink" title="导入必要的包"></a>导入必要的包</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Import需要的套件</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torchvision.transforms <span class="keyword">as</span> transforms</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader, Dataset</span><br><span class="line"><span class="keyword">import</span> time</span><br></pre></td></tr></table></figure>
+<p><code>cv2</code> 我是通过如下命令下载</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install opencv-python</span><br></pre></td></tr></table></figure>
+<p><code>torch</code> 我下载的是 <code>cuda10.2</code> 的版本，这里就简单放一下下载 <code>pytorch</code> 的代码，至于如何使用 <code>GPU</code> 加速，可以上网查查。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install torch==1.10.0+cu102 torchvision==0.11.1+cu102 torchaudio===0.10.0+cu102 -f https://download.pytorch.org/whl/cu102/torch_stable.html</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="读取数据"><a href="#读取数据" class="headerlink" title="读取数据"></a>读取数据</h1><p>把训练集、验证集和测试集读取进来，放入 <code>numpy</code> 数组。 <code>x</code> 为其图片的像素张量，<code>y</code> 为其标签。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Read image 利用 OpenCV(cv2) 读入照片并存放在 numpy array 中</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">readfile</span>(<span class="params">path, label</span>):</span></span><br><span class="line">    <span class="comment"># label 是一个 boolean variable, 代表需不需要回传 y 值</span></span><br><span class="line">    image_dir = <span class="built_in">sorted</span>(os.listdir(path))  <span class="comment"># os.listdir(path)将path路径下的文件名以列表形式读出</span></span><br><span class="line">    <span class="comment"># print(os.listdir(path))</span></span><br><span class="line">    <span class="comment"># print(image_dir)</span></span><br><span class="line">    x = np.zeros((<span class="built_in">len</span>(image_dir), <span class="number">128</span>, <span class="number">128</span>, <span class="number">3</span>), dtype=np.uint8)</span><br><span class="line">    y = np.zeros((<span class="built_in">len</span>(image_dir)), dtype=np.uint8)</span><br><span class="line">    <span class="keyword">for</span> i, file <span class="keyword">in</span> <span class="built_in">enumerate</span>(image_dir):</span><br><span class="line">        img = cv2.imread(os.path.join(path, file))  <span class="comment"># os.path.join(path, file) 路径名合并</span></span><br><span class="line">        x[i, :, :] = cv2.resize(img, (<span class="number">128</span>, <span class="number">128</span>))</span><br><span class="line">        <span class="keyword">if</span> label:</span><br><span class="line">            y[i] = <span class="built_in">int</span>(file.split(<span class="string">&quot;_&quot;</span>)[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">if</span> label:</span><br><span class="line">        <span class="keyword">return</span> x, y</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分别将 training set、validation set、testing set 用 readfile 函式读进来</span></span><br><span class="line">workspace_dir = <span class="string">&#x27;./food-11&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Reading data&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;...&quot;</span>)</span><br><span class="line">train_x, train_y = readfile(os.path.join(workspace_dir, <span class="string">&quot;training&quot;</span>), <span class="literal">True</span>)</span><br><span class="line"><span class="comment"># print(&quot;Size of training data = &#123;&#125;&quot;.format(len(train_x)))</span></span><br><span class="line">val_x, val_y = readfile(os.path.join(workspace_dir, <span class="string">&quot;validation&quot;</span>), <span class="literal">True</span>)</span><br><span class="line"><span class="comment"># print(&quot;Size of validation data = &#123;&#125;&quot;.format(len(val_x)</span></span><br><span class="line">test_x = readfile(os.path.join(workspace_dir, <span class="string">&quot;testing&quot;</span>), <span class="literal">False</span>)</span><br><span class="line"><span class="comment"># print(&quot;Size of Testing data = &#123;&#125;&quot;.format(len(test_x)))</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Reading data complicated&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h1><p>定义数据增强操作（随机翻转、随机旋转），定义 <code>batch</code> 的大小。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;&#x27;&#x27; Dataset &#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Dataset&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;...&quot;</span>)</span><br><span class="line"><span class="comment"># training 时做 data augmentation</span></span><br><span class="line"><span class="comment"># transforms.Compose 将图像操作串联起来</span></span><br><span class="line">train_transform = transforms.Compose([</span><br><span class="line">    transforms.ToPILImage(),</span><br><span class="line">    transforms.RandomHorizontalFlip(),  <span class="comment"># 随机将图片水平翻转</span></span><br><span class="line">    transforms.RandomRotation(<span class="number">15</span>),  <span class="comment"># 随机旋转图片 (-15,15)</span></span><br><span class="line">    transforms.ToTensor(),  <span class="comment"># 将图片转成 Tensor, 并把数值normalize到[0,1](data normalization)</span></span><br><span class="line">])</span><br><span class="line"><span class="comment"># testing 时不需做 data augmentation</span></span><br><span class="line">test_transform = transforms.Compose([</span><br><span class="line">    transforms.ToPILImage(),</span><br><span class="line">    transforms.ToTensor(),</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ImgDataset</span>(<span class="params">Dataset</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, x, y=<span class="literal">None</span>, transform=<span class="literal">None</span></span>):</span></span><br><span class="line">        self.x = x</span><br><span class="line">        <span class="comment"># label is required to be a LongTensor</span></span><br><span class="line">        self.y = y</span><br><span class="line">        <span class="keyword">if</span> y <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            self.y = torch.LongTensor(y)</span><br><span class="line">        self.transform = transform</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.x)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span>(<span class="params">self, index</span>):</span></span><br><span class="line">        X = self.x[index]</span><br><span class="line">        <span class="keyword">if</span> self.transform <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            X = self.transform(X)</span><br><span class="line">        <span class="keyword">if</span> self.y <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            Y = self.y[index]</span><br><span class="line">            <span class="keyword">return</span> X, Y</span><br><span class="line">        <span class="keyword">else</span>:  <span class="comment"># 如果没有标签那么只返回X</span></span><br><span class="line">            <span class="keyword">return</span> X</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">32</span></span><br><span class="line">train_set = ImgDataset(train_x, train_y, train_transform)</span><br><span class="line">val_set = ImgDataset(val_x, val_y, test_transform)</span><br><span class="line">train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=<span class="literal">True</span>)</span><br><span class="line">val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=<span class="literal">False</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Dataset complicated&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h1><p>定义CNN的结构。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;&#x27;&#x27; Model &#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Model&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;...&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Classifier</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Classifier, self).__init__()</span><br><span class="line">        <span class="comment"># torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)</span></span><br><span class="line">        <span class="comment"># torch.nn.MaxPool2d(kernel_size, stride, padding)</span></span><br><span class="line">        <span class="comment"># input 维度 [3, 128, 128]</span></span><br><span class="line">        self.cnn = nn.Sequential(</span><br><span class="line">            nn.Conv2d(<span class="number">3</span>, <span class="number">64</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>),  <span class="comment"># [64, 128, 128]</span></span><br><span class="line">            nn.BatchNorm2d(<span class="number">64</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>, <span class="number">2</span>, <span class="number">0</span>),  <span class="comment"># [64, 64, 64]</span></span><br><span class="line"></span><br><span class="line">            nn.Conv2d(<span class="number">64</span>, <span class="number">128</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>),  <span class="comment"># [128, 64, 64]</span></span><br><span class="line">            nn.BatchNorm2d(<span class="number">128</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>, <span class="number">2</span>, <span class="number">0</span>),  <span class="comment"># [128, 32, 32]</span></span><br><span class="line"></span><br><span class="line">            nn.Conv2d(<span class="number">128</span>, <span class="number">256</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>),  <span class="comment"># [256, 32, 32]</span></span><br><span class="line">            nn.BatchNorm2d(<span class="number">256</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>, <span class="number">2</span>, <span class="number">0</span>),  <span class="comment"># [256, 16, 16]</span></span><br><span class="line"></span><br><span class="line">            nn.Conv2d(<span class="number">256</span>, <span class="number">512</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>),  <span class="comment"># [512, 16, 16]</span></span><br><span class="line">            nn.BatchNorm2d(<span class="number">512</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>, <span class="number">2</span>, <span class="number">0</span>),  <span class="comment"># [512, 8, 8]</span></span><br><span class="line"></span><br><span class="line">            nn.Conv2d(<span class="number">512</span>, <span class="number">512</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>),  <span class="comment"># [512, 8, 8]</span></span><br><span class="line">            nn.BatchNorm2d(<span class="number">512</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>, <span class="number">2</span>, <span class="number">0</span>),  <span class="comment"># [512, 4, 4]</span></span><br><span class="line">        )</span><br><span class="line">        self.fc = nn.Sequential(</span><br><span class="line">            nn.Linear(<span class="number">512</span> * <span class="number">4</span> * <span class="number">4</span>, <span class="number">1024</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.Linear(<span class="number">1024</span>, <span class="number">512</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.Linear(<span class="number">512</span>, <span class="number">11</span>)</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        out = self.cnn(x)</span><br><span class="line">        out = out.view(out.size()[<span class="number">0</span>], -<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> self.fc(out)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Model complicated&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h1><p>对模型进行训练，迭代30次，并用验证集测试，最后将训练集和验证集合并在进行训练。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;&#x27;&#x27; Training &#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Training&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;...&quot;</span>)</span><br><span class="line"><span class="comment"># 使用training set訓練，並使用validation set尋找好的參數</span></span><br><span class="line">model = Classifier().cuda()</span><br><span class="line">loss = nn.CrossEntropyLoss()  <span class="comment"># 因為是 classification task，所以 loss 使用 CrossEntropyLoss</span></span><br><span class="line">optimizer = torch.optim.Adam(model.parameters(), lr=<span class="number">0.001</span>)  <span class="comment"># optimizer 使用 Adam</span></span><br><span class="line">num_epoch = <span class="number">30</span>  <span class="comment"># 迭代30次</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epoch):</span><br><span class="line">    epoch_start_time = time.time()</span><br><span class="line">    train_acc = <span class="number">0.0</span></span><br><span class="line">    train_loss = <span class="number">0.0</span></span><br><span class="line">    val_acc = <span class="number">0.0</span></span><br><span class="line">    val_loss = <span class="number">0.0</span></span><br><span class="line"></span><br><span class="line">    model.train()  <span class="comment"># 確保 model 是在 train model (開啟 Dropout 等...)</span></span><br><span class="line">    <span class="keyword">for</span> i, data <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader):</span><br><span class="line">        optimizer.zero_grad()  <span class="comment"># 用 optimizer 將 model 參數的 gradient 歸零</span></span><br><span class="line">        train_pred = model(data[<span class="number">0</span>].cuda())  <span class="comment"># 利用 model 得到預測的機率分佈 這邊實際上就是去呼叫 model 的 forward 函數</span></span><br><span class="line">        batch_loss = loss(train_pred, data[<span class="number">1</span>].cuda())  <span class="comment"># 計算 loss （注意 prediction 跟 label 必須同時在 CPU 或是 GPU 上）</span></span><br><span class="line">        batch_loss.backward()  <span class="comment"># 利用 back propagation 算出每個參數的 gradient</span></span><br><span class="line">        optimizer.step()  <span class="comment"># 以 optimizer 用 gradient 更新參數值</span></span><br><span class="line"></span><br><span class="line">        train_acc += np.<span class="built_in">sum</span>(np.argmax(train_pred.cpu().data.numpy(), axis=<span class="number">1</span>) == data[<span class="number">1</span>].numpy())</span><br><span class="line">        train_loss += batch_loss.item()</span><br><span class="line"></span><br><span class="line">    model.<span class="built_in">eval</span>()</span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        <span class="keyword">for</span> i, data <span class="keyword">in</span> <span class="built_in">enumerate</span>(val_loader):</span><br><span class="line">            val_pred = model(data[<span class="number">0</span>].cuda())</span><br><span class="line">            batch_loss = loss(val_pred, data[<span class="number">1</span>].cuda())</span><br><span class="line"></span><br><span class="line">            val_acc += np.<span class="built_in">sum</span>(np.argmax(val_pred.cpu().data.numpy(), axis=<span class="number">1</span>) == data[<span class="number">1</span>].numpy())</span><br><span class="line">            val_loss += batch_loss.item()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 將結果 print 出來</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[%03d/%03d] %2.2f sec(s) Train Acc: %3.6f Loss: %3.6f | Val Acc: %3.6f loss: %3.6f&#x27;</span> % \</span><br><span class="line">              (epoch + <span class="number">1</span>, num_epoch, time.time() - epoch_start_time, \</span><br><span class="line">               train_acc / train_set.__len__(), train_loss / train_set.__len__(), val_acc / val_set.__len__(),</span><br><span class="line">               val_loss / val_set.__len__()))</span><br><span class="line"></span><br><span class="line">train_val_x = np.concatenate((train_x, val_x), axis=<span class="number">0</span>)</span><br><span class="line">train_val_y = np.concatenate((train_y, val_y), axis=<span class="number">0</span>)</span><br><span class="line">train_val_set = ImgDataset(train_val_x, train_val_y, train_transform)</span><br><span class="line">train_val_loader = DataLoader(train_val_set, batch_size=batch_size, shuffle=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">model_best = Classifier().cuda()</span><br><span class="line">loss = nn.CrossEntropyLoss()  <span class="comment"># 因為是 classification task，所以 loss 使用 CrossEntropyLoss</span></span><br><span class="line">optimizer = torch.optim.Adam(model_best.parameters(), lr=<span class="number">0.001</span>)  <span class="comment"># optimizer 使用 Adam</span></span><br><span class="line">num_epoch = <span class="number">30</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epoch):</span><br><span class="line">    epoch_start_time = time.time()</span><br><span class="line">    train_acc = <span class="number">0.0</span></span><br><span class="line">    train_loss = <span class="number">0.0</span></span><br><span class="line"></span><br><span class="line">    model_best.train()</span><br><span class="line">    <span class="keyword">for</span> i, data <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_val_loader):</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        train_pred = model_best(data[<span class="number">0</span>].cuda())</span><br><span class="line">        batch_loss = loss(train_pred, data[<span class="number">1</span>].cuda())</span><br><span class="line">        batch_loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line"></span><br><span class="line">        train_acc += np.<span class="built_in">sum</span>(np.argmax(train_pred.cpu().data.numpy(), axis=<span class="number">1</span>) == data[<span class="number">1</span>].numpy())</span><br><span class="line">        train_loss += batch_loss.item()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 將結果 print 出來</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;[%03d/%03d] %2.2f sec(s) Train Acc: %3.6f Loss: %3.6f&#x27;</span> % \</span><br><span class="line">          (epoch + <span class="number">1</span>, num_epoch, time.time() - epoch_start_time, \</span><br><span class="line">           train_acc / train_val_set.__len__(), train_loss / train_val_set.__len__()))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Training complicated&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>Output:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[001/030] <span class="number">70.94</span> sec(s) Train Acc: <span class="number">0.260997</span> Loss: <span class="number">0.065946</span> | Val Acc: <span class="number">0.303499</span> loss: <span class="number">0.060955</span></span><br><span class="line">[002/030] <span class="number">56.79</span> sec(s) Train Acc: <span class="number">0.362051</span> Loss: <span class="number">0.057194</span> | Val Acc: <span class="number">0.372595</span> loss: <span class="number">0.057390</span></span><br><span class="line">[003/030] <span class="number">57.03</span> sec(s) Train Acc: <span class="number">0.409588</span> Loss: <span class="number">0.053193</span> | Val Acc: <span class="number">0.395335</span> loss: <span class="number">0.054268</span></span><br><span class="line">[004/030] <span class="number">57.81</span> sec(s) Train Acc: <span class="number">0.455504</span> Loss: <span class="number">0.049251</span> | Val Acc: <span class="number">0.454519</span> loss: <span class="number">0.048942</span></span><br><span class="line">[005/030] <span class="number">57.97</span> sec(s) Train Acc: <span class="number">0.499899</span> Loss: <span class="number">0.045356</span> | Val Acc: <span class="number">0.455977</span> loss: <span class="number">0.051678</span></span><br><span class="line">[006/030] <span class="number">58.28</span> sec(s) Train Acc: <span class="number">0.535982</span> Loss: <span class="number">0.042452</span> | Val Acc: <span class="number">0.378717</span> loss: <span class="number">0.074250</span></span><br><span class="line">[007/030] <span class="number">59.17</span> sec(s) Train Acc: <span class="number">0.553720</span> Loss: <span class="number">0.040124</span> | Val Acc: <span class="number">0.568513</span> loss: <span class="number">0.039936</span></span><br><span class="line">[008/030] <span class="number">59.99</span> sec(s) Train Acc: <span class="number">0.579769</span> Loss: <span class="number">0.038209</span> | Val Acc: <span class="number">0.556268</span> loss: <span class="number">0.041599</span></span><br><span class="line">[009/030] <span class="number">59.79</span> sec(s) Train Acc: <span class="number">0.596392</span> Loss: <span class="number">0.036224</span> | Val Acc: <span class="number">0.502332</span> loss: <span class="number">0.045684</span></span><br><span class="line">[010/030] <span class="number">60.00</span> sec(s) Train Acc: <span class="number">0.618690</span> Loss: <span class="number">0.033986</span> | Val Acc: <span class="number">0.552770</span> loss: <span class="number">0.043603</span></span><br><span class="line">[011/030] <span class="number">60.34</span> sec(s) Train Acc: <span class="number">0.640482</span> Loss: <span class="number">0.032332</span> | Val Acc: <span class="number">0.569679</span> loss: <span class="number">0.040512</span></span><br><span class="line">[012/030] <span class="number">60.72</span> sec(s) Train Acc: <span class="number">0.664403</span> Loss: <span class="number">0.030329</span> | Val Acc: <span class="number">0.537609</span> loss: <span class="number">0.047755</span></span><br><span class="line">[013/030] <span class="number">59.88</span> sec(s) Train Acc: <span class="number">0.685181</span> Loss: <span class="number">0.028571</span> | Val Acc: <span class="number">0.534111</span> loss: <span class="number">0.045569</span></span><br><span class="line">[014/030] <span class="number">60.37</span> sec(s) Train Acc: <span class="number">0.690249</span> Loss: <span class="number">0.028063</span> | Val Acc: <span class="number">0.612828</span> loss: <span class="number">0.037240</span></span><br><span class="line">[015/030] <span class="number">60.48</span> sec(s) Train Acc: <span class="number">0.709811</span> Loss: <span class="number">0.026130</span> | Val Acc: <span class="number">0.649563</span> loss: <span class="number">0.034160</span></span><br><span class="line">[016/030] <span class="number">60.54</span> sec(s) Train Acc: <span class="number">0.720961</span> Loss: <span class="number">0.025035</span> | Val Acc: <span class="number">0.641691</span> loss: <span class="number">0.034600</span></span><br><span class="line">[017/030] <span class="number">60.84</span> sec(s) Train Acc: <span class="number">0.738901</span> Loss: <span class="number">0.023416</span> | Val Acc: <span class="number">0.635277</span> loss: <span class="number">0.034863</span></span><br><span class="line">[018/030] <span class="number">60.48</span> sec(s) Train Acc: <span class="number">0.757551</span> Loss: <span class="number">0.022210</span> | Val Acc: <span class="number">0.616035</span> loss: <span class="number">0.039769</span></span><br><span class="line">[019/030] <span class="number">59.98</span> sec(s) Train Acc: <span class="number">0.774073</span> Loss: <span class="number">0.020678</span> | Val Acc: <span class="number">0.649271</span> loss: <span class="number">0.035323</span></span><br><span class="line">[020/030] <span class="number">60.62</span> sec(s) Train Acc: <span class="number">0.779343</span> Loss: <span class="number">0.019825</span> | Val Acc: <span class="number">0.662099</span> loss: <span class="number">0.033701</span></span><br><span class="line">[021/030] <span class="number">60.04</span> sec(s) Train Acc: <span class="number">0.790999</span> Loss: <span class="number">0.018790</span> | Val Acc: <span class="number">0.682216</span> loss: <span class="number">0.032581</span></span><br><span class="line">[022/030] <span class="number">60.72</span> sec(s) Train Acc: <span class="number">0.800426</span> Loss: <span class="number">0.017761</span> | Val Acc: <span class="number">0.620408</span> loss: <span class="number">0.041586</span></span><br><span class="line">[023/030] <span class="number">60.28</span> sec(s) Train Acc: <span class="number">0.810156</span> Loss: <span class="number">0.016732</span> | Val Acc: <span class="number">0.674344</span> loss: <span class="number">0.036074</span></span><br><span class="line">[024/030] <span class="number">60.17</span> sec(s) Train Acc: <span class="number">0.825461</span> Loss: <span class="number">0.015653</span> | Val Acc: <span class="number">0.649271</span> loss: <span class="number">0.039717</span></span><br><span class="line">[025/030] <span class="number">59.96</span> sec(s) Train Acc: <span class="number">0.838638</span> Loss: <span class="number">0.014406</span> | Val Acc: <span class="number">0.639067</span> loss: <span class="number">0.041005</span></span><br><span class="line">[026/030] <span class="number">58.78</span> sec(s) Train Acc: <span class="number">0.842793</span> Loss: <span class="number">0.014155</span> | Val Acc: <span class="number">0.657434</span> loss: <span class="number">0.040948</span></span><br><span class="line">[027/030] <span class="number">60.47</span> sec(s) Train Acc: <span class="number">0.854247</span> Loss: <span class="number">0.013192</span> | Val Acc: <span class="number">0.664140</span> loss: <span class="number">0.042358</span></span><br><span class="line">[028/030] <span class="number">59.34</span> sec(s) Train Acc: <span class="number">0.861443</span> Loss: <span class="number">0.012012</span> | Val Acc: <span class="number">0.687755</span> loss: <span class="number">0.038089</span></span><br><span class="line">[029/030] <span class="number">59.39</span> sec(s) Train Acc: <span class="number">0.876748</span> Loss: <span class="number">0.010853</span> | Val Acc: <span class="number">0.676385</span> loss: <span class="number">0.038813</span></span><br><span class="line">[030/030] <span class="number">59.35</span> sec(s) Train Acc: <span class="number">0.882222</span> Loss: <span class="number">0.010558</span> | Val Acc: <span class="number">0.648105</span> loss: <span class="number">0.043327</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>对测试集进行预测</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;&#x27;&#x27; Testing &#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Testing&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;...&quot;</span>)</span><br><span class="line">test_set = ImgDataset(test_x, transform=test_transform)</span><br><span class="line">test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=<span class="literal">False</span>)</span><br><span class="line">model_best.<span class="built_in">eval</span>()</span><br><span class="line">prediction = []</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="keyword">for</span> i, data <span class="keyword">in</span> <span class="built_in">enumerate</span>(test_loader):</span><br><span class="line">        test_pred = model_best(data.cuda())</span><br><span class="line">        test_label = np.argmax(test_pred.cpu().data.numpy(), axis=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">for</span> y <span class="keyword">in</span> test_label:</span><br><span class="line">            prediction.append(y)</span><br><span class="line"><span class="comment"># 將結果寫入 csv 檔</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;predict.csv&quot;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(<span class="string">&#x27;Id,Category\n&#x27;</span>)</span><br><span class="line">    <span class="keyword">for</span> i, y <span class="keyword">in</span> <span class="built_in">enumerate</span>(prediction):</span><br><span class="line">        f.write(<span class="string">&#x27;&#123;&#125;,&#123;&#125;\n&#x27;</span>.<span class="built_in">format</span>(i, y))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Testing complicated&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2021/12/12/DLPJ_CNN%E9%A3%9F%E7%89%A9%E5%9B%BE%E7%89%87%E5%88%86%E7%B1%BB/" title="CNN图片分类(Pytorch)">http://example.com/2021/12/12/DLPJ_CNN食物图片分类/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/CNN/" rel="tag"># CNN</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/12/DL1_CNN/" rel="prev" title="深度学习(一)——CNN卷积神经网络">
+      <i class="fa fa-chevron-left"></i> 深度学习(一)——CNN卷积神经网络
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E5%88%86%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">图片分类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E5%BF%85%E8%A6%81%E7%9A%84%E5%8C%85"><span class="nav-number">2.</span> <span class="nav-text">导入必要的包</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">3.</span> <span class="nav-text">读取数据</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">数据处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="nav-number">5.</span> <span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">6.</span> <span class="nav-text">训练模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">7.</span> <span class="nav-text">测试</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
