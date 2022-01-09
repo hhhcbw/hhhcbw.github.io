@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="简介AlexNet的提出使得大型卷积网络开始变得流行起来，但是人们对于CNN网络究竟为什么能表现这么好，以及怎么样能变得更好尚不清楚，因此为了解决上述两个问题，ZFNet提出了一种可视化技术，用于理解网络中间的特征层和最后的分类器层，并且找到改进神经网络的结构的方法。ZFNet是Matthew D.Zeiler 和 Rob Fergus 在2013年撰写的论文Visualizing and Und">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习(五)——ZFNet+Pytorch实现">
+<meta property="og:url" content="http://example.com/2022/01/09/DL5_ZFNet/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="简介AlexNet的提出使得大型卷积网络开始变得流行起来，但是人们对于CNN网络究竟为什么能表现这么好，以及怎么样能变得更好尚不清楚，因此为了解决上述两个问题，ZFNet提出了一种可视化技术，用于理解网络中间的特征层和最后的分类器层，并且找到改进神经网络的结构的方法。ZFNet是Matthew D.Zeiler 和 Rob Fergus 在2013年撰写的论文Visualizing and Und">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e420b3b113ee4ceb945eaf5d126f35f2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e84ea1721f254b649299714befcfd283.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/277d4675777b433e95dfd9423fe9c1c9.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/de96df0bc724460bb1a12e92981508b0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6a8fa9002cf34752a783f1d567467db7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2911adef369a4d69ac64fe061d131431.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/88c52d2b221943b6a1d6cc427adaa535.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e9f86fabb9bd4e37af66c176ee089719.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_16,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5cf7fa2ff9f24ddb9c9a5ef986f7faea.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/78a125072c0f4133956366cca757a3de.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2d3f8ebd1da7490dbd18aaddf9bac1fe.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a6efac7fc7334419aef16673651a329f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6c1dde3c5a944bf9a59e4dd3e6623ab6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2022-01-09T13:34:00.000Z">
+<meta property="article:modified_time" content="2022-01-09T13:34:41.758Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="ZFNet">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/e420b3b113ee4ceb945eaf5d126f35f2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2022/01/09/DL5_ZFNet/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>深度学习(五)——ZFNet+Pytorch实现 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/09/DL5_ZFNet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          深度学习(五)——ZFNet+Pytorch实现
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-01-09 21:34:00 / 修改时间：21:34:41" itemprop="dateCreated datePublished" datetime="2022-01-09T21:34:00+08:00">2022-01-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>AlexNet的提出使得大型卷积网络开始变得流行起来，但是人们对于CNN网络究竟为什么能表现这么好，以及怎么样能变得更好尚不清楚，因此为了解决上述两个问题，ZFNet提出了一种可视化技术，用于理解网络中间的特征层和最后的分类器层，并且找到改进神经网络的结构的方法。ZFNet是Matthew D.Zeiler 和 Rob Fergus 在2013年撰写的论文Visualizing and Understanding Convolutional Networks中提出的，是当年ILSVRC的冠军。ZFNet使用反卷积（deconv）和可视化特征图来达到可视化AlexNet的目的，并指出不足，最后修改网络结构，提升分类结果。</p>
+<span id="more"></span>
+<hr>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><h2 id="反卷积网络结构"><a href="#反卷积网络结构" class="headerlink" title="反卷积网络结构"></a>反卷积网络结构</h2><p>论文使用反卷积网络(deconvnet)进行可视化。反卷积网络可以看成是卷积网络的逆过程，但它不具有学习的能力，只是用于探测卷积网络。</p>
+<p>反卷积网络依附于网络中的每一层，不断地将特征图映射回输入图并可视化。过程中将需要检测的激活图送入反卷积网络，而其余激活图都设置为0。进入反卷积网络后，经过1.unpool；2.rectify；3.filter；不断生成新的激活图，直到映射回原图。大致流程如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/e420b3b113ee4ceb945eaf5d126f35f2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<ul>
+<li><strong>unpool</strong><br>首先说明，AlexNet中使用的max pooling是不可逆的，因为最大池化丢失了一部分图像信息。但是，如果我们记录了最大池化过程中最大值所在的位置，就可以近似地反池化。<br>为了记录池化过程中最大值的位置，论文中使用了一种开关（switch）结构，如上图所示。需要说明的一点是，当输入图像确定时，最大池化过程中最大值的位置时固定的，所以开关设置是特定的。</li>
+<li><strong>rectification</strong><br>AlexNet使用非线性的ReLU作为激活函数，从而修正特征图，使其始终为正。“反激活”的过程，仍使用ReLU进行映射。</li>
+<li><strong>filtering</strong><br>反卷积的过程使用了一个转置卷积，顾名思义即卷积网络中卷积矩阵的转置（具体查阅<a target="_blank" rel="noopener" href="https://blog.csdn.net/LoseInVain/article/details/81098502">一文搞懂反卷积，转置卷积</a>），直接作用在修正后的反池化图上。<h2 id="卷积网络可视化"><a href="#卷积网络可视化" class="headerlink" title="卷积网络可视化"></a>卷积网络可视化</h2>在训练结束后，我们在测试集上运用反卷积网络可视化激活特征图。</li>
+<li>特征可视化（feature visualization）<br><img src="https://img-blog.csdnimg.cn/e84ea1721f254b649299714befcfd283.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>在每一层中，随机选取9个激活程度最高的特征图，反卷积结果如下：</li>
+</ul>
+<ol>
+<li>第二层主要相应图像的角点、边缘和颜色。</li>
+<li>第三层具有更复杂的不变形，主要捕获相似的纹理。</li>
+<li>第四层提取具有类别性的内容，例如狗脸、鸟腿等。</li>
+<li>第五层提取具有重要意义的整个对象，例如键盘、狗等。</li>
+</ol>
+<ul>
+<li>训练时的特征演变（evolution）<br><img src="https://img-blog.csdnimg.cn/277d4675777b433e95dfd9423fe9c1c9.png"><br>图中每一行代表同一张图片在不同epoch时反卷积的结果（论文中选取1,2,5,10,,20,30,40,64epoch）。结果表明：较低层的特征收敛更快，在几个epoch之后就会收敛、固定；较高层特征收敛更慢，在40-50epochs之后在完全收敛。</li>
+<li>特征不变性<br><img src="https://img-blog.csdnimg.cn/de96df0bc724460bb1a12e92981508b0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>论文分别对5张图像进行了三种处理：（从上到下分别是）水平平移、尺寸缩放、旋转图像。第二列的图像表示卷积网络第一层中原始图和特征图向量间的欧式距离。第三列是第七层的欧氏距离。第四列则代表处理后归属正确标签的概率。<br>实验表明，在前期（layer1），微小的转变（transformation）会导致一个明显的变化。而后期（layer7），水平平移和尺寸缩放带来的改变逐渐稳定，近似呈线性。旋转处理仍有较大变化。这说明CNN具有平移、缩放不变性，而不具有旋转不变性。</li>
+<li>AlexNet存在的问题<br><img src="https://img-blog.csdnimg.cn/6a8fa9002cf34752a783f1d567467db7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>AlexNet中第一层使用11*11，步长为4的卷积核。然而在可视化时发现，第一层提取的信息多为高、低频，而中频的信息很少提取出。同时在可视化第二层是会发现由于步长过大引起的混叠伪像（aliasing artifact，参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/438190575">这篇文章</a>）。所以论文采用更小的卷积核（7*7）和更短的步长（2）。<br>下面是ZFNet的网络结构。<br><img src="https://img-blog.csdnimg.cn/2911adef369a4d69ac64fe061d131431.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></li>
+</ul>
+<h2 id="遮挡实验"><a href="#遮挡实验" class="headerlink" title="遮挡实验"></a>遮挡实验</h2><p><img src="https://img-blog.csdnimg.cn/88c52d2b221943b6a1d6cc427adaa535.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>可以发现，遮挡到目标物体就很难识别出来，遮挡背景并不会有太大影响，可见网络确实是根据物体判断的。<br><img src="https://img-blog.csdnimg.cn/e9f86fabb9bd4e37af66c176ee089719.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_16,color_FFFFFF,t_70,g_se,x_16"><br>可以看出，狗的眼睛和鼻子对于狗的识别有很强的相关性。</p>
+<h2 id="消融实验"><a href="#消融实验" class="headerlink" title="消融实验"></a>消融实验</h2><p>通过移除不同层，或者调整每层特征图个数，来观察对识别准确率产生的影响。<br><img src="https://img-blog.csdnimg.cn/5cf7fa2ff9f24ddb9c9a5ef986f7faea.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>可以发现只移除最后两层全连接层或者只移除最后的两层卷积层，并不会对结果产生特别大的影响，但是同时移除掉，就会使误差产生巨大的上升，可见总体的深度对于获得好的效果是重要的。还发现，增加中间卷积层的大小确实可以降低错误，但是导致的扩大的全连接层会导致过拟合。</p>
+<h2 id="泛化实验"><a href="#泛化实验" class="headerlink" title="泛化实验"></a>泛化实验</h2><p>通过在ImageNet数据集上预训练，再在Caltech与PASCAL VOC 2012数据集上训练最后的softmax层。<br><img src="https://img-blog.csdnimg.cn/78a125072c0f4133956366cca757a3de.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="Caltech-256"><br><img src="https://img-blog.csdnimg.cn/2d3f8ebd1da7490dbd18aaddf9bac1fe.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="PASCAL VOC 2012"><br>从上面可以看出ZFNet在其它数据集上效果也是不错的，即网络确实是学到了一般的特征，在Caltech-256只需要不到十张图片即可超过之前最强的算法。在PASCAL 2012效果不是最好的，可能的原因是，PASCAL数据集多是多物体图片，而ImageNet数据集多是单物体图片，所以本质上是不同的。如果使用的损失函数是多标签的，可能可以改善这个结果。</p>
+<hr>
+<h1 id="Pytorch实现"><a href="#Pytorch实现" class="headerlink" title="Pytorch实现"></a>Pytorch实现</h1><p>从<a target="_blank" rel="noopener" href="http://download.tensorflow.org/example_images/flower_photos.tgz">http://download.tensorflow.org/example_images/flower_photos.tgz</a>下载数据集<br>执行下面代码，将数据集划分为训练集与验证集。<br><strong>split_data.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> shutil <span class="keyword">import</span> copy</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">mkfile</span>(<span class="params">file</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(file):</span><br><span class="line">        os.makedirs(file)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">file = <span class="string">&#x27;flower_data/flower_photos&#x27;</span></span><br><span class="line">flower_class = [cla <span class="keyword">for</span> cla <span class="keyword">in</span> os.listdir(file) <span class="keyword">if</span> <span class="string">&quot;.txt&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> cla]</span><br><span class="line">mkfile(<span class="string">&#x27;flower_data/train&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> cla <span class="keyword">in</span> flower_class:</span><br><span class="line">    mkfile(<span class="string">&#x27;flower_data/train/&#x27;</span>+cla)</span><br><span class="line"></span><br><span class="line">mkfile(<span class="string">&#x27;flower_data/val&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> cla <span class="keyword">in</span> flower_class:</span><br><span class="line">    mkfile(<span class="string">&#x27;flower_data/val/&#x27;</span>+cla)</span><br><span class="line"></span><br><span class="line">split_rate = <span class="number">0.1</span></span><br><span class="line"><span class="keyword">for</span> cla <span class="keyword">in</span> flower_class:</span><br><span class="line">    cla_path = file + <span class="string">&#x27;/&#x27;</span> + cla + <span class="string">&#x27;/&#x27;</span></span><br><span class="line">    images = os.listdir(cla_path)</span><br><span class="line">    num = <span class="built_in">len</span>(images)</span><br><span class="line">    eval_index = random.sample(images, k=<span class="built_in">int</span>(num*split_rate))</span><br><span class="line">    <span class="keyword">for</span> index, image <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">        <span class="keyword">if</span> image <span class="keyword">in</span> eval_index:</span><br><span class="line">            image_path = cla_path + image</span><br><span class="line">            new_path = <span class="string">&#x27;flower_data/val/&#x27;</span> + cla</span><br><span class="line">            copy(image_path, new_path)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            image_path = cla_path + image</span><br><span class="line">            new_path = <span class="string">&#x27;flower_data/train/&#x27;</span> + cla</span><br><span class="line">            copy(image_path, new_path)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\r[&#123;&#125;] processing [&#123;&#125;/&#123;&#125;]&quot;</span>.<span class="built_in">format</span>(cla, index+<span class="number">1</span>, num), end=<span class="string">&quot;&quot;</span>)  <span class="comment"># processing bar</span></span><br><span class="line">    <span class="built_in">print</span>()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;processing done!&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>model.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ZFNet</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, num_classes=<span class="number">1000</span>, init_weights=<span class="literal">False</span></span>):</span></span><br><span class="line">        <span class="built_in">super</span>(ZFNet, self).__init__()</span><br><span class="line">        self.features = nn.Sequential(  <span class="comment"># 打包</span></span><br><span class="line">            nn.Conv2d(<span class="number">3</span>, <span class="number">48</span>, kernel_size=<span class="number">7</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>),   <span class="comment"># input[3, 224, 224]  output[48, 110, 110] 自动舍去小数点后</span></span><br><span class="line">            nn.ReLU(inplace=<span class="literal">True</span>),  <span class="comment"># inplace 可以载入更大模型</span></span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>),       <span class="comment"># output[48, 55, 55] kernel_num为原论文一半</span></span><br><span class="line">            nn.Conv2d(<span class="number">48</span>, <span class="number">128</span>, kernel_size=<span class="number">5</span>, stride=<span class="number">2</span>),            <span class="comment"># output[128, 26, 26]</span></span><br><span class="line">            nn.ReLU(inplace=<span class="literal">True</span>),</span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>),       <span class="comment"># output[128, 13, 13]</span></span><br><span class="line">            nn.Conv2d(<span class="number">128</span>, <span class="number">192</span>, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>),          <span class="comment"># output[192, 13, 13]</span></span><br><span class="line">            nn.ReLU(inplace=<span class="literal">True</span>),</span><br><span class="line">            nn.Conv2d(<span class="number">192</span>, <span class="number">192</span>, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>),          <span class="comment"># output[192, 13, 13]</span></span><br><span class="line">            nn.ReLU(inplace=<span class="literal">True</span>),</span><br><span class="line">            nn.Conv2d(<span class="number">192</span>, <span class="number">128</span>, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>),          <span class="comment"># output[128, 13, 13]</span></span><br><span class="line">            nn.ReLU(inplace=<span class="literal">True</span>),</span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>),                  <span class="comment"># output[128, 6, 6]</span></span><br><span class="line">        )</span><br><span class="line">        self.classifier = nn.Sequential(</span><br><span class="line">            nn.Dropout(p=<span class="number">0.5</span>),</span><br><span class="line">            <span class="comment"># 全连接</span></span><br><span class="line">            nn.Linear(<span class="number">128</span> * <span class="number">6</span> * <span class="number">6</span>, <span class="number">2048</span>),</span><br><span class="line">            nn.ReLU(inplace=<span class="literal">True</span>),</span><br><span class="line">            nn.Dropout(p=<span class="number">0.5</span>),</span><br><span class="line">            nn.Linear(<span class="number">2048</span>, <span class="number">2048</span>),</span><br><span class="line">            nn.ReLU(inplace=<span class="literal">True</span>),</span><br><span class="line">            nn.Linear(<span class="number">2048</span>, num_classes),</span><br><span class="line">        )</span><br><span class="line">        <span class="keyword">if</span> init_weights:</span><br><span class="line">            self._initialize_weights()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        x = self.features(x)</span><br><span class="line">        x = torch.flatten(x, start_dim=<span class="number">1</span>)  <span class="comment"># 展平   或者view()</span></span><br><span class="line">        x = self.classifier(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_initialize_weights</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> self.modules():</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, nn.Conv2d):</span><br><span class="line">                nn.init.kaiming_normal_(m.weight, mode=<span class="string">&#x27;fan_out&#x27;</span>, nonlinearity=<span class="string">&#x27;relu&#x27;</span>)  <span class="comment"># 何教授方法</span></span><br><span class="line">                <span class="keyword">if</span> m.bias <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                    nn.init.constant_(m.bias, <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">elif</span> <span class="built_in">isinstance</span>(m, nn.Linear):</span><br><span class="line">                nn.init.normal_(m.weight, <span class="number">0</span>, <span class="number">0.01</span>)  <span class="comment"># 正态分布赋值</span></span><br><span class="line">                nn.init.constant_(m.bias, <span class="number">0</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>train.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms, datasets, utils</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> model <span class="keyword">import</span> ZFNet</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># device : GPU or CPU</span></span><br><span class="line">device = torch.device(<span class="string">&quot;cuda:0&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(device)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据转换</span></span><br><span class="line">data_transform = &#123;</span><br><span class="line">    <span class="string">&quot;train&quot;</span>: transforms.Compose([transforms.RandomResizedCrop(<span class="number">224</span>),</span><br><span class="line">                                 transforms.RandomHorizontalFlip(),</span><br><span class="line">                                 transforms.ToTensor(),</span><br><span class="line">                                 transforms.Normalize((<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>), (<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))]),</span><br><span class="line">    <span class="string">&quot;val&quot;</span>: transforms.Compose([transforms.Resize((<span class="number">224</span>, <span class="number">224</span>)),  <span class="comment"># cannot 224, must (224, 224)</span></span><br><span class="line">                               transforms.ToTensor(),</span><br><span class="line">                               transforms.Normalize((<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>), (<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))])&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># data_root = os.path.abspath(os.path.join(os.getcwd(), &quot;../..&quot;))  # get data root path</span></span><br><span class="line">data_root = os.getcwd()</span><br><span class="line">image_path = data_root + <span class="string">&quot;/flower_data/&quot;</span>  <span class="comment"># flower data set path</span></span><br><span class="line">train_dataset = datasets.ImageFolder(root=image_path + <span class="string">&quot;/train&quot;</span>,</span><br><span class="line">                                     transform=data_transform[<span class="string">&quot;train&quot;</span>])</span><br><span class="line">train_num = <span class="built_in">len</span>(train_dataset)</span><br><span class="line"></span><br><span class="line"><span class="comment"># &#123;&#x27;daisy&#x27;:0, &#x27;dandelion&#x27;:1, &#x27;roses&#x27;:2, &#x27;sunflower&#x27;:3, &#x27;tulips&#x27;:4&#125;</span></span><br><span class="line">flower_list = train_dataset.class_to_idx</span><br><span class="line">cla_dict = <span class="built_in">dict</span>((val, key) <span class="keyword">for</span> key, val <span class="keyword">in</span> flower_list.items())</span><br><span class="line"><span class="comment"># write dict into json file</span></span><br><span class="line"></span><br><span class="line">json_str = json.dumps(cla_dict, indent=<span class="number">4</span>)</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;class_indices.json&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> json_file:</span><br><span class="line">    json_file.write(json_str)</span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">32</span></span><br><span class="line">train_loader = torch.utils.data.DataLoader(train_dataset,</span><br><span class="line">                                           batch_size=batch_size, shuffle=<span class="literal">True</span>,</span><br><span class="line">                                           num_workers=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">validate_dataset = datasets.ImageFolder(root=image_path + <span class="string">&quot;/val&quot;</span>,</span><br><span class="line">                                        transform=data_transform[<span class="string">&quot;val&quot;</span>])</span><br><span class="line">val_num = <span class="built_in">len</span>(validate_dataset)</span><br><span class="line">validate_loader = torch.utils.data.DataLoader(validate_dataset,</span><br><span class="line">                                              batch_size=batch_size, shuffle=<span class="literal">True</span>,</span><br><span class="line">                                              num_workers=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">test_data_iter = <span class="built_in">iter</span>(validate_loader)</span><br><span class="line">test_image, test_label = test_data_iter.<span class="built_in">next</span>()</span><br><span class="line"><span class="comment"># print(test_image[0].size(),type(test_image[0]))</span></span><br><span class="line"><span class="comment"># print(test_label[0],test_label[0].item(),type(test_label[0]))</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示图像，之前需把validate_loader中batch_size改为4</span></span><br><span class="line"><span class="comment"># def imshow(img):</span></span><br><span class="line"><span class="comment">#     img = img / 2 + 0.5  # unnormalize</span></span><br><span class="line"><span class="comment">#     npimg = img.numpy()</span></span><br><span class="line"><span class="comment">#     plt.imshow(np.transpose(npimg, (1, 2, 0)))</span></span><br><span class="line"><span class="comment">#     plt.show()</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># print(&#x27; &#x27;.join(&#x27;%5s&#x27; % cla_dict[test_label[j].item()] for j in range(4)))</span></span><br><span class="line"><span class="comment"># imshow(utils.make_grid(test_image))</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">net = ZFNet(num_classes=<span class="number">5</span>, init_weights=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">net.to(device)</span><br><span class="line"><span class="comment"># 损失函数:这里用交叉熵</span></span><br><span class="line">loss_function = nn.CrossEntropyLoss()</span><br><span class="line"><span class="comment"># 优化器 这里用Adam</span></span><br><span class="line">optimizer = optim.Adam(net.parameters(), lr=<span class="number">0.0002</span>)</span><br><span class="line"><span class="comment"># 训练参数保存路径</span></span><br><span class="line">save_path = <span class="string">&#x27;./AlexNet.pth&#x27;</span></span><br><span class="line"><span class="comment"># 训练过程中最高准确率</span></span><br><span class="line">best_acc = <span class="number">0.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 开始进行训练和测试，训练一轮，测试一轮</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">    <span class="comment"># train</span></span><br><span class="line">    net.train()    <span class="comment"># 训练过程中，使用之前定义网络中的dropout</span></span><br><span class="line">    running_loss = <span class="number">0.0</span></span><br><span class="line">    t1 = time.perf_counter()</span><br><span class="line">    <span class="keyword">for</span> step, data <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader, start=<span class="number">0</span>):</span><br><span class="line">        images, labels = data</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        outputs = net(images.to(device))</span><br><span class="line">        loss = loss_function(outputs, labels.to(device))</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># print statistics</span></span><br><span class="line">        running_loss += loss.item()</span><br><span class="line">        <span class="comment"># print train process</span></span><br><span class="line">        rate = (step + <span class="number">1</span>) / <span class="built_in">len</span>(train_loader)</span><br><span class="line">        a = <span class="string">&quot;*&quot;</span> * <span class="built_in">int</span>(rate * <span class="number">50</span>)</span><br><span class="line">        b = <span class="string">&quot;.&quot;</span> * <span class="built_in">int</span>((<span class="number">1</span> - rate) * <span class="number">50</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\rtrain loss: &#123;:^3.0f&#125;%[&#123;&#125;-&gt;&#123;&#125;]&#123;:.3f&#125;&quot;</span>.<span class="built_in">format</span>(<span class="built_in">int</span>(rate * <span class="number">100</span>), a, b, loss), end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>()</span><br><span class="line">    <span class="built_in">print</span>(time.perf_counter()-t1)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># validate</span></span><br><span class="line">    net.<span class="built_in">eval</span>()    <span class="comment"># 测试过程中不需要dropout，使用所有的神经元</span></span><br><span class="line">    acc = <span class="number">0.0</span>  <span class="comment"># accumulate accurate number / epoch</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        <span class="keyword">for</span> val_data <span class="keyword">in</span> validate_loader:</span><br><span class="line">            val_images, val_labels = val_data</span><br><span class="line">            outputs = net(val_images.to(device))</span><br><span class="line">            predict_y = torch.<span class="built_in">max</span>(outputs, dim=<span class="number">1</span>)[<span class="number">1</span>]</span><br><span class="line">            acc += (predict_y == val_labels.to(device)).<span class="built_in">sum</span>().item()</span><br><span class="line">        val_accurate = acc / val_num</span><br><span class="line">        <span class="keyword">if</span> val_accurate &gt; best_acc:</span><br><span class="line">            best_acc = val_accurate</span><br><span class="line">            torch.save(net.state_dict(), save_path)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[epoch %d] train_loss: %.3f  test_accuracy: %.3f&#x27;</span> %</span><br><span class="line">              (epoch + <span class="number">1</span>, running_loss / step, val_accurate))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Finished Training&#x27;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Output:<br><img src="https://img-blog.csdnimg.cn/a6efac7fc7334419aef16673651a329f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><strong>predict.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> model <span class="keyword">import</span> ZFNet</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">os.environ[<span class="string">&quot;KMP_DUPLICATE_LIB_OK&quot;</span>]=<span class="string">&quot;TRUE&quot;</span></span><br><span class="line"></span><br><span class="line">data_transform = transforms.Compose(</span><br><span class="line">    [transforms.Resize((<span class="number">224</span>, <span class="number">224</span>)),</span><br><span class="line">     transforms.ToTensor(),</span><br><span class="line">     transforms.Normalize((<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>), (<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))])</span><br><span class="line"></span><br><span class="line"><span class="comment"># load image</span></span><br><span class="line">img = Image.<span class="built_in">open</span>(<span class="string">&quot;./sunflower.jpg&quot;</span>)  <span class="comment"># 验证太阳花</span></span><br><span class="line"><span class="comment"># img = Image.open(&quot;./roses.jpg&quot;)     # 验证玫瑰花</span></span><br><span class="line">plt.imshow(img)</span><br><span class="line"><span class="comment"># [N, C, H, W]</span></span><br><span class="line">img = data_transform(img)</span><br><span class="line"><span class="comment"># expand batch dimension</span></span><br><span class="line">img = torch.unsqueeze(img, dim=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># read class_indict</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    json_file = <span class="built_in">open</span>(<span class="string">&#x27;./class_indices.json&#x27;</span>, <span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    class_indict = json.load(json_file)</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    <span class="built_in">print</span>(e)</span><br><span class="line">    exit(-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># create model</span></span><br><span class="line">model = ZFNet(num_classes=<span class="number">5</span>)</span><br><span class="line"><span class="comment"># load model weights</span></span><br><span class="line">model_weight_path = <span class="string">&quot;./AlexNet.pth&quot;</span></span><br><span class="line">model.load_state_dict(torch.load(model_weight_path))</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="comment"># predict class</span></span><br><span class="line">    output = torch.squeeze(model(img))</span><br><span class="line">    predict = torch.softmax(output, dim=<span class="number">0</span>)</span><br><span class="line">    predict_cla = torch.argmax(predict).numpy()</span><br><span class="line"><span class="built_in">print</span>(class_indict[<span class="built_in">str</span>(predict_cla)], predict[predict_cla].item())</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Output:<br><img src="https://img-blog.csdnimg.cn/6c1dde3c5a944bf9a59e4dd3e6623ab6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2022/01/09/DL5_ZFNet/" title="深度学习(五)——ZFNet+Pytorch实现">http://example.com/2022/01/09/DL5_ZFNet/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/ZFNet/" rel="tag"># ZFNet</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/09/DL4_VGG/" rel="prev" title="深度学习(四)——VGG+Pytorch实现">
+      <i class="fa fa-chevron-left"></i> 深度学习(四)——VGG+Pytorch实现
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8D%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">反卷积网络结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">2.2.</span> <span class="nav-text">卷积网络可视化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%AE%E6%8C%A1%E5%AE%9E%E9%AA%8C"><span class="nav-number">2.3.</span> <span class="nav-text">遮挡实验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C"><span class="nav-number">2.4.</span> <span class="nav-text">消融实验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%9B%E5%8C%96%E5%AE%9E%E9%AA%8C"><span class="nav-number">2.5.</span> <span class="nav-text">泛化实验</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pytorch%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">Pytorch实现</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
