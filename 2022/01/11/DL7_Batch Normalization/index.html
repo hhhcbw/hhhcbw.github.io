@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="简介Batch Normalization是如今深度学习常见的方法，来加速深层网络训练的收敛，并且有正则化的作用，甚至可以不使用Dropout或者减小神经元被drop的概率。  原理深度神经网络训练的问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习(七)——Batch Normalization+Pytorch实现">
+<meta property="og:url" content="http://example.com/2022/01/11/DL7_Batch%20Normalization/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="简介Batch Normalization是如今深度学习常见的方法，来加速深层网络训练的收敛，并且有正则化的作用，甚至可以不使用Dropout或者减小神经元被drop的概率。  原理深度神经网络训练的问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/40dc5ceaec9f44718b8d0d9608a0d6e3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/ab56a1d03c0f4c3293058d0742a83c6f.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/fd1fa159f3a14d26a40ad8876e063a6c.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/bdc35c2b53e8461c9b60bc6eba415a2b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_14,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8cba917ef1fe4733be54f79c91e974f8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/4d6e0ef827a645e2b254b03b1faabab9.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5b5427d0984a4cfb84d9be37ac723554.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6416160577c549f689dfe04a49883ac4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/db55a121b9fb478b9c729ede03159fb4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_13,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e491d361fd3a472284e898d4a96b995b.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a0c23ba3f9ae45a6987a121224f6d536.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/808796cd46814edfafc23ce135ae9f75.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d4c0865df32244c08c9999a3d15ba8da.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/85864cac953d427892bf59fd8e05c80a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8e88f47fed584917b0ccd85b7c268bea.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2022-01-11T02:37:00.000Z">
+<meta property="article:modified_time" content="2022-01-13T12:22:05.455Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="Batch Normalization">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/40dc5ceaec9f44718b8d0d9608a0d6e3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2022/01/11/DL7_Batch%20Normalization/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>深度学习(七)——Batch Normalization+Pytorch实现 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/11/DL7_Batch%20Normalization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          深度学习(七)——Batch Normalization+Pytorch实现
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-11 10:37:00" itemprop="dateCreated datePublished" datetime="2022-01-11T10:37:00+08:00">2022-01-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-13 20:22:05" itemprop="dateModified" datetime="2022-01-13T20:22:05+08:00">2022-01-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>Batch Normalization是如今深度学习常见的方法，来加速深层网络训练的收敛，并且有正则化的作用，甚至可以不使用Dropout或者减小神经元被drop的概率。</p>
+<hr>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><h2 id="深度神经网络训练的问题"><a href="#深度神经网络训练的问题" class="headerlink" title="深度神经网络训练的问题"></a>深度神经网络训练的问题</h2><span id="more"></span>
+<p>深度神经网络模型的训练为什么困难、收敛慢？这个问题的解决在之前的工作中，有从尝试新的激活函数角度，如 ReLU、Maxout、PReLU等；有从权值初始化方法角度，如Xavier初始化、Kaiming初始化等，但收益相对都不是很高。</p>
+<p>这个问题的存在使得在设置 learning rate、初始化方法还有激活函数上得要很慎重，而这个问题的实质是因为在<strong>训练过程中，随着前一层参数的改变，哪怕很小的改变，也会因为网络加深而被放大，而这种改变使得每一层输入的分布发生改变，从而每一层需要持续地适应这种改变</strong>，这种现象在论文中被称为 <strong>Internal covariate shift （ICS，内部协变量偏移）</strong>。</p>
+<p>从另外一个角度看，把网络的中间层看作是 sub-network 以及采用 sigmoid 激活函数 z = g ( W u + b )，其中 u 是该层的输入，而 W 和 b 是学习的参数。随着 ∣ x ∣ 增大，g ′ ( x ) 趋向于0，这也就意味着会发生我们熟知的梯度消失（本质是落入饱和区），后来 ReLU 和 一些初始化方法是较好的缓解了这个问题。<br><img src="https://img-blog.csdnimg.cn/40dc5ceaec9f44718b8d0d9608a0d6e3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>换一个思路想，造成这个问题比较直观的原因是因为 ∣ x ∣ 的增大，即输入分布的变化，以及上面提到的 ICS 现象也是因为每一层的输入分布发生改变，那么很自然的想法就是，如果能确保输入的分布稳定，那么就不容易陷入饱和区域，从而梯度消失的问题也就得到很好的缓和，训练收敛的速度也随之提升了，问题就迎刃而解了。</p>
+<p>看着好像蛮简单的，但还是有随之而来的问题：</p>
+<ul>
+<li>确保输入的分布稳定，即 Normalization ，该怎么做？</li>
+<li>Normalization 能使得输入不落入饱和区域，反过来就是限制输入落入激活函数的线性区域，那这样网络不就失去了非线性的表达能力了吗，这该怎么弥补？</li>
+</ul>
+<p>上面的两个也就是 Batch Normalization 这篇论文工作的核心。</p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p><strong>白化（whitening）</strong> 作为一个很重要的数据预处理方法，它能使得模型训练收敛的更快，而白化一般包含两个目的：</p>
+<ul>
+<li>去除特征之间的相关性（特征独立）；</li>
+<li>使得所有特征具有相同的均值和方差（同分布）</li>
+</ul>
+<p>白化可以使得模型的输入标准化为均值为0，方差为1，那可以考虑将白化拓展到每一层的输入，就能使得每一层的分布趋于稳定。然而，标准的白化操作代价昂贵，特别是我们还希望白化操作是可微的，保证白化操作可以通过反向传播来更新梯度，即：<br><img src="https://img-blog.csdnimg.cn/ab56a1d03c0f4c3293058d0742a83c6f.png"><br>于是就有了本篇论文的工作，<strong>Batch Normalization（BN）</strong>，即对白化做了简化，将其作用到每一层的输入，使得输入分布稳定。<br>第一个简化是只对每一个特征维度做 Normalization，并没有考虑特征之间去相关，论文中也提到了，“<em>such normalization speeds up convergence, even when the features are not decorrelated</em>.”，即：<br><img src="https://img-blog.csdnimg.cn/fd1fa159f3a14d26a40ad8876e063a6c.png"><br>第二个简化是不通过整个数据集来统计 E[x^(k)^] 和 Var[x^(k)^] 和而是通过一个 <strong>mini-batch</strong> 内的激活值来估计均值和方差 ，得到：<br><img src="https://img-blog.csdnimg.cn/bdc35c2b53e8461c9b60bc6eba415a2b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_14,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/8cba917ef1fe4733be54f79c91e974f8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>而这样的 Normalization 是存在问题的，如论文中提到 “*simply normalizing each input of a layer may change what the layer can represent.*”，即简单地做 Normalization 会减低了网络的非线性的表达能力，比如采用 sigmoid 激活函数，normalization 会限制激活值落入到线性区域（近似线性），而这片区域是近似 [-2, 2] 这个区间，而在标准正态分布中，落入 [-2, 2] 的概率是95%。<br>这也就前面提到问题，作者采用的方式是 “make sure that the transformation inserted in the network can represent the identity transform”，为了实现这种可以恒等变换，引入了两个可学习的参数 γ^(k)^ 和 β^(k)^，使得：<br><img src="https://img-blog.csdnimg.cn/4d6e0ef827a645e2b254b03b1faabab9.png"><br>而在最极端的情况下，学习的两个参数分别为<br><img src="https://img-blog.csdnimg.cn/5b5427d0984a4cfb84d9be37ac723554.png"><br>，则可以恢复到原先的激活值，即恢复了网络的表达能力（restore the representation power of the network）。<br> Batch Normalization 大致的算法过程如下：<br> <img src="https://img-blog.csdnimg.cn/6416160577c549f689dfe04a49883ac4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>BN 采用 mini-batch 来估计均值和方差，这在训练的时候是可行的，但在 inference 或 online inference 时，是单实例的，不存在 mini-batch，所以就无法获得BN计算所需的均值和方差，这就需要利用训练阶段的Batch统计值，估计一个总体的均值和方差，从而实现 inference 阶段的 normalization：<br><img src="https://img-blog.csdnimg.cn/db55a121b9fb478b9c729ede03159fb4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_13,color_FFFFFF,t_70,g_se,x_16"><br>值得注意的是，在PyTorch代码实现的时候，会去采用<strong>指数滑动平均</strong>（Exponential Moving Average）来实现总体的估计，见PyTorch文档描述：</p>
+<p><img src="https://img-blog.csdnimg.cn/e491d361fd3a472284e898d4a96b995b.png"></p>
+<h2 id="更高的学习率"><a href="#更高的学习率" class="headerlink" title="更高的学习率"></a>更高的学习率</h2><p>在论文摘要部分提到了，“<em>Batch Normalization allows us to use much higher learning rates and be less careful about initialization</em>.”，在还没看正文时，就有疑问，为什么 BN 可以使得采用更大的学习率？作者专门在一小节中对其进行了解释。</p>
+<p>通常在训练深层网络，不会使用太大的学习率，因为它易导致梯度爆炸、梯度消失或者陷入到 poor local minima。而前面也提到，BN 能够一定程度上避免输入落入到激活函数的饱和区域，缓解了梯度消失的问题；另外因为每层输入都有 normalization 的存在，缓解了 ICS 的存在，使得每层的输入分布稳定，参数的变化（反向传播的梯度）也趋于稳定（不会因为随着层数加深，参数变化被放大），较好地缓解了梯度爆炸。</p>
+<p>论文中称 “<em>Batch Normalization also makes training more resilient to parameter scale</em>” ，并对这种参数更新（梯度）的稳定做了一个分析。因为通常，较大的学习率会使得参数的规模增大（increase the scale of layer parameters），假设增大了 a 倍，但因为 BN 的存在，反向传播并不会受到参数增大的影响，从而导致的梯度爆炸：<br><img src="https://img-blog.csdnimg.cn/a0c23ba3f9ae45a6987a121224f6d536.png"><br>第三个式子还能看到，更大的参数返回会导致更小的梯度，从而上面的结论也得到了验证：<strong>BN 的存在，使得参数变化趋于稳定，故能使用更大的学习率。</strong></p>
+<h2 id="正则化"><a href="#正则化" class="headerlink" title="正则化"></a>正则化</h2><p>在论文的摘要中提到因为 BN 的存在，使得 Dropout 可以被移除或者减小神经元被 drop 的概率，换句话说，BN 具备了 dropout 提升模型泛化能力（缓解过拟合）的功能，主要是因为通过 batch 内的激活值估计均值和方差，不是根据单一 sample 的值做模型优化，这可以变相地看成是某一种约束。</p>
+<p>这边有三点需要注意的是：</p>
+<ul>
+<li>论文中讨论将BN放在激活函数前好还是后好，“*but since u is likely the output of another nonlinearity, the shape of its distribution is likely to change during training, and constraining its first and second moments would not eliminate the covariate shift.*”，不是很明白，而 [1] 中提到 “不少研究表明将BN放在激活函数之后效果更好。” ，但并没有给出参考文献，这里还需后面验证。</li>
+<li>对于卷积层，在估计均值和方差时考虑的神经元激活值集合并不是标量特征，而是一个 feature map 内的特征值，“<em>we jointly normalize all the activations in a mini-batch over all locations. In Alg. 1, we let B be the set of all values in a feature map across both the elements of a mini-batch and spatial locations</em>”</li>
+<li>在 Normalization 前的线性变换 W u + b ，通常会省略掉偏置项 b  ，因为它的作用会被随后BN的均值给抵消掉（它的作用会被 β 代替）。</li>
+</ul>
+<hr>
+<h1 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h1><p>作者通过一个很简单的实验来验证BN是否能较好的缓解ICS问题。在MNIST数据集上，一个简单的三层的神经网络，在每一层之前加入BN，观察收敛速度和每层的输入分布变化，结果如下图：<br><img src="https://img-blog.csdnimg.cn/808796cd46814edfafc23ce135ae9f75.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>另外一个实验就是在 ImageNet Classification 任务上，实验的模型结构在 Inception-v1 上做的改进是参考 VGG 中小尺寸的卷积核的思想，将 5×5 的卷积核替换为 两层 3 × 3 的卷积核，并且加宽了网络和引入了BN，另外值得注意的是，<strong>在Inception-v2的网络结构设计中，用 stride=2 代替了 Inception-v1 中 max pool 做 feature map 的尺寸缩减。</strong><br>为了进一步加速 BN networks 训练收敛的速度，作者进一步改进了网络和训练的超参数：</p>
+<ul>
+<li><strong>Increase learning rate</strong>：在上面也提到了可以使用更大的学习率，那么增大学习率来加快模型训练；</li>
+<li><strong>Remove dropout</strong>：前面同样提到 BN 能一定程度缓解过拟合，那就将 dropout 移除来提速；</li>
+<li><strong>Reduce the L 2 weight regularization</strong>：减少 L2 正则项的权值；</li>
+<li><strong>Accelerate the learning rate decay</strong>：因为 BN 加快了模型的训练，所以相应的学习率的衰减也得加快，这里采用了指数衰减；</li>
+<li><strong>Remove Local Response Normalization</strong>：这里是移除了 LRN，其实在之前的一些工作中就不用它了；</li>
+<li><strong>Shuffle training examples more thoroughly</strong></li>
+<li><strong>Reduce the photometric distortions</strong><br>另外，作者还做了一些调整，设置了几个模型：</li>
+<li>BN-Baseline：即相较于 Inception-v1 引入了 BN；</li>
+<li>BN-x5：将学习率增大了5倍，为0.0075</li>
+<li>BN-x30：将学习率增大了30倍，为0.045</li>
+<li>BN-x5-Sigmoid：和 BN-x5 类似，但激活函数换成了Sigmoid。<br>下面是实验的结果，可以看到仅采用 BN 的Baselin 其收敛速度是快于 Inception v1，另外 BN-x5 更是快了14倍（达到Inception 的准确率），而虽 BN-x30 较之 BN-x5 会慢一些，但其准确率是最高的。有意思的是，论文中还玩了一个小小的文字游戏：<em>we apply Batch Normalization to the bestperforming ImageNet classification network, and show that we can match its performance using only 7% of the training steps, and can further exceed its accuracy by a substantial margin.</em> ，其实这里 7% 是由 BN-x5 实现的，而 BN-x30 是在准确率上做了提升。<br><img src="https://img-blog.csdnimg.cn/d4c0865df32244c08c9999a3d15ba8da.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></li>
+</ul>
+<hr>
+<h1 id="Pytorch实现"><a href="#Pytorch实现" class="headerlink" title="Pytorch实现"></a>Pytorch实现</h1><p>下面将Batch Normalization加入到GoogleNet中，并将5x5的卷积核用2个2x2的卷积核代替。<br>从<a target="_blank" rel="noopener" href="http://download.tensorflow.org/example_images/flower_photos.tgz">http://download.tensorflow.org/example_images/flower_photos.tgz</a>下载数据集<br>执行下面代码，将数据集划分为训练集与验证集。<br><strong>split_data.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> shutil <span class="keyword">import</span> copy</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">mkfile</span>(<span class="params">file</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(file):</span><br><span class="line">        os.makedirs(file)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">file = <span class="string">&#x27;flower_data/flower_photos&#x27;</span></span><br><span class="line">flower_class = [cla <span class="keyword">for</span> cla <span class="keyword">in</span> os.listdir(file) <span class="keyword">if</span> <span class="string">&quot;.txt&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> cla]</span><br><span class="line">mkfile(<span class="string">&#x27;flower_data/train&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> cla <span class="keyword">in</span> flower_class:</span><br><span class="line">    mkfile(<span class="string">&#x27;flower_data/train/&#x27;</span>+cla)</span><br><span class="line"></span><br><span class="line">mkfile(<span class="string">&#x27;flower_data/val&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> cla <span class="keyword">in</span> flower_class:</span><br><span class="line">    mkfile(<span class="string">&#x27;flower_data/val/&#x27;</span>+cla)</span><br><span class="line"></span><br><span class="line">split_rate = <span class="number">0.1</span></span><br><span class="line"><span class="keyword">for</span> cla <span class="keyword">in</span> flower_class:</span><br><span class="line">    cla_path = file + <span class="string">&#x27;/&#x27;</span> + cla + <span class="string">&#x27;/&#x27;</span></span><br><span class="line">    images = os.listdir(cla_path)</span><br><span class="line">    num = <span class="built_in">len</span>(images)</span><br><span class="line">    eval_index = random.sample(images, k=<span class="built_in">int</span>(num*split_rate))</span><br><span class="line">    <span class="keyword">for</span> index, image <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">        <span class="keyword">if</span> image <span class="keyword">in</span> eval_index:</span><br><span class="line">            image_path = cla_path + image</span><br><span class="line">            new_path = <span class="string">&#x27;flower_data/val/&#x27;</span> + cla</span><br><span class="line">            copy(image_path, new_path)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            image_path = cla_path + image</span><br><span class="line">            new_path = <span class="string">&#x27;flower_data/train/&#x27;</span> + cla</span><br><span class="line">            copy(image_path, new_path)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\r[&#123;&#125;] processing [&#123;&#125;/&#123;&#125;]&quot;</span>.<span class="built_in">format</span>(cla, index+<span class="number">1</span>, num), end=<span class="string">&quot;&quot;</span>)  <span class="comment"># processing bar</span></span><br><span class="line">    <span class="built_in">print</span>()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;processing done!&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>model.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GoogLeNet</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, num_classes=<span class="number">1000</span>, aux_logits=<span class="literal">True</span>, init_weights=<span class="literal">False</span></span>):</span></span><br><span class="line">        <span class="built_in">super</span>(GoogLeNet, self).__init__()</span><br><span class="line">        self.aux_logits = aux_logits</span><br><span class="line"></span><br><span class="line">        self.conv1 = BasicConv2d(<span class="number">3</span>, <span class="number">64</span>, kernel_size=<span class="number">7</span>, stride=<span class="number">2</span>, padding=<span class="number">3</span>)</span><br><span class="line">        self.maxpool1 = nn.MaxPool2d(<span class="number">3</span>, stride=<span class="number">2</span>, ceil_mode=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        self.conv2 = BasicConv2d(<span class="number">64</span>, <span class="number">64</span>, kernel_size=<span class="number">1</span>)</span><br><span class="line">        self.conv3 = BasicConv2d(<span class="number">64</span>, <span class="number">192</span>, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        self.maxpool2 = nn.MaxPool2d(<span class="number">3</span>, stride=<span class="number">2</span>, ceil_mode=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        self.inception3a = Inception(<span class="number">192</span>, <span class="number">64</span>, <span class="number">96</span>, <span class="number">128</span>, <span class="number">16</span>, <span class="number">32</span>, <span class="number">32</span>)</span><br><span class="line">        self.inception3b = Inception(<span class="number">256</span>, <span class="number">128</span>, <span class="number">128</span>, <span class="number">192</span>, <span class="number">32</span>, <span class="number">96</span>, <span class="number">64</span>)</span><br><span class="line">        self.maxpool3 = nn.MaxPool2d(<span class="number">3</span>, stride=<span class="number">2</span>, ceil_mode=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        self.inception4a = Inception(<span class="number">480</span>, <span class="number">192</span>, <span class="number">96</span>, <span class="number">208</span>, <span class="number">16</span>, <span class="number">48</span>, <span class="number">64</span>)</span><br><span class="line">        self.inception4b = Inception(<span class="number">512</span>, <span class="number">160</span>, <span class="number">112</span>, <span class="number">224</span>, <span class="number">24</span>, <span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.inception4c = Inception(<span class="number">512</span>, <span class="number">128</span>, <span class="number">128</span>, <span class="number">256</span>, <span class="number">24</span>, <span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.inception4d = Inception(<span class="number">512</span>, <span class="number">112</span>, <span class="number">144</span>, <span class="number">288</span>, <span class="number">32</span>, <span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.inception4e = Inception(<span class="number">528</span>, <span class="number">256</span>, <span class="number">160</span>, <span class="number">320</span>, <span class="number">32</span>, <span class="number">128</span>, <span class="number">128</span>)</span><br><span class="line">        self.maxpool4 = nn.MaxPool2d(<span class="number">3</span>, stride=<span class="number">2</span>, ceil_mode=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        self.inception5a = Inception(<span class="number">832</span>, <span class="number">256</span>, <span class="number">160</span>, <span class="number">320</span>, <span class="number">32</span>, <span class="number">128</span>, <span class="number">128</span>)</span><br><span class="line">        self.inception5b = Inception(<span class="number">832</span>, <span class="number">384</span>, <span class="number">192</span>, <span class="number">384</span>, <span class="number">48</span>, <span class="number">128</span>, <span class="number">128</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.aux_logits:</span><br><span class="line">            self.aux1 = InceptionAux(<span class="number">512</span>, num_classes)</span><br><span class="line">            self.aux2 = InceptionAux(<span class="number">528</span>, num_classes)</span><br><span class="line"></span><br><span class="line">        self.avgpool = nn.AdaptiveAvgPool2d((<span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line">        self.dropout = nn.Dropout(<span class="number">0.4</span>)</span><br><span class="line">        self.fc = nn.Linear(<span class="number">1024</span>, num_classes)</span><br><span class="line">        <span class="keyword">if</span> init_weights:</span><br><span class="line">            self._initialize_weights()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="comment"># N x 3 x 224 x 224</span></span><br><span class="line">        x = self.conv1(x)</span><br><span class="line">        <span class="comment"># N x 64 x 112 x 112</span></span><br><span class="line">        x = self.maxpool1(x)</span><br><span class="line">        <span class="comment"># N x 64 x 56 x 56</span></span><br><span class="line">        x = self.conv2(x)</span><br><span class="line">        <span class="comment"># N x 64 x 56 x 56</span></span><br><span class="line">        x = self.conv3(x)</span><br><span class="line">        <span class="comment"># N x 192 x 56 x 56</span></span><br><span class="line">        x = self.maxpool2(x)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># N x 192 x 28 x 28</span></span><br><span class="line">        x = self.inception3a(x)</span><br><span class="line">        <span class="comment"># N x 256 x 28 x 28</span></span><br><span class="line">        x = self.inception3b(x)</span><br><span class="line">        <span class="comment"># N x 480 x 28 x 28</span></span><br><span class="line">        x = self.maxpool3(x)</span><br><span class="line">        <span class="comment"># N x 480 x 14 x 14</span></span><br><span class="line">        x = self.inception4a(x)</span><br><span class="line">        <span class="comment"># N x 512 x 14 x 14</span></span><br><span class="line">        <span class="keyword">if</span> self.training <span class="keyword">and</span> self.aux_logits:    <span class="comment"># eval model lose this layer</span></span><br><span class="line">            aux1 = self.aux1(x)</span><br><span class="line"></span><br><span class="line">        x = self.inception4b(x)</span><br><span class="line">        <span class="comment"># N x 512 x 14 x 14</span></span><br><span class="line">        x = self.inception4c(x)</span><br><span class="line">        <span class="comment"># N x 512 x 14 x 14</span></span><br><span class="line">        x = self.inception4d(x)</span><br><span class="line">        <span class="comment"># N x 528 x 14 x 14</span></span><br><span class="line">        <span class="keyword">if</span> self.training <span class="keyword">and</span> self.aux_logits:    <span class="comment"># eval model lose this layer</span></span><br><span class="line">            aux2 = self.aux2(x)</span><br><span class="line"></span><br><span class="line">        x = self.inception4e(x)</span><br><span class="line">        <span class="comment"># N x 832 x 14 x 14</span></span><br><span class="line">        x = self.maxpool4(x)</span><br><span class="line">        <span class="comment"># N x 832 x 7 x 7</span></span><br><span class="line">        x = self.inception5a(x)</span><br><span class="line">        <span class="comment"># N x 832 x 7 x 7</span></span><br><span class="line">        x = self.inception5b(x)</span><br><span class="line">        <span class="comment"># N x 1024 x 7 x 7</span></span><br><span class="line"></span><br><span class="line">        x = self.avgpool(x)</span><br><span class="line">        <span class="comment"># N x 1024 x 1 x 1</span></span><br><span class="line">        x = torch.flatten(x, <span class="number">1</span>)</span><br><span class="line">        <span class="comment"># N x 1024</span></span><br><span class="line">        x = self.dropout(x)</span><br><span class="line">        x = self.fc(x)</span><br><span class="line">        <span class="comment"># N x 1000 (num_classes)</span></span><br><span class="line">        <span class="keyword">if</span> self.training <span class="keyword">and</span> self.aux_logits:   <span class="comment"># eval model lose this layer</span></span><br><span class="line">            <span class="keyword">return</span> x, aux2, aux1</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_initialize_weights</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> self.modules():</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(m, nn.Conv2d):</span><br><span class="line">                nn.init.kaiming_normal_(m.weight, mode=<span class="string">&#x27;fan_out&#x27;</span>, nonlinearity=<span class="string">&#x27;relu&#x27;</span>)</span><br><span class="line">                <span class="keyword">if</span> m.bias <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                    nn.init.constant_(m.bias, <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">elif</span> <span class="built_in">isinstance</span>(m, nn.Linear):</span><br><span class="line">                nn.init.normal_(m.weight, <span class="number">0</span>, <span class="number">0.01</span>)</span><br><span class="line">                nn.init.constant_(m.bias, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#inception结构</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Inception</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, in_channels, ch1x1, ch3x3red, ch3x3, ch5x5red, ch5x5, pool_proj</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Inception, self).__init__()</span><br><span class="line"></span><br><span class="line">        self.branch1 = BasicConv2d(in_channels, ch1x1, kernel_size=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        self.branch2 = nn.Sequential(</span><br><span class="line">            BasicConv2d(in_channels, ch3x3red, kernel_size=<span class="number">1</span>),</span><br><span class="line">            BasicConv2d(ch3x3red, ch3x3, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>)   <span class="comment"># 保证输出大小等于输入大小</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        self.branch3 = nn.Sequential(</span><br><span class="line">            BasicConv2d(in_channels, ch5x5red, kernel_size=<span class="number">1</span>),</span><br><span class="line">            BasicConv2d(ch5x5red, ch5x5, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>),</span><br><span class="line">            BasicConv2d(ch5x5, ch5x5, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>)     <span class="comment"># 保证输出大小等于输入大小</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        self.branch4 = nn.Sequential(</span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">1</span>, padding=<span class="number">1</span>),</span><br><span class="line">            BasicConv2d(in_channels, pool_proj, kernel_size=<span class="number">1</span>)</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        branch1 = self.branch1(x)</span><br><span class="line">        branch2 = self.branch2(x)</span><br><span class="line">        branch3 = self.branch3(x)</span><br><span class="line">        branch4 = self.branch4(x)</span><br><span class="line"></span><br><span class="line">        outputs = [branch1, branch2, branch3, branch4]</span><br><span class="line">        <span class="keyword">return</span> torch.cat(outputs, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#辅助分类器</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InceptionAux</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, in_channels, num_classes</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(InceptionAux, self).__init__()</span><br><span class="line">        self.averagePool = nn.AvgPool2d(kernel_size=<span class="number">5</span>, stride=<span class="number">3</span>)</span><br><span class="line">        self.conv = BasicConv2d(in_channels, <span class="number">128</span>, kernel_size=<span class="number">1</span>)  <span class="comment"># output[batch, 128, 4, 4]</span></span><br><span class="line"></span><br><span class="line">        self.fc1 = nn.Linear(<span class="number">2048</span>, <span class="number">1024</span>)</span><br><span class="line">        self.fc2 = nn.Linear(<span class="number">1024</span>, num_classes)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="comment"># aux1: N x 512 x 14 x 14, aux2: N x 528 x 14 x 14</span></span><br><span class="line">        x = self.averagePool(x)</span><br><span class="line">        <span class="comment"># aux1: N x 512 x 4 x 4, aux2: N x 528 x 4 x 4</span></span><br><span class="line">        x = self.conv(x)</span><br><span class="line">        <span class="comment"># N x 128 x 4 x 4</span></span><br><span class="line">        x = torch.flatten(x, <span class="number">1</span>)</span><br><span class="line">        x = F.dropout(x, <span class="number">0.5</span>, training=self.training)</span><br><span class="line">        <span class="comment"># N x 2048</span></span><br><span class="line">        x = F.relu(self.fc1(x), inplace=<span class="literal">True</span>)</span><br><span class="line">        x = F.dropout(x, <span class="number">0.5</span>, training=self.training)</span><br><span class="line">        <span class="comment"># N x 1024</span></span><br><span class="line">        x = self.fc2(x)</span><br><span class="line">        <span class="comment"># N x num_classes</span></span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BasicConv2d</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, in_channels, out_channels, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(BasicConv2d, self).__init__()</span><br><span class="line">        self.conv = nn.Conv2d(in_channels, out_channels, **kwargs)</span><br><span class="line">        self.bn = nn.BatchNorm2d(out_channels)</span><br><span class="line">        self.relu = nn.ReLU(inplace=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        x = self.conv(x)</span><br><span class="line">        x = self.bn(x)</span><br><span class="line">        x = self.relu(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure>
+<p><strong>train.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms, datasets</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> model <span class="keyword">import</span> GoogLeNet</span><br><span class="line"></span><br><span class="line">device = torch.device(<span class="string">&quot;cuda:0&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(device)</span><br><span class="line"></span><br><span class="line">data_transform = &#123;</span><br><span class="line">    <span class="string">&quot;train&quot;</span>: transforms.Compose([transforms.RandomResizedCrop(<span class="number">224</span>),</span><br><span class="line">                                 transforms.RandomHorizontalFlip(),</span><br><span class="line">                                 transforms.ToTensor(),</span><br><span class="line">                                 transforms.Normalize((<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>), (<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))]),</span><br><span class="line">    <span class="string">&quot;val&quot;</span>: transforms.Compose([transforms.Resize((<span class="number">224</span>, <span class="number">224</span>)),</span><br><span class="line">                               transforms.ToTensor(),</span><br><span class="line">                               transforms.Normalize((<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>), (<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))])&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#data_root = os.path.abspath(os.path.join(os.getcwd(), &quot;../..&quot;))  # get data root path</span></span><br><span class="line">data_root = os.getcwd()</span><br><span class="line">image_path = data_root + <span class="string">&quot;/flower_data/&quot;</span>  <span class="comment"># flower data set path</span></span><br><span class="line"></span><br><span class="line">train_dataset = datasets.ImageFolder(root=image_path + <span class="string">&quot;train&quot;</span>,</span><br><span class="line">                                     transform=data_transform[<span class="string">&quot;train&quot;</span>])</span><br><span class="line">train_num = <span class="built_in">len</span>(train_dataset)</span><br><span class="line"></span><br><span class="line"><span class="comment"># &#123;&#x27;daisy&#x27;:0, &#x27;dandelion&#x27;:1, &#x27;roses&#x27;:2, &#x27;sunflower&#x27;:3, &#x27;tulips&#x27;:4&#125;</span></span><br><span class="line">flower_list = train_dataset.class_to_idx</span><br><span class="line">cla_dict = <span class="built_in">dict</span>((val, key) <span class="keyword">for</span> key, val <span class="keyword">in</span> flower_list.items())</span><br><span class="line"><span class="comment"># write dict into json file</span></span><br><span class="line">json_str = json.dumps(cla_dict, indent=<span class="number">4</span>)</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;class_indices.json&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> json_file:</span><br><span class="line">    json_file.write(json_str)</span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">32</span></span><br><span class="line">train_loader = torch.utils.data.DataLoader(train_dataset,</span><br><span class="line">                                           batch_size=batch_size, shuffle=<span class="literal">True</span>,</span><br><span class="line">                                           num_workers=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">validate_dataset = datasets.ImageFolder(root=image_path + <span class="string">&quot;val&quot;</span>,</span><br><span class="line">                                        transform=data_transform[<span class="string">&quot;val&quot;</span>])</span><br><span class="line">val_num = <span class="built_in">len</span>(validate_dataset)</span><br><span class="line">validate_loader = torch.utils.data.DataLoader(validate_dataset,</span><br><span class="line">                                              batch_size=batch_size, shuffle=<span class="literal">False</span>,</span><br><span class="line">                                              num_workers=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># test_data_iter = iter(validate_loader)</span></span><br><span class="line"><span class="comment"># test_image, test_label = test_data_iter.next()</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># net = torchvision.models.googlenet(num_classes=5)</span></span><br><span class="line"><span class="comment"># model_dict = net.state_dict()</span></span><br><span class="line"><span class="comment"># pretrain_model = torch.load(&quot;googlenet.pth&quot;)</span></span><br><span class="line"><span class="comment"># del_list = [&quot;aux1.fc2.weight&quot;, &quot;aux1.fc2.bias&quot;,</span></span><br><span class="line"><span class="comment">#             &quot;aux2.fc2.weight&quot;, &quot;aux2.fc2.bias&quot;,</span></span><br><span class="line"><span class="comment">#             &quot;fc.weight&quot;, &quot;fc.bias&quot;]</span></span><br><span class="line"><span class="comment"># pretrain_dict = &#123;k: v for k, v in pretrain_model.items() if k not in del_list&#125;</span></span><br><span class="line"><span class="comment"># model_dict.update(pretrain_dict)</span></span><br><span class="line"><span class="comment"># net.load_state_dict(model_dict)</span></span><br><span class="line">net = GoogLeNet(num_classes=<span class="number">5</span>, aux_logits=<span class="literal">True</span>, init_weights=<span class="literal">True</span>)</span><br><span class="line">net.to(device)</span><br><span class="line">loss_function = nn.CrossEntropyLoss()</span><br><span class="line">optimizer = optim.Adam(net.parameters(), lr=<span class="number">0.0015</span>)</span><br><span class="line">scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=<span class="number">1500</span>, gamma=<span class="number">0.1</span>) <span class="comment"># 权重衰减策略</span></span><br><span class="line"></span><br><span class="line">best_acc = <span class="number">0.0</span></span><br><span class="line">save_path = <span class="string">&#x27;./googleNet.pth&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">30</span>):</span><br><span class="line">    <span class="comment"># train</span></span><br><span class="line">    net.train()</span><br><span class="line">    running_loss = <span class="number">0.0</span></span><br><span class="line">    <span class="keyword">for</span> step, data <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader, start=<span class="number">0</span>):</span><br><span class="line">        images, labels = data</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        logits, aux_logits2, aux_logits1 = net(images.to(device))</span><br><span class="line">        loss0 = loss_function(logits, labels.to(device))</span><br><span class="line">        loss1 = loss_function(aux_logits1, labels.to(device))</span><br><span class="line">        loss2 = loss_function(aux_logits2, labels.to(device))</span><br><span class="line">        loss = loss0 + loss1 * <span class="number">0.3</span> + loss2 * <span class="number">0.3</span></span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line">        scheduler.step()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># print statistics</span></span><br><span class="line">        running_loss += loss.item()</span><br><span class="line">        <span class="comment"># print train process</span></span><br><span class="line">        rate = (step + <span class="number">1</span>) / <span class="built_in">len</span>(train_loader)</span><br><span class="line">        a = <span class="string">&quot;*&quot;</span> * <span class="built_in">int</span>(rate * <span class="number">50</span>)</span><br><span class="line">        b = <span class="string">&quot;.&quot;</span> * <span class="built_in">int</span>((<span class="number">1</span> - rate) * <span class="number">50</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\rtrain loss: &#123;:^3.0f&#125;%[&#123;&#125;-&gt;&#123;&#125;]&#123;:.3f&#125;&quot;</span>.<span class="built_in">format</span>(<span class="built_in">int</span>(rate * <span class="number">100</span>), a, b, loss), end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># validate</span></span><br><span class="line">    net.<span class="built_in">eval</span>()</span><br><span class="line">    acc = <span class="number">0.0</span>  <span class="comment"># accumulate accurate number / epoch</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        <span class="keyword">for</span> val_data <span class="keyword">in</span> validate_loader:</span><br><span class="line">            val_images, val_labels = val_data</span><br><span class="line">            outputs = net(val_images.to(device))  <span class="comment"># eval model only have last output layer</span></span><br><span class="line">            predict_y = torch.<span class="built_in">max</span>(outputs, dim=<span class="number">1</span>)[<span class="number">1</span>]</span><br><span class="line">            acc += (predict_y == val_labels.to(device)).<span class="built_in">sum</span>().item()</span><br><span class="line">        val_accurate = acc / val_num</span><br><span class="line">        <span class="keyword">if</span> val_accurate &gt; best_acc:</span><br><span class="line">            best_acc = val_accurate</span><br><span class="line">            torch.save(net.state_dict(), save_path)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[epoch %d] train_loss: %.3f  test_accuracy: %.3f&#x27;</span> %</span><br><span class="line">              (epoch + <span class="number">1</span>, running_loss / step, val_accurate))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Finished Training&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>Output:<br><img src="https://img-blog.csdnimg.cn/85864cac953d427892bf59fd8e05c80a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p><strong>predict.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> model <span class="keyword">import</span> GoogLeNet</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">os.environ[<span class="string">&quot;KMP_DUPLICATE_LIB_OK&quot;</span>]=<span class="string">&quot;TRUE&quot;</span></span><br><span class="line"></span><br><span class="line">data_transform = transforms.Compose(</span><br><span class="line">    [transforms.Resize((<span class="number">224</span>, <span class="number">224</span>)),</span><br><span class="line">     transforms.ToTensor(),</span><br><span class="line">     transforms.Normalize((<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>), (<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))])</span><br><span class="line"></span><br><span class="line"><span class="comment"># load image</span></span><br><span class="line">img = Image.<span class="built_in">open</span>(<span class="string">&quot;./sunflower.jpg&quot;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"><span class="comment"># [N, C, H, W]</span></span><br><span class="line">img = data_transform(img)</span><br><span class="line"><span class="comment"># expand batch dimension</span></span><br><span class="line">img = torch.unsqueeze(img, dim=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># read class_indict</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    json_file = <span class="built_in">open</span>(<span class="string">&#x27;./class_indices.json&#x27;</span>, <span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    class_indict = json.load(json_file)</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    <span class="built_in">print</span>(e)</span><br><span class="line">    exit(-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># create model</span></span><br><span class="line">model = GoogLeNet(num_classes=<span class="number">5</span>, aux_logits=<span class="literal">False</span>)</span><br><span class="line"><span class="comment"># load model weights</span></span><br><span class="line">model_weight_path = <span class="string">&quot;./googleNet.pth&quot;</span></span><br><span class="line">missing_keys, unexpected_keys = model.load_state_dict(torch.load(model_weight_path), strict=<span class="literal">False</span>)</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="comment"># predict class</span></span><br><span class="line">    output = torch.squeeze(model(img))</span><br><span class="line">    predict = torch.softmax(output, dim=<span class="number">0</span>)</span><br><span class="line">    predict_cla = torch.argmax(predict).numpy()</span><br><span class="line"><span class="built_in">print</span>(class_indict[<span class="built_in">str</span>(predict_cla)])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>Output:<br><img src="https://img-blog.csdnimg.cn/8e88f47fed584917b0ccd85b7c268bea.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2022/01/11/DL7_Batch%20Normalization/" title="深度学习(七)——Batch Normalization+Pytorch实现">http://example.com/2022/01/11/DL7_Batch Normalization/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/Batch-Normalization/" rel="tag"># Batch Normalization</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/09/DL5_ZFNet/" rel="prev" title="深度学习(五)——ZFNet+Pytorch实现">
+      <i class="fa fa-chevron-left"></i> 深度学习(五)——ZFNet+Pytorch实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/01/11/DL6_GoogleNet/" rel="next" title="深度学习(六)——GoogleNet+Pytorch实现">
+      深度学习(六)——GoogleNet+Pytorch实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%AE%AD%E7%BB%83%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">深度神经网络训练的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">解决方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E9%AB%98%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%8E%87"><span class="nav-number">2.3.</span> <span class="nav-text">更高的学习率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E5%8C%96"><span class="nav-number">2.4.</span> <span class="nav-text">正则化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">3.</span> <span class="nav-text">实验</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pytorch%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">Pytorch实现</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
