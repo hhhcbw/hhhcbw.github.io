@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="简介Faster R-CNN是Fast R-CNN的进一步升级，不使用Selective Search（费时，难以用GPU优化），而是将候选框的选取部分通过一个RPN(Region Rroposal Network)整合进一个深度网络（RNP与后面分类的部分可以共享前面的卷积），使其更快更准。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="目标检测(四)——Faster R-CNN">
+<meta property="og:url" content="http://example.com/2022/01/27/OD4_Faster%20R-CNN/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="简介Faster R-CNN是Fast R-CNN的进一步升级，不使用Selective Search（费时，难以用GPU优化），而是将候选框的选取部分通过一个RPN(Region Rroposal Network)整合进一个深度网络（RNP与后面分类的部分可以共享前面的卷积），使其更快更准。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/63f5a02f68794ea98dcdabc89766c91a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5963147fac254f3c8500b06a6310712b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a55e22ef71244ecba1f2c7af65ceab80.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8920f23ac8f34ae4b474cf863a1c1c34.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/098dcef07b234ced880f6073511dfb4f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/cf1d0d55445043c1ab8c488280954580.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e988669b54174c0590a1cbe2ca6c325e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/4dfef3753d444107a9d3580ae2e99640.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2022-01-27T12:07:00.000Z">
+<meta property="article:modified_time" content="2022-01-27T12:08:01.110Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="目标检测">
+<meta property="article:tag" content="Faster R-CNN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/63f5a02f68794ea98dcdabc89766c91a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2022/01/27/OD4_Faster%20R-CNN/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>目标检测(四)——Faster R-CNN | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/27/OD4_Faster%20R-CNN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          目标检测(四)——Faster R-CNN
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-01-27 20:07:00 / 修改时间：20:08:01" itemprop="dateCreated datePublished" datetime="2022-01-27T20:07:00+08:00">2022-01-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/" itemprop="url" rel="index"><span itemprop="name">目标检测</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>Faster R-CNN是Fast R-CNN的进一步升级，不使用Selective Search（费时，难以用GPU优化），而是将候选框的选取部分通过一个RPN(Region Rroposal Network)整合进一个深度网络（RNP与后面分类的部分可以共享前面的卷积），使其更快更准。</p>
+<span id="more"></span>
+<hr>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><h2 id="Faster-R-CNN整体结构"><a href="#Faster-R-CNN整体结构" class="headerlink" title="Faster R-CNN整体结构"></a>Faster R-CNN整体结构</h2><p>在Faster R-CNN中加入一个提取边缘的神经网络，也就说找候选框的工作也交给神经网络来做了。这样，目标检测的四个基本步骤（<strong>候选区域生成，特征提取，分类，边框调整</strong>）终于被统一到一个深度网络框架之内。<br><img src="https://img-blog.csdnimg.cn/63f5a02f68794ea98dcdabc89766c91a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br> Faster R-CNN可以简单地看成是区域生成网络+Fast R-CNN的模型，用区域生成网络（Region Proposal Network，简称RPN）来代替Fast R-CNN中的选择性搜索方法，结构如下：</p>
+<ol>
+<li>首先向CNN网络(VGG-16)输入任意大小图片</li>
+<li>Faster RCNN使用一组基础的conv+relu+pooling层提取feature map。<strong>该feature map被共享用于后续RPN层和RoI Pooling层。</strong></li>
+<li>Region Proposal Networks。<strong>RPN网络用于生成region proposals，该层通过softmax判断anchors属于foreground或者background，再利用bounding box regression修正anchors获得精确的region proposals，输出其Top-N(默认为300)的区域给RoI pooling。</strong></li>
+<li>第2步得到的高维特征图和第3步输出的区域，通过Rol pooling，产生固定尺寸的输出，该输出到全连接层判定目标类别。</li>
+<li><strong>利用proposal feature maps计算每个region proposal的不同类别概率，同时bounding box regression获得检测框最终的精确位置</strong></li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/5963147fac254f3c8500b06a6310712b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="Faster R-CNN基本结构"></p>
+<hr>
+<h2 id="RPN（Region-Proposal-Networks）原理"><a href="#RPN（Region-Proposal-Networks）原理" class="headerlink" title="RPN（Region Proposal Networks）原理"></a>RPN（Region Proposal Networks）原理</h2><p>RPN网络的主要作用是<strong>得出比较准确的候选区域</strong>。整个过程分为两步</p>
+<ul>
+<li><strong>用n×n(默认3×3=9)的大小窗口去扫描特征图</strong>，每个滑窗位置映射到一个低维的向量(默认256维)，并为每个滑窗位置考虑k种(在论文设计中k=9)可能的<strong>参考窗口</strong>(论文中称为<strong>anchors</strong>，<strong>锚框</strong>)</li>
+<li>低维特征向量输入两个并行连接的1 x 1卷积层然后得出两个部分：reg窗口回归层(用于修正位置)和cls窗口分类层(是否为前景或背景概率)</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/a55e22ef71244ecba1f2c7af65ceab80.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="RPN层基本结构"><br>上图3展示了RPN网络的具体结构。可以看到RPN网络实际分为2条线，<strong>上面一条通过softmax分类anchors获得foreground和background（检测目标是foreground）</strong>，</p>
+<p><strong>下面一条用于计算对于anchors的bounding box regression偏移量，以获得精确的proposal</strong>。而最后的Proposal层则负责综合foreground anchors和bounding box regression偏移量获取proposals，</p>
+<p>同时剔除太小和超出边界的proposals（有一些分类实在太烂的区域，我们直接丢掉，否则计算量会非常大）。其实整个网络到了Proposal Layer这里，就完成了相当于<strong>目标定位</strong>（相当于完成了选择性搜索(SS)生成候选区）的功能。</p>
+<h2 id="anchors"><a href="#anchors" class="headerlink" title="anchors"></a>anchors</h2><p><img src="https://img-blog.csdnimg.cn/8920f23ac8f34ae4b474cf863a1c1c34.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>  <strong>举个例子：</strong></p>
+<ul>
+<li>3*3卷积核的中心点对应原图上的位置，将该点作为anchor的中心点，在原图中框出多尺度、多种长宽比的anchors, 三种尺度{ 128，256，512 }， 三种长宽比{1:1，1:2，2:1}</li>
+</ul>
+<p><strong>解释：</strong><br>所谓anchors，实际上就是一组的矩形</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[[ -<span class="number">84.</span>  -<span class="number">40.</span>   <span class="number">99.</span>   <span class="number">55.</span>]</span><br><span class="line"> [-<span class="number">176.</span>  -<span class="number">88.</span>  <span class="number">191.</span>  <span class="number">103.</span>]</span><br><span class="line"> [-<span class="number">360.</span> -<span class="number">184.</span>  <span class="number">375.</span>  <span class="number">199.</span>]</span><br><span class="line"> [ -<span class="number">56.</span>  -<span class="number">56.</span>   <span class="number">71.</span>   <span class="number">71.</span>]</span><br><span class="line"> [-<span class="number">120.</span> -<span class="number">120.</span>  <span class="number">135.</span>  <span class="number">135.</span>]</span><br><span class="line"> [-<span class="number">248.</span> -<span class="number">248.</span>  <span class="number">263.</span>  <span class="number">263.</span>]</span><br><span class="line"> [ -<span class="number">36.</span>  -<span class="number">80.</span>   <span class="number">51.</span>   <span class="number">95.</span>]</span><br><span class="line"> [ -<span class="number">80.</span> -<span class="number">168.</span>   <span class="number">95.</span>  <span class="number">183.</span>]</span><br><span class="line"> [-<span class="number">168.</span> -<span class="number">344.</span>  <span class="number">183.</span>  <span class="number">359.</span>]]</span><br></pre></td></tr></table></figure>
+<p>其中每行的4个值 (x_1, y_1, x_2, y_2) 表矩形左上和右下角点坐标。9个矩形共有3种形状，长宽比为大约为{1:1, 1:2, 2:1} 三种，如图4。实际上通过anchors就引入了检测中常用到的多尺度方法。<br><img src="https://img-blog.csdnimg.cn/098dcef07b234ced880f6073511dfb4f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_19,color_FFFFFF,t_70,g_se,x_16" alt="anchors示意图"><br> 注：关于上面的anchors size，其实是根据检测图像设置的。在python demo中，会把任意大小的输入图像reshape成800x600（即图2中的M=800，N=600）。再回头来看anchors的大小，anchors中长宽1:2中最大为352x704，长宽2:1中最大736x384，<strong>基本是cover了800x600的各个尺度和形状。</strong></p>
+<p><strong>那么这9个anchors是做什么的呢？</strong>借用Faster RCNN论文中的原图，如图5，遍历Conv layers计算获得的feature maps，为每一个点（每一个像素的中心）都配备这9种anchors作为初始的检测框。<strong>这样做获得检测框很不准确，不用担心，后面还有2次bounding box regression可以修正检测框位置。</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/cf1d0d55445043c1ab8c488280954580.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><strong>其实RPN最终就是在原图尺度上，设置了密密麻麻的候选Anchor。然后用cnn去判断哪些Anchor是里面有目标的foreground anchor，哪些是没目标的backgroud。所以，仅仅是个二分类而已！</strong></p>
+<p>而<strong>anchor的个数</strong>也是我们关心的一个问题，如下图经过CNN后得到的特征是51 x 39（通道数忽略），那么对于9种形状的anchor，一共有51 x 39 x 9 = 17901个anchor从RPN层输出，对于更高维度的图像，输出的特征会更大，带来<strong>训练参数过大</strong>的问题。<br><img src="https://img-blog.csdnimg.cn/e988669b54174c0590a1cbe2ca6c325e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h2 id="候选区域的训练"><a href="#候选区域的训练" class="headerlink" title="候选区域的训练"></a>候选区域的训练</h2><ul>
+<li><strong>训练样本anchor标记</strong></li>
+</ul>
+<ol>
+<li>每个ground-truth box有着最高的IoU的anchor标记为正样本</li>
+<li>剩下的anchor/anchors与任何ground-truth box的IoU大于0.7记为正样本，IoU小于0.3，记为负样本</li>
+<li>剩下的样本全部忽略<br>正负样本比例为1：3</li>
+</ol>
+<ul>
+<li><strong>训练损失</strong></li>
+</ul>
+<ol>
+<li>RPN classification (anchor good / bad) ，二分类，是否有物体，是、否</li>
+<li>RPN regression (anchor -&gt; proposal) ，回归</li>
+<li>注：这里使用的损失函数和Fast R-CNN内的损失函数原理类似，同时最小化两种代价</li>
+</ol>
+<p>候选区域的训练是为了让得出来的正确的候选区域， 并且候选区域经过了回归微调。</p>
+<p>在这基础之上做Fast RCNN训练是得到特征向量（不要anchor越过边界的以及太小的，剩下默认挑300个）做分类预测和回归预测。</p>
+<h2 id="Faster-R-CNN的训练"><a href="#Faster-R-CNN的训练" class="headerlink" title="Faster R-CNN的训练"></a>Faster R-CNN的训练</h2><p>Faster R-CNN的训练分为两部分（也有一部分的，不过论文所有实验用的是两部分），即两个网络的训练，并分为四个步骤。<br><img src="https://img-blog.csdnimg.cn/4dfef3753d444107a9d3580ae2e99640.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<ul>
+<li>第一阶段，按照上面候选区域的训练方法训练RPN（网络初始化为ImageNet的预训练模型，然后在训练RPN时fine-tune）。</li>
+<li>第二阶段，单独训练检测网络，使用RPN层的产生的候选区域（也初始化为ImageNet的预训练模型）。</li>
+<li>第三阶段，使用检测器的网络去初始化RPN的训练，训练过程中保持共享的卷积层不变，只 fine-tune RPN。</li>
+<li>第四阶段，保持共享卷积层固定，微调Fast R-CNN独有的层。</li>
+</ul>
+<p>这样的话，整个网络共享相同的卷积层，并且形成了一个统一的网络。像这样相似的交替训练可以迭代更多的次数，但是这样做只能获得微不足道的提升。</p>
+<hr>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="效果对比"><a href="#效果对比" class="headerlink" title="效果对比"></a>效果对比</h2><table>
+<thead>
+<tr>
+<th></th>
+<th>R-CNN</th>
+<th>Fast R-CNN</th>
+<th>Faster R-CNN</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Test time/image</td>
+<td>50.0s</td>
+<td>2.0s</td>
+<td>0.2s</td>
+</tr>
+<tr>
+<td>mAP(VOC2007)</td>
+<td>66.0</td>
+<td>66.9</td>
+<td>66.9</td>
+</tr>
+</tbody></table>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ul>
+<li>提出RPN网络</li>
+<li>端到端网络模型（可以将VGG替换为ResNet，mAP进一步提升）<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2></li>
+<li><strong>训练参数过大</strong></li>
+<li>对于真实训练使用来说还是过于耗时</li>
+</ul>
+<h2 id="可以改进的地方"><a href="#可以改进的地方" class="headerlink" title="可以改进的地方"></a>可以改进的地方</h2><ul>
+<li>RPN（Region Proposal Networks） 改进 对于小目标选择利用多尺度特征信息进行RPN</li>
+<li>速度提升 如YOLO系列算法，删去了RPN，直接对Region Proposal（候选区）进行分类回归，极大的提升了网络的速度</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2022/01/27/OD4_Faster%20R-CNN/" title="目标检测(四)——Faster R-CNN">http://example.com/2022/01/27/OD4_Faster R-CNN/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/" rel="tag"># 目标检测</a>
+              <a href="/tags/Faster-R-CNN/" rel="tag"># Faster R-CNN</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/26/OD3_Fast%20R-CNN/" rel="prev" title="目标检测(三)——Fast R-CNN">
+      <i class="fa fa-chevron-left"></i> 目标检测(三)——Fast R-CNN
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Faster-R-CNN%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">Faster R-CNN整体结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RPN%EF%BC%88Region-Proposal-Networks%EF%BC%89%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">RPN（Region Proposal Networks）原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#anchors"><span class="nav-number">2.3.</span> <span class="nav-text">anchors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%80%99%E9%80%89%E5%8C%BA%E5%9F%9F%E7%9A%84%E8%AE%AD%E7%BB%83"><span class="nav-number">2.4.</span> <span class="nav-text">候选区域的训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Faster-R-CNN%E7%9A%84%E8%AE%AD%E7%BB%83"><span class="nav-number">2.5.</span> <span class="nav-text">Faster R-CNN的训练</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%88%E6%9E%9C%E5%AF%B9%E6%AF%94"><span class="nav-number">3.1.</span> <span class="nav-text">效果对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">3.2.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">3.3.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E4%BB%A5%E6%94%B9%E8%BF%9B%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">3.4.</span> <span class="nav-text">可以改进的地方</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
