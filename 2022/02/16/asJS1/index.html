@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="同步JavaScript要理解什么是异步JavaScript，我们应该从确切理解同步 JavaScript    开始。先看一个简单的例子（运行它，这是源码）： 12345678const btn &#x3D; document.querySelector(&amp;#x27;button&amp;#x27;);btn.addEventListener(&amp;#x27;click&amp;#x27;, () &#x3D;&gt; &amp;#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="异步JavaScript(一)——异步JavaScript简介">
+<meta property="og:url" content="http://example.com/2022/02/16/asJS1/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="同步JavaScript要理解什么是异步JavaScript，我们应该从确切理解同步 JavaScript    开始。先看一个简单的例子（运行它，这是源码）： 12345678const btn &#x3D; document.querySelector(&amp;#x27;button&amp;#x27;);btn.addEventListener(&amp;#x27;click&amp;#x27;, () &#x3D;&gt; &amp;#123;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-02-16T08:11:00.000Z">
+<meta property="article:modified_time" content="2022-02-16T08:11:43.500Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="Web前端">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/02/16/asJS1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>异步JavaScript(一)——异步JavaScript简介 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/16/asJS1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          异步JavaScript(一)——异步JavaScript简介
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-02-16 16:11:00 / 修改时间：16:11:43" itemprop="dateCreated datePublished" datetime="2022-02-16T16:11:00+08:00">2022-02-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="同步JavaScript"><a href="#同步JavaScript" class="headerlink" title="同步JavaScript"></a>同步JavaScript</h1><p>要理解什么是异步JavaScript，我们应该从确切理解同步 JavaScript    开始。<br>先看一个简单的例子（<a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/basic-function.html">运行它</a>，<a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/basic-function.html">这是源码</a>）：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> btn = <span class="built_in">document</span>.querySelector(<span class="string">&#x27;button&#x27;</span>);</span><br><span class="line">btn.addEventListener(<span class="string">&#x27;click&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  alert(<span class="string">&#x27;You clicked me!&#x27;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> pElem = <span class="built_in">document</span>.createElement(<span class="string">&#x27;p&#x27;</span>);</span><br><span class="line">  pElem.textContent = <span class="string">&#x27;This is a newly-added paragraph.&#x27;</span>;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(pElem);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这段代码, 一行一行的顺序执行：</p>
+<ol>
+<li>先取得一个在DOM里面的 <code>&lt;button&gt;</code> 引用。</li>
+<li>点击按钮的时候，添加一个 <code>click</code> 事件监听器:<ol>
+<li><code>alert()</code> 消息出现。</li>
+<li>一旦alert 结束，创建一个 <code>&lt;p&gt;</code> 元素。</li>
+<li>给它的文本内容赋值。</li>
+<li>最后，把这个段落放进网页。</li>
+</ol>
+</li>
+</ol>
+<p>每一个操作在执行的时候，其他任何事情都没有发生 — 网页的渲染暂停.  JavaScript is single threaded. 任何时候只能做一件事情, 只有一个主线程，其他的事情都阻塞了，直到前面的操作完成。</p>
+<p>所以上面的例子，点击了按钮以后，段落不会创建，直到在alert消息框中点击ok，段落才会出现。</p>
+<hr>
+<h1 id="异步JavaScript"><a href="#异步JavaScript" class="headerlink" title="异步JavaScript"></a>异步JavaScript</h1><p>就前面提到的种种原因（比如，和阻塞相关）很多网页API特性使用异步代码，特别是从外部的设备上获取资源，譬如，从网络获取文件，访问数据库，从网络摄像头获得视频流，或者向VR头罩广播图像。</p>
+<p>为什么使用异步代码这么难？看一个例子，当你从服务器获取一个图像，通常你不可能立马就得到，这需要时间，虽然现在的网络很快。这意味着下面的伪代码可能不能正常工作：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> response = fetch(<span class="string">&#x27;myImage.png&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> blob = response.blob();</span><br><span class="line"><span class="comment">// display your image blob in the UI somehow</span></span><br></pre></td></tr></table></figure>
+<p>因为你不知道下载图片会多久，所以第二行代码执行的时候可能报错（可能间歇的，也可能每次）因为图像还没有就绪。取代的方法就是，代码必须等到 <code>response</code> 返回才能继续往下执行。</p>
+<p>在JavaScript代码中，你经常会遇到两种异步编程风格：老派 <code>callbacks</code>，新派 <code>promise</code>。下面就来分别介绍。</p>
+<h2 id="异步callbacks"><a href="#异步callbacks" class="headerlink" title="异步callbacks"></a>异步callbacks</h2><p>异步 <code>callbacks</code> 其实就是函数，只不过是作为参数传递给那些在后台执行的其他函数. 当那些后台运行的代码结束，就调用 <code>callbacks</code> 函数，通知你工作已经完成，或者其他有趣的事情发生了。使用 <code>callbacks</code> 有一点老套，在一些老派但经常使用的API里面，你会经常看到这种风格。</p>
+<p>举个例子，异步 <code>callback</code> 就是 <code>addEventListener()</code> 第二个参数（前面的例子）：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">btn.addEventListener(<span class="string">&#x27;click&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  alert(<span class="string">&#x27;You clicked me!&#x27;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> pElem = <span class="built_in">document</span>.createElement(<span class="string">&#x27;p&#x27;</span>);</span><br><span class="line">  pElem.textContent = <span class="string">&#x27;This is a newly-added paragraph.&#x27;</span>;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(pElem);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>第一个参数是侦听的事件类型，第二个就是事件发生时调用的回调函数。.</p>
+<p>当我们把回调函数作为一个参数传递给另一个函数时，仅仅是把回调函数定义作为参数传递过去 — 回调函数并没有立刻执行，回调函数会在包含它的函数的某个地方异步执行，包含函数负责在合适的时候执行回调函数。</p>
+<p>你可以自己写一个容易的，包含回调函数的函数。来看另外一个例子，用 <code>XMLHttpRequest </code>API (<a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/xhr-async-callback.html">运行它</a>, <a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/xhr-async-callback.html">源代码</a>) 加载资源：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">loadAsset</span>(<span class="params">url, type, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">  xhr.open(<span class="string">&#x27;GET&#x27;</span>, url);</span><br><span class="line">  xhr.responseType = type;</span><br><span class="line"></span><br><span class="line">  xhr.onload = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    callback(xhr.response);</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  xhr.send();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">displayImage</span>(<span class="params">blob</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> objectURL = URL.createObjectURL(blob);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> image = <span class="built_in">document</span>.createElement(<span class="string">&#x27;img&#x27;</span>);</span><br><span class="line">  image.src = objectURL;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(image);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">loadAsset(<span class="string">&#x27;coffee.jpg&#x27;</span>, <span class="string">&#x27;blob&#x27;</span>, displayImage);</span><br></pre></td></tr></table></figure>
+<p>创建 <code>displayImage()</code> 函数，简单的把blob传递给它，生成 <code>objectURL</code>，然后再生成一个 <code>image</code> 元素，把 <code>objectURL</code> 作为 <code>image</code> 的源地址，最后显示这张图片。  然后，我们创建 <code>loadAsset()</code> 函数，把URL，type，和回调函数同时都作为参数。函数用 <code>XMLHttpRequest</code> (通常缩写 “XHR”) 获取给定URL的资源，在获得资源响应后再把响应作为参数传递给回调函数去处理。 (使用 <code>onload</code> 事件处理) ，有点烧脑，是不是？！</p>
+<p>回调函数用途广泛 — 他们不仅仅可以用来控制函数的执行顺序和函数之间的数据传递，还可以根据环境的不同，将数据传递给不同的函数，所以对下载好的资源，你可以采用不同的操作来处理，譬如 <code>processJSON()</code>, <code>displayText()</code>, 等等。</p>
+<p>请注意，不是所有的回调函数都是异步的 — 有一些是同步的。一个例子就是使用 <code>Array.prototype.forEach()</code> 来遍历数组 (<a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/foreach.html">运行</a>, <a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/foreach.html">源代码</a>):</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> gods = [<span class="string">&#x27;Apollo&#x27;</span>, <span class="string">&#x27;Artemis&#x27;</span>, <span class="string">&#x27;Ares&#x27;</span>, <span class="string">&#x27;Zeus&#x27;</span>];</span><br><span class="line"></span><br><span class="line">gods.forEach(<span class="function"><span class="keyword">function</span> (<span class="params">eachName, index</span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(index + <span class="string">&#x27;. &#x27;</span> + eachName);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在这个例子中，我们遍历一个希腊神的数组，并在控制台中打印索引和值。<code>forEach()</code> 需要的参数是一个回调函数，回调函数本身带有两个参数，数组元素和索引值。它无需等待任何事情，立即运行。</p>
+<h2 id="Promises"><a href="#Promises" class="headerlink" title="Promises"></a>Promises</h2><p><code>Promises</code> 是新派的异步代码，现代的web APIs经常用到。 <code>fetch()</code> API就是一个很好的例子, 它基本上就是一个现代版的，更高效的 <code>XMLHttpRequest</code>。看个例子:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">fetch(<span class="string">&#x27;products.json&#x27;</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> response.json();</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">json</span>) </span>&#123;</span><br><span class="line">  products = json;</span><br><span class="line">  initialize();</span><br><span class="line">&#125;).catch(<span class="function"><span class="keyword">function</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;Fetch problem: &#x27;</span> + err.message);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这里 <code>fetch()</code> 只需要一个参数— 资源的网络 URL — 返回一个 <code>promise</code>. <code>promise</code> 是表示异步操作完成或失败的对象。可以说，它代表了一种中间状态。 本质上，这是浏览器说“我保证尽快给您答复”的方式，因此得名“<code>promise</code>”。</p>
+<p>这两种可能的结果都还没有发生，因此 <code>fetch</code> 操作目前正在等待浏览器试图在将来某个时候完成该操作的结果。然后我们有三个代码块链接到 <code>fetch()</code> 的末尾：</p>
+<ul>
+<li>两个 <code>then()</code> 块。两者都包含一个回调函数，如果前一个操作成功，该函数将运行，并且每个回调都接收前一个成功操作的结果作为输入，因此您可以继续对它执行其他操作。每个 .<code>then()</code> 块返回另一个 <code>promise</code>，这意味着可以将多个.<code>then()</code> 块链接到另一个块上，这样就可以依次执行多个异步操作。</li>
+<li>如果其中任何一个 <code>then()</code> 块失败，则在末尾运行 <code>catch()</code> 块——与同步 <code>try...catch</code> 类似，<code>catch()</code> 提供了一个错误对象，可用来报告发生的错误类型。但是请注意，同步 <code>try...catch</code> 不能与 <code>promise</code> 一起工作，尽管它可以与<code>async</code>/<code>await</code>一起工作，稍后您将了解到这一点。</li>
+</ul>
+<h2 id="事件队列"><a href="#事件队列" class="headerlink" title="事件队列"></a>事件队列</h2><p>像 <code>promise</code> 这样的异步操作被放入事件队列中，事件队列在主线程完成处理后运行，这样它们就不会阻止后续JavaScript代码的运行。排队操作将尽快完成，然后将结果返回到JavaScript环境。</p>
+<h2 id="Promises-对比-callbacks"><a href="#Promises-对比-callbacks" class="headerlink" title="Promises 对比 callbacks"></a>Promises 对比 callbacks</h2><p><code>promises</code> 与旧式 <code>callbacks</code> 有一些相似之处。它们本质上是一个返回的对象，您可以将回调函数附加到该对象上，而不必将回调作为参数传递给另一个函数。</p>
+<p>然而，<code>Promise</code> 是专门为异步操作而设计的，与旧式回调相比具有许多优点:</p>
+<ul>
+<li>您可以使用多个 <code>then()</code> 操作将多个异步操作链接在一起，并将其中一个操作的结果作为输入传递给下一个操作。这种链接方式对回调来说要难得多，会使回调以混乱的“末日金字塔”告终。 (也称为回调地狱)。</li>
+<li><code>Promise</code> 总是严格按照它们放置在事件队列中的顺序调用。</li>
+<li>错误处理要好得多——所有的错误都由块末尾的一个.catch()块处理，而不是在“金字塔”的每一层单独处理。</li>
+</ul>
+<hr>
+<h1 id="异步代码的本质"><a href="#异步代码的本质" class="headerlink" title="异步代码的本质"></a>异步代码的本质</h1><p>让我们研究一个示例，它进一步说明了异步代码的本质，展示了当我们不完全了解代码执行顺序以及将异步代码视为同步代码时可能发生的问题。下面的示例与我们之前看到的非常相似( <a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/async-sync.html">运行它</a> 和 <a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/async-sync.html">源代码</a>)。一个不同之处在于，我们包含了许多 <code>console.log()</code> 语句，以展示代码将在其中执行的顺序。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log (<span class="string">&#x27;Starting&#x27;</span>);</span><br><span class="line"><span class="keyword">let</span> image;</span><br><span class="line"></span><br><span class="line">fetch(<span class="string">&#x27;coffee.jpg&#x27;</span>).then(<span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;It worked :)&#x27;</span>)</span><br><span class="line">  <span class="keyword">return</span> response.blob();</span><br><span class="line">&#125;).then(<span class="function">(<span class="params">myBlob</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> objectURL = URL.createObjectURL(myBlob);</span><br><span class="line">  image = <span class="built_in">document</span>.createElement(<span class="string">&#x27;img&#x27;</span>);</span><br><span class="line">  image.src = objectURL;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(image);</span><br><span class="line">&#125;).catch(<span class="function">(<span class="params">error</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;There has been a problem with your fetch operation: &#x27;</span> + error.message);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log (<span class="string">&#x27;All done!&#x27;</span>);</span><br></pre></td></tr></table></figure>
+<p>浏览器将会执行代码，看见第一个 <code>console.log()</code> 输出(<code>Starting</code>) ，然后创建 <code>image</code> 变量。</p>
+<p>然后，它将移动到下一行并开始执行 <code>fetch()</code> 块，但是，因为 <code>fetch()</code> 是异步执行的，没有阻塞，所以在 <code>promise</code> 相关代码之后程序继续执行，从而到达最后的 <code>console.log()</code> 语句(<code>All done!</code>)并将其输出到控制台。</p>
+<p>只有当 <code>fetch()</code> 块完成运行返回结果给.<code>then()</code> ，我们才最后看到第二个 <code>console.log()</code> 消息 (<code>It worked ;</code>)) . 所以 这些消息 可能以 和你预期不同的顺序出现：</p>
+<ul>
+<li>Starting</li>
+<li>All done!</li>
+<li>It worked : )</li>
+</ul>
+<p>如果你感到疑惑，考虑下面这个小例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">console.log(&quot;registering click handler&quot;);</span><br><span class="line"></span><br><span class="line">button.addEventListener(&#x27;click&#x27;, () =&gt; &#123;</span><br><span class="line">  console.log(&quot;get click&quot;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">console.log(&quot;all done&quot;);</span><br></pre></td></tr></table></figure>
+<p>这在行为上非常相似——第一个和第三个 <code>console.log()</code> 消息将立即显示，但是第二个消息将被阻塞，直到有人单击鼠标按钮。前面的示例以相同的方式工作，只是在这种情况下，第二个消息在 <code>promise</code> 链上被阻塞，直到获取资源后再显示在屏幕上，而不是单击。</p>
+<p>要查看实际情况，请尝试获取<a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/async-sync.html">示例</a>的本地副本，并将第三个 <code>console.log()</code> 调用更改为以下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">console.log (&#x27;All done! &#x27; + image.src + &#x27;displayed.&#x27;);</span><br></pre></td></tr></table></figure>
+<p>此时控制台将会报错，而不会显示第三个 <code>console.log</code> 的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TypeError: image is undefined; can&#x27;t access its &quot;src&quot; property</span><br></pre></td></tr></table></figure>
+<p>这是因为：浏览器运行第三个 <code>console.log()</code> 的时候，<code>fetch()</code> 语句块还没有完成，因此 <code>image</code> 还没有赋值。</p>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2022/02/16/asJS1/" title="异步JavaScript(一)——异步JavaScript简介">http://example.com/2022/02/16/asJS1/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+              <a href="/tags/Web%E5%89%8D%E7%AB%AF/" rel="tag"># Web前端</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/16/JS12/" rel="prev" title="JavaScript(十二)——弹跳球进阶版">
+      <i class="fa fa-chevron-left"></i> JavaScript(十二)——弹跳球进阶版
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5JavaScript"><span class="nav-number">1.</span> <span class="nav-text">同步JavaScript</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5JavaScript"><span class="nav-number">2.</span> <span class="nav-text">异步JavaScript</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5callbacks"><span class="nav-number">2.1.</span> <span class="nav-text">异步callbacks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Promises"><span class="nav-number">2.2.</span> <span class="nav-text">Promises</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E9%98%9F%E5%88%97"><span class="nav-number">2.3.</span> <span class="nav-text">事件队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Promises-%E5%AF%B9%E6%AF%94-callbacks"><span class="nav-number">2.4.</span> <span class="nav-text">Promises 对比 callbacks</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E4%BB%A3%E7%A0%81%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="nav-number">3.</span> <span class="nav-text">异步代码的本质</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
