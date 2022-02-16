@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="baidu-site-verification" content="code-91m5KMieIc" />
+<meta name="msvalidate.01" content="91B4A9616CD05CBE396019C4E8646333" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这个实例将会利用 Canvas API 来在屏幕上画小球, 还会用到 requestAnimationFrame API 来使整个画面动起来 —— 我们并不要求你事先学习过这些 API 的相关知识，希望你完成这个练习之后会想去探索更多。这个过程中我们会用到一些漂亮的小东西并向你展示一些技巧，比如小球从墙上反弹，检查它们是否撞到了对方 （也就是碰撞检测）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript(十一)——弹跳球">
+<meta property="og:url" content="http://example.com/2022/02/16/JS11/index.html">
+<meta property="og:site_name" content="cbw">
+<meta property="og:description" content="这个实例将会利用 Canvas API 来在屏幕上画小球, 还会用到 requestAnimationFrame API 来使整个画面动起来 —— 我们并不要求你事先学习过这些 API 的相关知识，希望你完成这个练习之后会想去探索更多。这个过程中我们会用到一些漂亮的小东西并向你展示一些技巧，比如小球从墙上反弹，检查它们是否撞到了对方 （也就是碰撞检测）。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/33768da32a06445e8859fe485684be31.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2022-02-16T02:52:00.000Z">
+<meta property="article:modified_time" content="2022-02-16T02:53:01.735Z">
+<meta property="article:author" content="zju_cbw">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="Web前端">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/33768da32a06445e8859fe485684be31.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2022/02/16/JS11/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JavaScript(十一)——弹跳球 | cbw</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+           <a target="_blank" rel="noopener" href="https://github.com/hhhcbw" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">cbw</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tag fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/16/JS11/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JavaScript(十一)——弹跳球
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-02-16 10:52:00 / 修改时间：10:53:01" itemprop="dateCreated datePublished" datetime="2022-02-16T10:52:00+08:00">2022-02-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>这个实例将会利用 Canvas API 来在屏幕上画小球, 还会用到 requestAnimationFrame API 来使整个画面动起来 —— 我们并不要求你事先学习过这些 API 的相关知识，希望你完成这个练习之后会想去探索更多。这个过程中我们会用到一些漂亮的小东西并向你展示一些技巧，比如小球从墙上反弹，检查它们是否撞到了对方 （也就是碰撞检测）。</p>
+</blockquote>
+<span id="more"></span>
+<hr>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>首先下载 <a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/roy-tian/learning-area/master/javascript/oojs/bouncing-balls/bouncing-balls-start.zip">bouncing-balls-start.zip</a>，其中包含以下三个文件：index.html、style.css 和 main.js。它们分别包含以下内容：</p>
+<ol>
+<li>一个非常简单的 HTML 文档，包括一个 <code>&lt;h1&gt;</code> 元素、一个 <code>&lt;canvas&gt;</code> 元素来画小球，还有一些元素将 CSS 和 JavaScript 运用到我们的 HTML 中。</li>
+<li>一些非常简单的样式，主要是 <code>&lt;h1&gt;</code> 元素的样式和定位，另外还能使画面填充整个页面从而摆脱滚动条和边缘的空白（这样看起来非常简洁）</li>
+<li>一些 JavaScript 用来设置 <code>&lt;canvas&gt;</code> 元素，并提供我们要用到的基本函数。</li>
+</ol>
+<p>脚本的第一部分是这样的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> canvas = <span class="built_in">document</span>.querySelector(<span class="string">&#x27;canvas&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> ctx = canvas.getContext(<span class="string">&#x27;2d&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> width = canvas.width = <span class="built_in">window</span>.innerWidth;</span><br><span class="line"><span class="keyword">const</span> height = canvas.height = <span class="built_in">window</span>.innerHeight;</span><br></pre></td></tr></table></figure>
+<p>这个脚本使用变量代指了 <code>&lt;canvas&gt;</code> 元素, 然后对其调用 <code>getContext()</code> 从而我们获得一个开始画画的环境。存储以上操作结果的变量（<code>ctx</code>）是一个对象，直接代指画布上的一块允许我们绘制 2D 图形的区域。</p>
+<p>接下来，我们设置 <code>width</code> 和 <code>height</code> 变量，并且让画布元素的宽和高（分别使用 <code>canvas.width</code> 和 <code>canvas.height</code> 表示）等于浏览器的宽和高（也就是网页显示的区域 — 可以从 <code>Window.innerWidth</code> 和 <code>Window.innerHeight</code> 参数获得）。</p>
+<p>你会看到我们在这里串联了多个赋值表达式在一起,这样能更快地设置变量——这是完全正确的。</p>
+<p>原始脚本最后的部分如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">random</span>(<span class="params">min,max</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">Math</span>.floor(<span class="built_in">Math</span>.random()*(max-min)) + min;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">randomColor</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">&#x27;rgb(&#x27;</span> +</span><br><span class="line">         random(<span class="number">0</span>, <span class="number">255</span>) + <span class="string">&#x27;, &#x27;</span> +</span><br><span class="line">         random(<span class="number">0</span>, <span class="number">255</span>) + <span class="string">&#x27;, &#x27;</span> +</span><br><span class="line">         random(<span class="number">0</span>, <span class="number">255</span>) + <span class="string">&#x27;)&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第一个函数为我们生成一个 <code>min</code> 至 <code>max</code> 之间的随机整数，第二个函数为我们生成一个随机的颜色值。</p>
+<hr>
+<h1 id="为程序中的小球建立模型"><a href="#为程序中的小球建立模型" class="headerlink" title="为程序中的小球建立模型"></a>为程序中的小球建立模型</h1><p>我们的项目中会有很多小球在屏幕上跳来跳去。因此这些小球会以相同的方式运作，从而我们可以通过一个对象实例化它们。首先，我们将下面的构造器加入到代码的底部。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Ball</span>(<span class="params">x, y, velX, velY, color, size</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">this</span>.x = x;</span><br><span class="line">  <span class="built_in">this</span>.y = y;</span><br><span class="line">  <span class="built_in">this</span>.velX = velX;</span><br><span class="line">  <span class="built_in">this</span>.velY = velY;</span><br><span class="line">  <span class="built_in">this</span>.color = color;</span><br><span class="line">  <span class="built_in">this</span>.size = size;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个构造器中定义了每个小球需要的参数：</p>
+<ul>
+<li><code>x</code> 和 <code>y</code> 坐标 —— 小球在屏幕上最开始时候的坐标。坐标的范围从 0 （左上角）到浏览器视口的宽和高（右下角）。</li>
+<li>水平和竖直速度（<code>velX</code> 和 <code>velY</code>）—— 我们会给每个小球一个水平和竖直速度。实际上，当我们让这些球开始运动时候，每过一帧都会给小球的 <code>x</code> 和 <code>y</code> 坐标加一次这些值。</li>
+<li><code>color</code> —— 每一个小球会有自己的颜色。</li>
+<li><code>size</code> —— 每一个小球会有自己的大小 — 也就是小球的半径，以像素为单位。</li>
+</ul>
+<p>这里说明了小球的属性，那么方法呢？别忘了我们要让小球动起来。</p>
+<h2 id="画小球"><a href="#画小球" class="headerlink" title="画小球"></a>画小球</h2><p>首先给小球的原型加上 <code>draw()</code> 方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Ball.prototype.draw = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  ctx.beginPath();</span><br><span class="line">  ctx.fillStyle = <span class="built_in">this</span>.color;</span><br><span class="line">  ctx.arc(<span class="built_in">this</span>.x, <span class="built_in">this</span>.y, <span class="built_in">this</span>.size, <span class="number">0</span>, <span class="number">2</span> * <span class="built_in">Math</span>.PI);</span><br><span class="line">  ctx.fill();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过使用这个函数，通过使用我们之前定义的 <code>ctx</code> 对象 的方法，我们就可以让在屏幕上画出小球了。<code>ctx</code> 的内容区域就像是一张纸，现在我们就可以命令我们的笔画一点东西。</p>
+<ul>
+<li>首先，我们使用 <code>beginPath()</code> 来声明我们现在要开始在纸上画一个图形了。</li>
+<li>然后，我们使用 <code>fillStyle</code> 来定义这个图形的颜色 — 这个值正是小球的颜色属性。</li>
+<li>接下来，我们使用 <code>arc()</code> 方法来在纸上画出一段圆弧。有这些参数：</li>
+</ul>
+<ol>
+<li><code>x</code> 和 <code>y </code> 是圆弧的中心的坐标 —— 也就是小球的中心坐标。</li>
+<li>圆弧的半径 —— 小球的半径。</li>
+<li>最后两个参数是开始和结束，也就是圆弧对应的夹角，单位以弧度表示。这里我们用的是 0 和 2 * PI，也就是 360 度（如果你设置成 0 和 1 * PI，则只会出现一个半圆，也就是 180 度）</li>
+</ol>
+<ul>
+<li>最后，我们使用 <code>fill()</code> 方法，也就是声明我们结束了以 <code>beginPath() </code>开始的绘画，并且使用我们之前设置的颜色进行填充。 </li>
+</ul>
+<p>现在你已经可以测试你的对象了。</p>
+<ol>
+<li>保存代码，将 HTML 加载到浏览器中。</li>
+<li>打开浏览器中的 JavaScript 控制台，刷新页面，从而画布可以根据可视的区域调整自己的大小。</li>
+<li>通过下面的代码创建一个小球实例。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> testBall = <span class="keyword">new</span> Ball(<span class="number">50</span>, <span class="number">100</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="string">&#x27;blue&#x27;</span>, <span class="number">10</span>);</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>你可以调用实例的这些属性。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">testBall.x</span><br><span class="line">testBall.size</span><br><span class="line">testBall.color</span><br><span class="line">testBall.draw()</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>当你键入最后一行的时候，你会在你的画布上看到一个小球被画出来了。</li>
+</ol>
+<h2 id="更新小球的数据"><a href="#更新小球的数据" class="headerlink" title="更新小球的数据"></a>更新小球的数据</h2><p>我们可以在一个固定位置画出小球，但是他们不会动，我们需要一个函数来更新一些东西。在 JavaScript 文件底部加上下面的代码，也就是给小球原型加上一个 <code>update()</code> 方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Ball.prototype.update = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> ((<span class="built_in">this</span>.x + <span class="built_in">this</span>.size) &gt;= width) &#123;</span><br><span class="line">    <span class="built_in">this</span>.velX = -(<span class="built_in">this</span>.velX);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ((<span class="built_in">this</span>.x - <span class="built_in">this</span>.size) &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="built_in">this</span>.velX = -(<span class="built_in">this</span>.velX);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ((<span class="built_in">this</span>.y + <span class="built_in">this</span>.size) &gt;= height) &#123;</span><br><span class="line">    <span class="built_in">this</span>.velY = -(<span class="built_in">this</span>.velY);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ((<span class="built_in">this</span>.y - <span class="built_in">this</span>.size) &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="built_in">this</span>.velY = -(<span class="built_in">this</span>.velY);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">this</span>.x += <span class="built_in">this</span>.velX;</span><br><span class="line">  <span class="built_in">this</span>.y += <span class="built_in">this</span>.velY;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数的前四个部分用来检查小球是否碰到画布的边缘。如果碰到，我们反转小球的速度方向来让它向反方向移动。就比如说，如果小球正向上移动 （正 <code>velY</code>），然后垂直速度发生改变，小球就向下移动 （负 <code>velY</code>）。</p>
+<p>在这四部分中，我们：</p>
+<ul>
+<li>检查小球的 x 坐标是否大于画布的宽度（小球会从右边缘离开）。</li>
+<li>检查小球的 x 坐标是否小于0（小球会从左边缘离开）。</li>
+<li>检查小球的 y 坐标是否大于画布的高度（小球会从下边缘离开）。</li>
+<li>检查小球的 y 坐标是否小于0（小球会从上边缘离开）。</li>
+</ul>
+<p>在每种情况下，我们都会加上小球的半径，因为 <code>x/y</code> 坐标是小球中心的坐标，我们希望小球在其边界接触浏览器窗口的边界时反弹，而不是小球的一部分都不见了再返回。</p>
+<p>最后两行，我们将 <code>velX</code> 的值加到 <code>x</code> 的坐标上，将 <code>velY</code> 的值加到 <code>y</code> 坐标上 —— 每次调用这个方法的时候小球就移动这么多。</p>
+<p>暂时先这样做； 让我们继续做一些动画！</p>
+<h2 id="让球动起来"><a href="#让球动起来" class="headerlink" title="让球动起来"></a>让球动起来</h2><p>现在就变得非常有趣了。我们在画布上加上一些小球，并且让他们动起来。</p>
+<ol>
+<li>首先我们需要一个地方储存小球，下面的数组会干这件事 —— 现在将它添加到你的代码底部：</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> balls = [];</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (balls.length &lt; <span class="number">25</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> size = random(<span class="number">10</span>, <span class="number">20</span>);</span><br><span class="line">    <span class="keyword">let</span> ball = <span class="keyword">new</span> Ball(</span><br><span class="line">      <span class="comment">// 为避免绘制错误，球至少离画布边缘球本身一倍宽度的距离</span></span><br><span class="line">      random(<span class="number">0</span> + size, width - size),</span><br><span class="line">      random(<span class="number">0</span> + size, height - size),</span><br><span class="line">      random(-<span class="number">7</span>, <span class="number">7</span>),</span><br><span class="line">      random(-<span class="number">7</span>, <span class="number">7</span>),</span><br><span class="line">      randomColor(),</span><br><span class="line">      size</span><br><span class="line">    );</span><br><span class="line">    balls.push(ball);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>几乎所有的动画效果都会用到一个运动循环，也就是每一帧都自动更新视图。这是大多数游戏或者其他类似项目的基础。</li>
+<li>现在将它添加到你的代码底部：</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">loop</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  ctx.fillStyle = <span class="string">&#x27;rgba(0, 0, 0, 0.25)&#x27;</span>;</span><br><span class="line">  ctx.fillRect(<span class="number">0</span>, <span class="number">0</span>, width, height);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; balls.length; i++) &#123;</span><br><span class="line">    balls[i].draw();</span><br><span class="line">    balls[i].update();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  requestAnimationFrame(loop);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>loop()</code> 函数做了下面的事情：</p>
+<ul>
+<li>将整个画布的颜色设置成半透明的黑色。然后使用  <code>fillRect()</code>（这四个参数分别是起始的坐标、绘制的矩形的宽和高）画出一个填充满整个画布的矩形。这是在下一个视图画出来时用来遮住之前的视图的。如果不这样做得话，你就会在屏幕上看到一条蛇的形状而不是小球的运动了。用来填充的颜色设置成半透明的 <code>rgba(0,0,0,0.25)</code>，也就是让之前的视图留下来一点点，从而你可以看到小球运动时的轨迹。如果你将 0.25 设置成 1 时，你就完全看不到了。试着改变其中的值查看造成的影响。</li>
+<li>当且仅当小球数量小于 25 时，将 <code>random()</code> 函数产生的数字传入新的小球实例从而创建一个新的小球，并且加入到数组中。因此当屏幕上有 25 个小球时，不会再出现更多小球。你可以改变这个值，从而看到不同小球个数造成的影响。如果你的电脑或者浏览器性能不怎么样的话，几千个小球的速度就会明显慢下来。</li>
+<li>遍历数组中的所有小球，并且让每个小球都调用 <code>draw()</code> 和 <code>update()</code> 函数来将自己画出来，并且再接下来的每一帧都按照其速度进行位置的更新。</li>
+<li>使用 <code>requestAnimationFrame()</code> 方法再运行一次函数 —— 当一个函数正在运行时传递相同的函数名，从而每隔一小段时间都会运行一次这个函数，这样我们可以得到一个平滑的动画效果。这主要是通过递归完成的 —— 也就是说函数每次运行的时候都会调用自己，从而可以一遍又一遍得运行。</li>
+</ul>
+<ol start="4">
+<li>最后但是非常重要的是，加上下面这一行 —— 让动画开始运行的话我们需要调用这个函数。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">loop();</span><br></pre></td></tr></table></figure>
+<p>完成这些基础的之后在浏览器打开测试一下！</p>
+<h2 id="添加碰撞检测"><a href="#添加碰撞检测" class="headerlink" title="添加碰撞检测"></a>添加碰撞检测</h2><p>现在会更加有趣，给我们的项目加上碰撞检测，从而小球会知道他们正在撞击其他的球。</p>
+<ol>
+<li>首先在 <code>update()</code> 方法后添加以下方法 （即 <code>Ball.prototype.update</code> 的下面）。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Ball.prototype.collisionDetect = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j &lt; balls.length; j++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span> !== balls[j]) &#123;</span><br><span class="line">      <span class="keyword">const</span> dx = <span class="built_in">this</span>.x - balls[j].x;</span><br><span class="line">      <span class="keyword">const</span> dy = <span class="built_in">this</span>.y - balls[j].y;</span><br><span class="line">      <span class="keyword">const</span> distance = <span class="built_in">Math</span>.sqrt(dx * dx + dy * dy);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (distance &lt; <span class="built_in">this</span>.size + balls[j].size) &#123;</span><br><span class="line">        balls[j].color = <span class="built_in">this</span>.color = randomColor();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法有一点点复杂，如果不理解的话不必过分担心，下面是对它的解释：</p>
+<ul>
+<li>对于每个小球，我们都要检查其他的小球是否和当前这个小球相撞了。为了达到此目的，我们构造另外一个 <code>for</code>  循环来遍历 <code>balls[]</code> 数组中的小球。</li>
+<li>在循环里面，我们使用一个 <code>if</code> 语句来检查遍历的小球是否是当前的小球。我们不希望检测到一个小球撞到了自己！为了达到这个目的，我们需要检查当前小球 (即正在调用 <code>collisionDetect</code> 方法的球) 是否和被循环到的小球 (<code>for</code> 循环检测中的当前遍历所引用的球) 是不是同一个。我们使用 <code>!</code> 来否定判断，因此只有两个小球不是同一个时，条件判断中的代码才会运行。</li>
+<li>我们使用了一个常见的算法来检测两个小球是否相撞了，两个小球中心的距离是否小于两个小球的半径之和。这些会在 2D 碰撞检测 介绍地更加详细。</li>
+<li>如果检测到了碰撞，会运行 if 语句中的代码。我们会将两个小球的颜色都设置成随机的一种。</li>
+</ul>
+<ol start="2">
+<li>我们也需要在每一帧动画中都调用这个函数，因此在 <code>balls[i].update()</code> 加上下面的代码：</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">balls[i].collisionDetect();</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>保存文件，刷新浏览器，你就会看到小球在撞击时会变色！<br><img src="https://img-blog.csdnimg.cn/33768da32a06445e8859fe485684be31.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+    
+    
+          <div>
+               <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+          </div>
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>zju_cbw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2022/02/16/JS11/" title="JavaScript(十一)——弹跳球">http://example.com/2022/02/16/JS11/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+              <a href="/tags/Web%E5%89%8D%E7%AB%AF/" rel="tag"># Web前端</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/16/JS10/" rel="prev" title="JavaScript(十)——JSON">
+      <i class="fa fa-chevron-left"></i> JavaScript(十)——JSON
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81NDU2OS8zMTA0MA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E7%A8%8B%E5%BA%8F%E4%B8%AD%E7%9A%84%E5%B0%8F%E7%90%83%E5%BB%BA%E7%AB%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">为程序中的小球建立模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%BB%E5%B0%8F%E7%90%83"><span class="nav-number">2.1.</span> <span class="nav-text">画小球</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E5%B0%8F%E7%90%83%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-number">2.2.</span> <span class="nav-text">更新小球的数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A9%E7%90%83%E5%8A%A8%E8%B5%B7%E6%9D%A5"><span class="nav-number">2.3.</span> <span class="nav-text">让球动起来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E7%A2%B0%E6%92%9E%E6%A3%80%E6%B5%8B"><span class="nav-number">2.4.</span> <span class="nav-text">添加碰撞检测</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zju_cbw"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">zju_cbw</p>
+  <div class="site-description" itemprop="description">努力才配拥有正茂风华</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hhhcbw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hhhcbw" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_44491423" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_44491423" rel="noopener" target="_blank"><i class="fab fa-codiepie fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2021-10 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zju_cbw</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
