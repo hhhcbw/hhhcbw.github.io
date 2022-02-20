@@ -25,41 +25,21 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="引言我们知道，如果将全连接的神经网络应用到图像上是非常困难的，因为如果是 1000x1000 像素的图片，参数量可能就上亿了。我们能否能设计一种网络，可以减少我们的参数量。">
+  <meta name="description" content="定义普通带名函数1234567function abs(x)&amp;#123;    if(x&gt;&#x3D;0)&amp;#123;        return x;    &amp;#125;else&amp;#123;        return -x;    &amp;#125;&amp;#125;">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深度学习(一)——CNN卷积神经网络">
-<meta property="og:url" content="http://example.com/2021/12/12/DL1_CNN/index.html">
+<meta property="og:title" content="JavaScript杂谈(二)——箭头函数和匿名函数的区别">
+<meta property="og:url" content="http://example.com/2022/02/20/JS_basic2/index.html">
 <meta property="og:site_name" content="cbw">
-<meta property="og:description" content="引言我们知道，如果将全连接的神经网络应用到图像上是非常困难的，因为如果是 1000x1000 像素的图片，参数量可能就上亿了。我们能否能设计一种网络，可以减少我们的参数量。">
+<meta property="og:description" content="定义普通带名函数1234567function abs(x)&amp;#123;    if(x&gt;&#x3D;0)&amp;#123;        return x;    &amp;#125;else&amp;#123;        return -x;    &amp;#125;&amp;#125;">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/1d9d72bf6cfc417ea1ba2feb7dc1379c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/e54b339751bd4582b385a2396a5f3e5f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/b80b44fc6d51417ea2159e2fc66a6c4d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/f2bb7fa7531944c4a403fb70526c5a74.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/e44e9038bffd41cd93f0ae828fb2eeff.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/9e228f2f5fff4345883e55e6dc98aefa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/d9b535a9a2ac40909ee547e9c476032d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/ed9377d48d86488e8d69f504461c4e8c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/0872bfd96fa1447bb9369ee0b97802a3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/98cc85c338fc4d47b913ba2973e6b4d7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/c9f49b2d9d2f4452899a2e7262a3191a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/6cbdad7175874787a8b4ae8ba98e878a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/f73a0084fe124fcbac657b074a95e560.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/fd192a2eab9e4c3287239ef3f965f64d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/83422a736a2845b8bdce3e5b13a48a17.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/c52adc8c80dd45d18f3ee256c092963e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/ed6cc2151db24606a6fb7e77f77b82b9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/1fd502b01ed340dcb8cb172935d11162.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/2f1354230903476c8d60847aaa1b5fd4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="article:published_time" content="2021-12-12T15:05:00.000Z">
-<meta property="article:modified_time" content="2021-12-12T15:06:15.705Z">
+<meta property="article:published_time" content="2022-02-20T10:15:00.000Z">
+<meta property="article:modified_time" content="2022-02-20T10:15:39.115Z">
 <meta property="article:author" content="zju_cbw">
-<meta property="article:tag" content="深度学习">
-<meta property="article:tag" content="CNN">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="Web前端">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://img-blog.csdnimg.cn/1d9d72bf6cfc417ea1ba2feb7dc1379c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
 
-<link rel="canonical" href="http://example.com/2021/12/12/DL1_CNN/">
+<link rel="canonical" href="http://example.com/2022/02/20/JS_basic2/">
 
 
 <script id="page-configurations">
@@ -72,7 +52,7 @@
   };
 </script>
 
-  <title>深度学习(一)——CNN卷积神经网络 | cbw</title>
+  <title>JavaScript杂谈(二)——箭头函数和匿名函数的区别 | cbw</title>
   
 
 
@@ -226,7 +206,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/DL1_CNN/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/20/JS_basic2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -239,7 +219,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          深度学习(一)——CNN卷积神经网络
+          JavaScript杂谈(二)——箭头函数和匿名函数的区别
         </h1>
 
         <div class="post-meta">
@@ -251,7 +231,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-12-12 23:05:00 / 修改时间：23:06:15" itemprop="dateCreated datePublished" datetime="2021-12-12T23:05:00+08:00">2021-12-12</time>
+              <time title="创建时间：2022-02-20 18:15:00 / 修改时间：18:15:39" itemprop="dateCreated datePublished" datetime="2022-02-20T18:15:00+08:00">2022-02-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -259,7 +239,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
                 </span>
             </span>
 
@@ -281,20 +261,28 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>我们知道，如果将全连接的神经网络应用到图像上是非常困难的，因为如果是 1000x1000 像素的图片，参数量可能就上亿了。<br>我们能否能设计一种网络，可以减少我们的参数量。<br><img src="https://img-blog.csdnimg.cn/1d9d72bf6cfc417ea1ba2feb7dc1379c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+        <h1 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h1><h2 id="普通带名函数"><a href="#普通带名函数" class="headerlink" title="普通带名函数"></a>普通带名函数</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">abs</span>(<span class="params">x</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(x&gt;=<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> -x;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <span id="more"></span>
-<p>实际上，我们的眼睛是先找出图像的特征，再根据特征分辨图像到底是什么的，我们也可以设计网络去识别特征，再根据特征识别图像。如果可以这样，就能大大减少参数量，因为特征比整个图像小得多。<br><img src="https://img-blog.csdnimg.cn/e54b339751bd4582b385a2396a5f3e5f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>并且，无论这个特征出现在什么地方，我们都可以使用一个神经元来完成这个工作，这样就可以减少参数量。<br><img src="https://img-blog.csdnimg.cn/b80b44fc6d51417ea2159e2fc66a6c4d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>图像还有个特点就是，假如我们把奇数像素点提取出来，而删去偶数像素点，其实对我们识别图像是没有什么太大的影响的。</p>
-<p><strong>CNN就是利用图像的这些特定来简化参数量的。</strong></p>
+<p>像上述函数，在定义函数时function后会给函数命名如abs，那么在调用时直接以abs(-3)来调用即可。</p>
+<h2 id="匿名函数"><a href="#匿名函数" class="headerlink" title="匿名函数"></a>匿名函数</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> abs=<span class="function"><span class="keyword">function</span>(<span class="params">x</span>)</span>&#123; </span><br><span class="line">    <span class="keyword">if</span>(x&gt;=<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> -x;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述函数中，<code>function</code> 后并没有给函数命名，而是把整个函数直接赋值给变量 <code>abs</code>，调用时通过 <code>abs(9)</code> 来调用此函数。</p>
+<h2 id="箭头函数"><a href="#箭头函数" class="headerlink" title="箭头函数"></a>箭头函数</h2><p>顾名思义，箭头函数的定义用的就是一个箭头。箭头函数表面上相当于匿名函数，并且简化了函数定义。</p>
+<h3 id="当箭头函数只包含一个表达式时，它连-…-和return都省掉了。"><a href="#当箭头函数只包含一个表达式时，它连-…-和return都省掉了。" class="headerlink" title="当箭头函数只包含一个表达式时，它连{ … }和return都省掉了。"></a>当箭头函数只包含一个表达式时，它连{ … }和return都省掉了。</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x =&gt; x * x</span><br></pre></td></tr></table></figure>
+<p>上面的箭头函数相当于一个匿名函数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> (<span class="params">x</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x * x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="当箭头函数不仅包含一个表达式时："><a href="#当箭头函数不仅包含一个表达式时：" class="headerlink" title="当箭头函数不仅包含一个表达式时："></a>当箭头函数不仅包含一个表达式时：</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(x,y) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (x &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> x + y;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> -x + y;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <hr>
-<h1 id="网络结构"><a href="#网络结构" class="headerlink" title="网络结构"></a>网络结构</h1><p>CNN整个网络结构如下<br><img src="https://img-blog.csdnimg.cn/f2bb7fa7531944c4a403fb70526c5a74.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<h2 id="Convolution-卷积层"><a href="#Convolution-卷积层" class="headerlink" title="Convolution 卷积层"></a>Convolution 卷积层</h2><p><img src="https://img-blog.csdnimg.cn/e44e9038bffd41cd93f0ae828fb2eeff.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>卷积层简单来说就是通过多个卷积核（过滤器）来提取特征。<br><img src="https://img-blog.csdnimg.cn/9e228f2f5fff4345883e55e6dc98aefa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>卷积过程就是设定一个 stride(步长)，然后每次和过滤器内积完之后，移动 stride。<br><img src="https://img-blog.csdnimg.cn/d9b535a9a2ac40909ee547e9c476032d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>从下图可以看出，无论特征在哪，都可以通过一个过滤器提取出来。<br><img src="https://img-blog.csdnimg.cn/ed9377d48d86488e8d69f504461c4e8c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>之后，每个过滤器重复上面的操作即可。<br><img src="https://img-blog.csdnimg.cn/0872bfd96fa1447bb9369ee0b97802a3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>对于RGB图像，我们设计三层的过滤器即可。<br><img src="https://img-blog.csdnimg.cn/98cc85c338fc4d47b913ba2973e6b4d7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>有人可能会有疑问，滤波器和神经元有什么关系，看着一点都不像啊？其实过滤器就是神经元。<br>如果我们将图像展平，是不是就和神经元的连接差不多了。<br><img src="https://img-blog.csdnimg.cn/c9f49b2d9d2f4452899a2e7262a3191a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>而且神经元和神经元之间还是权值共享的，这样做既可以省好多参数，还可以避免过拟合。<br><img src="https://img-blog.csdnimg.cn/6cbdad7175874787a8b4ae8ba98e878a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<h2 id="池化层"><a href="#池化层" class="headerlink" title="池化层"></a>池化层</h2><p>我们以最大池化为例。<br><img src="https://img-blog.csdnimg.cn/f73a0084fe124fcbac657b074a95e560.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>最大池化就是在卷积之后，从每个块中提取出最大的，这就和提取奇数像素点一样，即使少了这些像素也对我们识别图像产生不了太大影响，这既可以减少参数，也可以防止过拟合。<br><img src="https://img-blog.csdnimg.cn/fd192a2eab9e4c3287239ef3f965f64d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h1 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h1><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> obj1 = &#123;</span><br><span class="line">    <span class="attr">birth</span>: <span class="number">1990</span>,</span><br><span class="line">    <span class="attr">getAge</span>: <span class="function"><span class="keyword">function</span> (<span class="params">year</span>) </span>&#123;   </span><br><span class="line">        <span class="keyword">let</span> fn=<span class="function"><span class="keyword">function</span>(<span class="params">y</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> y - <span class="built_in">this</span>.birth; <span class="comment">// this指向window或undefined</span></span><br><span class="line">        &#125;;  </span><br><span class="line">        <span class="keyword">return</span> fn(year); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> obj2 = &#123;</span><br><span class="line">    <span class="attr">birth</span>: <span class="number">1990</span>,</span><br><span class="line">    <span class="attr">getAge</span>: <span class="function"><span class="keyword">function</span> (<span class="params">year</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> fn = <span class="function">(<span class="params">y</span>) =&gt;</span> y - <span class="built_in">this</span>.birth; <span class="comment">// this.birth为1990</span></span><br><span class="line">        <span class="keyword">return</span> fn(year);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
 <hr>
-<h1 id="全连接层"><a href="#全连接层" class="headerlink" title="全连接层"></a>全连接层</h1><p>我们在经过多次卷积池化这样操作后，需要将提取到的特征展平，放入全连接层。<br><img src="https://img-blog.csdnimg.cn/83422a736a2845b8bdce3e5b13a48a17.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>Flatten操作可以根据下面的图，很方便地理解。<br><img src="https://img-blog.csdnimg.cn/c52adc8c80dd45d18f3ee256c092963e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<hr>
-<h1 id="使用Keras设计CNN"><a href="#使用Keras设计CNN" class="headerlink" title="使用Keras设计CNN"></a>使用Keras设计CNN</h1><p><img src="https://img-blog.csdnimg.cn/ed6cc2151db24606a6fb7e77f77b82b9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>需要注意的是，从第二卷积层开始，每一个过滤器的深度都是上一层过滤器的个数。<br><img src="https://img-blog.csdnimg.cn/1fd502b01ed340dcb8cb172935d11162.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/2f1354230903476c8d60847aaa1b5fd4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<hr>
-<h1 id="Pytorch搭建CNN"><a href="#Pytorch搭建CNN" class="headerlink" title="Pytorch搭建CNN"></a>Pytorch搭建CNN</h1><p>可以看我的这篇文章，<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44491423/article/details/121892838">CNN图片分类(Pytorch)</a>。</p>
+<h1 id="区别"><a href="#区别" class="headerlink" title="区别"></a>区别</h1><ol>
+<li>箭头函数没有 <code>prototype</code>(原型)，所以箭头函数本身没有 <code>this</code>。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a = <span class="function">() =&gt;</span> &#123;&#125;;</span><br><span class="line"><span class="built_in">console</span>.log(a.prototype); <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>箭头函数内部的 <code>this</code> 是词法作用域，由上下文确定，<code>this</code> 指向在定义的时候继承自外层第一个普通函数的 <code>this</code>。函数体内的 <code>this</code> 对象，就是定义时所在的对象，与使用时所在的对象无关。</li>
+</ol>
 
     </div>
 
@@ -320,7 +308,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2021/12/12/DL1_CNN/" title="深度学习(一)——CNN卷积神经网络">http://example.com/2021/12/12/DL1_CNN/</a>
+    <a href="http://example.com/2022/02/20/JS_basic2/" title="JavaScript杂谈(二)——箭头函数和匿名函数的区别">http://example.com/2022/02/20/JS_basic2/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -331,8 +319,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
-              <a href="/tags/CNN/" rel="tag"># CNN</a>
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+              <a href="/tags/Web%E5%89%8D%E7%AB%AF/" rel="tag"># Web前端</a>
           </div>
 
         
@@ -341,13 +329,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/12/09/ML13_%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="prev" title="机器学习(十三)——神经网络">
-      <i class="fa fa-chevron-left"></i> 机器学习(十三)——神经网络
+    <a href="/2022/02/20/JS_basic1/" rel="prev" title="JavaScript杂谈(一)——箭头函数没有this">
+      <i class="fa fa-chevron-left"></i> JavaScript杂谈(一)——箭头函数没有this
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/12/12/DLPJ_CNN%E9%A3%9F%E7%89%A9%E5%9B%BE%E7%89%87%E5%88%86%E7%B1%BB/" rel="next" title="CNN图片分类(Pytorch)">
-      CNN图片分类(Pytorch) <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -411,7 +396,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">网络结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Convolution-%E5%8D%B7%E7%A7%AF%E5%B1%82"><span class="nav-number">2.1.</span> <span class="nav-text">Convolution 卷积层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%A0%E5%8C%96%E5%B1%82"><span class="nav-number">2.2.</span> <span class="nav-text">池化层</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%A8%E8%BF%9E%E6%8E%A5%E5%B1%82"><span class="nav-number">3.</span> <span class="nav-text">全连接层</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Keras%E8%AE%BE%E8%AE%A1CNN"><span class="nav-number">4.</span> <span class="nav-text">使用Keras设计CNN</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pytorch%E6%90%AD%E5%BB%BACNN"><span class="nav-number">5.</span> <span class="nav-text">Pytorch搭建CNN</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">定义</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E5%B8%A6%E5%90%8D%E5%87%BD%E6%95%B0"><span class="nav-number">1.1.</span> <span class="nav-text">普通带名函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%BF%E5%90%8D%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">匿名函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%AD%E5%A4%B4%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">箭头函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%93%E7%AE%AD%E5%A4%B4%E5%87%BD%E6%95%B0%E5%8F%AA%E5%8C%85%E5%90%AB%E4%B8%80%E4%B8%AA%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%97%B6%EF%BC%8C%E5%AE%83%E8%BF%9E-%E2%80%A6-%E5%92%8Creturn%E9%83%BD%E7%9C%81%E6%8E%89%E4%BA%86%E3%80%82"><span class="nav-number">1.3.1.</span> <span class="nav-text">当箭头函数只包含一个表达式时，它连{ … }和return都省掉了。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%93%E7%AE%AD%E5%A4%B4%E5%87%BD%E6%95%B0%E4%B8%8D%E4%BB%85%E5%8C%85%E5%90%AB%E4%B8%80%E4%B8%AA%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%97%B6%EF%BC%9A"><span class="nav-number">1.3.2.</span> <span class="nav-text">当箭头函数不仅包含一个表达式时：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">举例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8C%BA%E5%88%AB"><span class="nav-number">3.</span> <span class="nav-text">区别</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

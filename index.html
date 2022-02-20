@@ -266,6 +266,162 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/20/JS_basic2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/20/JS_basic2/" class="post-title-link" itemprop="url">JavaScript杂谈(二)——箭头函数和匿名函数的区别</a>
+        </h2>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-02-20 18:15:00 / 修改时间：18:15:39" itemprop="dateCreated datePublished" datetime="2022-02-20T18:15:00+08:00">2022-02-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h1><h2 id="普通带名函数"><a href="#普通带名函数" class="headerlink" title="普通带名函数"></a>普通带名函数</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">abs</span>(<span class="params">x</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(x&gt;=<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> -x;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/20/JS_basic2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/20/JS_basic1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="zju_cbw">
+      <meta itemprop="description" content="努力才配拥有正茂风华">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="cbw">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/20/JS_basic1/" class="post-title-link" itemprop="url">JavaScript杂谈(一)——箭头函数没有this</a>
+        </h2>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-02-20 18:13:00 / 修改时间：18:14:06" itemprop="dateCreated datePublished" datetime="2022-02-20T18:13:00+08:00">2022-02-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>每个函数在定义被 ECMAScript 解析器解析时，都会创建两个特殊的变量：<code>this</code> 和 <code>arguments</code>,换句话说，每个函数都有属于自己的 <code>this</code> 对象；</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/20/JS_basic1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/17/JSWebApi2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -450,10 +606,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-02-16 16:11:00 / 修改时间：16:11:43" itemprop="dateCreated datePublished" datetime="2022-02-16T16:11:00+08:00">2022-02-16</time>
+              <time title="创建时间：2022-02-16 16:11:00" itemprop="dateCreated datePublished" datetime="2022-02-16T16:11:00+08:00">2022-02-16</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-02-20 18:15:04" itemprop="dateModified" datetime="2022-02-20T18:15:04+08:00">2022-02-20</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -476,74 +638,14 @@
 
       
           <h1 id="同步JavaScript"><a href="#同步JavaScript" class="headerlink" title="同步JavaScript"></a>同步JavaScript</h1><p>要理解什么是异步JavaScript，我们应该从确切理解同步 JavaScript    开始。<br>先看一个简单的例子（<a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/basic-function.html">运行它</a>，<a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/basic-function.html">这是源码</a>）：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> btn = <span class="built_in">document</span>.querySelector(<span class="string">&#x27;button&#x27;</span>);</span><br><span class="line">btn.addEventListener(<span class="string">&#x27;click&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  alert(<span class="string">&#x27;You clicked me!&#x27;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> pElem = <span class="built_in">document</span>.createElement(<span class="string">&#x27;p&#x27;</span>);</span><br><span class="line">  pElem.textContent = <span class="string">&#x27;This is a newly-added paragraph.&#x27;</span>;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(pElem);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>这段代码, 一行一行的顺序执行：</p>
-<ol>
-<li>先取得一个在DOM里面的 <code>&lt;button&gt;</code> 引用。</li>
-<li>点击按钮的时候，添加一个 <code>click</code> 事件监听器:<ol>
-<li><code>alert()</code> 消息出现。</li>
-<li>一旦alert 结束，创建一个 <code>&lt;p&gt;</code> 元素。</li>
-<li>给它的文本内容赋值。</li>
-<li>最后，把这个段落放进网页。</li>
-</ol>
-</li>
-</ol>
-<p>每一个操作在执行的时候，其他任何事情都没有发生 — 网页的渲染暂停.  JavaScript is single threaded. 任何时候只能做一件事情, 只有一个主线程，其他的事情都阻塞了，直到前面的操作完成。</p>
-<p>所以上面的例子，点击了按钮以后，段落不会创建，直到在alert消息框中点击ok，段落才会出现。</p>
-<hr>
-<h1 id="异步JavaScript"><a href="#异步JavaScript" class="headerlink" title="异步JavaScript"></a>异步JavaScript</h1><p>就前面提到的种种原因（比如，和阻塞相关）很多网页API特性使用异步代码，特别是从外部的设备上获取资源，譬如，从网络获取文件，访问数据库，从网络摄像头获得视频流，或者向VR头罩广播图像。</p>
-<p>为什么使用异步代码这么难？看一个例子，当你从服务器获取一个图像，通常你不可能立马就得到，这需要时间，虽然现在的网络很快。这意味着下面的伪代码可能不能正常工作：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> response = fetch(<span class="string">&#x27;myImage.png&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> blob = response.blob();</span><br><span class="line"><span class="comment">// display your image blob in the UI somehow</span></span><br></pre></td></tr></table></figure>
-<p>因为你不知道下载图片会多久，所以第二行代码执行的时候可能报错（可能间歇的，也可能每次）因为图像还没有就绪。取代的方法就是，代码必须等到 <code>response</code> 返回才能继续往下执行。</p>
-<p>在JavaScript代码中，你经常会遇到两种异步编程风格：老派 <code>callbacks</code>，新派 <code>promise</code>。下面就来分别介绍。</p>
-<h2 id="异步callbacks"><a href="#异步callbacks" class="headerlink" title="异步callbacks"></a>异步callbacks</h2><p>异步 <code>callbacks</code> 其实就是函数，只不过是作为参数传递给那些在后台执行的其他函数. 当那些后台运行的代码结束，就调用 <code>callbacks</code> 函数，通知你工作已经完成，或者其他有趣的事情发生了。使用 <code>callbacks</code> 有一点老套，在一些老派但经常使用的API里面，你会经常看到这种风格。</p>
-<p>举个例子，异步 <code>callback</code> 就是 <code>addEventListener()</code> 第二个参数（前面的例子）：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">btn.addEventListener(<span class="string">&#x27;click&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  alert(<span class="string">&#x27;You clicked me!&#x27;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> pElem = <span class="built_in">document</span>.createElement(<span class="string">&#x27;p&#x27;</span>);</span><br><span class="line">  pElem.textContent = <span class="string">&#x27;This is a newly-added paragraph.&#x27;</span>;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(pElem);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>第一个参数是侦听的事件类型，第二个就是事件发生时调用的回调函数。.</p>
-<p>当我们把回调函数作为一个参数传递给另一个函数时，仅仅是把回调函数定义作为参数传递过去 — 回调函数并没有立刻执行，回调函数会在包含它的函数的某个地方异步执行，包含函数负责在合适的时候执行回调函数。</p>
-<p>你可以自己写一个容易的，包含回调函数的函数。来看另外一个例子，用 <code>XMLHttpRequest </code>API (<a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/xhr-async-callback.html">运行它</a>, <a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/xhr-async-callback.html">源代码</a>) 加载资源：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">loadAsset</span>(<span class="params">url, type, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">  xhr.open(<span class="string">&#x27;GET&#x27;</span>, url);</span><br><span class="line">  xhr.responseType = type;</span><br><span class="line"></span><br><span class="line">  xhr.onload = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    callback(xhr.response);</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  xhr.send();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">displayImage</span>(<span class="params">blob</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> objectURL = URL.createObjectURL(blob);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> image = <span class="built_in">document</span>.createElement(<span class="string">&#x27;img&#x27;</span>);</span><br><span class="line">  image.src = objectURL;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(image);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">loadAsset(<span class="string">&#x27;coffee.jpg&#x27;</span>, <span class="string">&#x27;blob&#x27;</span>, displayImage);</span><br></pre></td></tr></table></figure>
-<p>创建 <code>displayImage()</code> 函数，简单的把blob传递给它，生成 <code>objectURL</code>，然后再生成一个 <code>image</code> 元素，把 <code>objectURL</code> 作为 <code>image</code> 的源地址，最后显示这张图片。  然后，我们创建 <code>loadAsset()</code> 函数，把URL，type，和回调函数同时都作为参数。函数用 <code>XMLHttpRequest</code> (通常缩写 “XHR”) 获取给定URL的资源，在获得资源响应后再把响应作为参数传递给回调函数去处理。 (使用 <code>onload</code> 事件处理) ，有点烧脑，是不是？！</p>
-<p>回调函数用途广泛 — 他们不仅仅可以用来控制函数的执行顺序和函数之间的数据传递，还可以根据环境的不同，将数据传递给不同的函数，所以对下载好的资源，你可以采用不同的操作来处理，譬如 <code>processJSON()</code>, <code>displayText()</code>, 等等。</p>
-<p>请注意，不是所有的回调函数都是异步的 — 有一些是同步的。一个例子就是使用 <code>Array.prototype.forEach()</code> 来遍历数组 (<a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/foreach.html">运行</a>, <a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/foreach.html">源代码</a>):</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> gods = [<span class="string">&#x27;Apollo&#x27;</span>, <span class="string">&#x27;Artemis&#x27;</span>, <span class="string">&#x27;Ares&#x27;</span>, <span class="string">&#x27;Zeus&#x27;</span>];</span><br><span class="line"></span><br><span class="line">gods.forEach(<span class="function"><span class="keyword">function</span> (<span class="params">eachName, index</span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(index + <span class="string">&#x27;. &#x27;</span> + eachName);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>在这个例子中，我们遍历一个希腊神的数组，并在控制台中打印索引和值。<code>forEach()</code> 需要的参数是一个回调函数，回调函数本身带有两个参数，数组元素和索引值。它无需等待任何事情，立即运行。</p>
-<h2 id="Promises"><a href="#Promises" class="headerlink" title="Promises"></a>Promises</h2><p><code>Promises</code> 是新派的异步代码，现代的web APIs经常用到。 <code>fetch()</code> API就是一个很好的例子, 它基本上就是一个现代版的，更高效的 <code>XMLHttpRequest</code>。看个例子:</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">fetch(<span class="string">&#x27;products.json&#x27;</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> response.json();</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">json</span>) </span>&#123;</span><br><span class="line">  products = json;</span><br><span class="line">  initialize();</span><br><span class="line">&#125;).catch(<span class="function"><span class="keyword">function</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;Fetch problem: &#x27;</span> + err.message);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>这里 <code>fetch()</code> 只需要一个参数— 资源的网络 URL — 返回一个 <code>promise</code>. <code>promise</code> 是表示异步操作完成或失败的对象。可以说，它代表了一种中间状态。 本质上，这是浏览器说“我保证尽快给您答复”的方式，因此得名“<code>promise</code>”。</p>
-<p>这两种可能的结果都还没有发生，因此 <code>fetch</code> 操作目前正在等待浏览器试图在将来某个时候完成该操作的结果。然后我们有三个代码块链接到 <code>fetch()</code> 的末尾：</p>
-<ul>
-<li>两个 <code>then()</code> 块。两者都包含一个回调函数，如果前一个操作成功，该函数将运行，并且每个回调都接收前一个成功操作的结果作为输入，因此您可以继续对它执行其他操作。每个 .<code>then()</code> 块返回另一个 <code>promise</code>，这意味着可以将多个.<code>then()</code> 块链接到另一个块上，这样就可以依次执行多个异步操作。</li>
-<li>如果其中任何一个 <code>then()</code> 块失败，则在末尾运行 <code>catch()</code> 块——与同步 <code>try...catch</code> 类似，<code>catch()</code> 提供了一个错误对象，可用来报告发生的错误类型。但是请注意，同步 <code>try...catch</code> 不能与 <code>promise</code> 一起工作，尽管它可以与<code>async</code>/<code>await</code>一起工作，稍后您将了解到这一点。</li>
-</ul>
-<h2 id="事件队列"><a href="#事件队列" class="headerlink" title="事件队列"></a>事件队列</h2><p>像 <code>promise</code> 这样的异步操作被放入事件队列中，事件队列在主线程完成处理后运行，这样它们就不会阻止后续JavaScript代码的运行。排队操作将尽快完成，然后将结果返回到JavaScript环境。</p>
-<h2 id="Promises-对比-callbacks"><a href="#Promises-对比-callbacks" class="headerlink" title="Promises 对比 callbacks"></a>Promises 对比 callbacks</h2><p><code>promises</code> 与旧式 <code>callbacks</code> 有一些相似之处。它们本质上是一个返回的对象，您可以将回调函数附加到该对象上，而不必将回调作为参数传递给另一个函数。</p>
-<p>然而，<code>Promise</code> 是专门为异步操作而设计的，与旧式回调相比具有许多优点:</p>
-<ul>
-<li>您可以使用多个 <code>then()</code> 操作将多个异步操作链接在一起，并将其中一个操作的结果作为输入传递给下一个操作。这种链接方式对回调来说要难得多，会使回调以混乱的“末日金字塔”告终。 (也称为回调地狱)。</li>
-<li><code>Promise</code> 总是严格按照它们放置在事件队列中的顺序调用。</li>
-<li>错误处理要好得多——所有的错误都由块末尾的一个.catch()块处理，而不是在“金字塔”的每一层单独处理。</li>
-</ul>
-<hr>
-<h1 id="异步代码的本质"><a href="#异步代码的本质" class="headerlink" title="异步代码的本质"></a>异步代码的本质</h1><p>让我们研究一个示例，它进一步说明了异步代码的本质，展示了当我们不完全了解代码执行顺序以及将异步代码视为同步代码时可能发生的问题。下面的示例与我们之前看到的非常相似( <a target="_blank" rel="noopener" href="https://mdn.github.io/learning-area/javascript/asynchronous/introducing/async-sync.html">运行它</a> 和 <a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/async-sync.html">源代码</a>)。一个不同之处在于，我们包含了许多 <code>console.log()</code> 语句，以展示代码将在其中执行的顺序。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log (<span class="string">&#x27;Starting&#x27;</span>);</span><br><span class="line"><span class="keyword">let</span> image;</span><br><span class="line"></span><br><span class="line">fetch(<span class="string">&#x27;coffee.jpg&#x27;</span>).then(<span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;It worked :)&#x27;</span>)</span><br><span class="line">  <span class="keyword">return</span> response.blob();</span><br><span class="line">&#125;).then(<span class="function">(<span class="params">myBlob</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> objectURL = URL.createObjectURL(myBlob);</span><br><span class="line">  image = <span class="built_in">document</span>.createElement(<span class="string">&#x27;img&#x27;</span>);</span><br><span class="line">  image.src = objectURL;</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(image);</span><br><span class="line">&#125;).catch(<span class="function">(<span class="params">error</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;There has been a problem with your fetch operation: &#x27;</span> + error.message);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log (<span class="string">&#x27;All done!&#x27;</span>);</span><br></pre></td></tr></table></figure>
-<p>浏览器将会执行代码，看见第一个 <code>console.log()</code> 输出(<code>Starting</code>) ，然后创建 <code>image</code> 变量。</p>
-<p>然后，它将移动到下一行并开始执行 <code>fetch()</code> 块，但是，因为 <code>fetch()</code> 是异步执行的，没有阻塞，所以在 <code>promise</code> 相关代码之后程序继续执行，从而到达最后的 <code>console.log()</code> 语句(<code>All done!</code>)并将其输出到控制台。</p>
-<p>只有当 <code>fetch()</code> 块完成运行返回结果给.<code>then()</code> ，我们才最后看到第二个 <code>console.log()</code> 消息 (<code>It worked ;</code>)) . 所以 这些消息 可能以 和你预期不同的顺序出现：</p>
-<ul>
-<li>Starting</li>
-<li>All done!</li>
-<li>It worked : )</li>
-</ul>
-<p>如果你感到疑惑，考虑下面这个小例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">console.log(&quot;registering click handler&quot;);</span><br><span class="line"></span><br><span class="line">button.addEventListener(&#x27;click&#x27;, () =&gt; &#123;</span><br><span class="line">  console.log(&quot;get click&quot;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">console.log(&quot;all done&quot;);</span><br></pre></td></tr></table></figure>
-<p>这在行为上非常相似——第一个和第三个 <code>console.log()</code> 消息将立即显示，但是第二个消息将被阻塞，直到有人单击鼠标按钮。前面的示例以相同的方式工作，只是在这种情况下，第二个消息在 <code>promise</code> 链上被阻塞，直到获取资源后再显示在屏幕上，而不是单击。</p>
-<p>要查看实际情况，请尝试获取<a target="_blank" rel="noopener" href="https://github.com/mdn/learning-area/blob/master/javascript/asynchronous/introducing/async-sync.html">示例</a>的本地副本，并将第三个 <code>console.log()</code> 调用更改为以下命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">console.log (&#x27;All done! &#x27; + image.src + &#x27;displayed.&#x27;);</span><br></pre></td></tr></table></figure>
-<p>此时控制台将会报错，而不会显示第三个 <code>console.log</code> 的信息：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TypeError: image is undefined; can&#x27;t access its &quot;src&quot; property</span><br></pre></td></tr></table></figure>
-<p>这是因为：浏览器运行第三个 <code>console.log()</code> 的时候，<code>fetch()</code> 语句块还没有完成，因此 <code>image</code> 还没有赋值。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/16/asJS1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -881,165 +983,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/14/JS8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="zju_cbw">
-      <meta itemprop="description" content="努力才配拥有正茂风华">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="cbw">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/14/JS8/" class="post-title-link" itemprop="url">JavaScript(八)——对象原型</a>
-        </h2>
-
-        <div class="post-meta">
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-02-14 16:15:00 / 修改时间：16:15:41" itemprop="dateCreated datePublished" datetime="2022-02-14T16:15:00+08:00">2022-02-14</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>通过原型这种机制，JavaScript 中的对象从其他对象继承功能特性；这种继承机制与经典的面向对象编程语言的继承机制不同。本文将探讨这些差别，解释原型链如何工作，并了解如何通过 <code>prototype</code> 属性向已有的构造器添加方法</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/02/14/JS8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/14/JS7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="zju_cbw">
-      <meta itemprop="description" content="努力才配拥有正茂风华">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="cbw">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/14/JS7/" class="post-title-link" itemprop="url">JavaScript(七)——对象基础</a>
-        </h2>
-
-        <div class="post-meta">
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-02-14 10:46:00 / 修改时间：10:47:09" itemprop="dateCreated datePublished" datetime="2022-02-14T10:46:00+08:00">2022-02-14</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>本文适合已有面向对象编程经验的人阅读</p>
-</blockquote>
-<h1 id="构建函数和对象"><a href="#构建函数和对象" class="headerlink" title="构建函数和对象"></a>构建函数和对象</h1><p>有些人认为 JavaScript 不是真正的面向对象的语言，比如它没有像许多面向对象的语言一样有用于创建class类的声明。JavaScript 用一种称为<strong>构建函数</strong>的特殊函数来定义对象和它们的特征。构建函数非常有用，因为很多情况下您不知道实际需要多少个对象（实例）。<strong>构建函数</strong>提供了创建您所需对象（实例）的有效方法，将对象的数据和特征函数按需联结至相应对象。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/02/14/JS7/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1111,7 +1054,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-count">65</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

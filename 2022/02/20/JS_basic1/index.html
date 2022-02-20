@@ -25,41 +25,21 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="引言我们知道，如果将全连接的神经网络应用到图像上是非常困难的，因为如果是 1000x1000 像素的图片，参数量可能就上亿了。我们能否能设计一种网络，可以减少我们的参数量。">
+  <meta name="description" content="每个函数在定义被 ECMAScript 解析器解析时，都会创建两个特殊的变量：this 和 arguments,换句话说，每个函数都有属于自己的 this 对象；">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深度学习(一)——CNN卷积神经网络">
-<meta property="og:url" content="http://example.com/2021/12/12/DL1_CNN/index.html">
+<meta property="og:title" content="JavaScript杂谈(一)——箭头函数没有this">
+<meta property="og:url" content="http://example.com/2022/02/20/JS_basic1/index.html">
 <meta property="og:site_name" content="cbw">
-<meta property="og:description" content="引言我们知道，如果将全连接的神经网络应用到图像上是非常困难的，因为如果是 1000x1000 像素的图片，参数量可能就上亿了。我们能否能设计一种网络，可以减少我们的参数量。">
+<meta property="og:description" content="每个函数在定义被 ECMAScript 解析器解析时，都会创建两个特殊的变量：this 和 arguments,换句话说，每个函数都有属于自己的 this 对象；">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/1d9d72bf6cfc417ea1ba2feb7dc1379c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/e54b339751bd4582b385a2396a5f3e5f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/b80b44fc6d51417ea2159e2fc66a6c4d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/f2bb7fa7531944c4a403fb70526c5a74.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/e44e9038bffd41cd93f0ae828fb2eeff.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/9e228f2f5fff4345883e55e6dc98aefa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/d9b535a9a2ac40909ee547e9c476032d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/ed9377d48d86488e8d69f504461c4e8c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/0872bfd96fa1447bb9369ee0b97802a3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/98cc85c338fc4d47b913ba2973e6b4d7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/c9f49b2d9d2f4452899a2e7262a3191a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/6cbdad7175874787a8b4ae8ba98e878a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/f73a0084fe124fcbac657b074a95e560.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/fd192a2eab9e4c3287239ef3f965f64d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/83422a736a2845b8bdce3e5b13a48a17.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/c52adc8c80dd45d18f3ee256c092963e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/ed6cc2151db24606a6fb7e77f77b82b9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/1fd502b01ed340dcb8cb172935d11162.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/2f1354230903476c8d60847aaa1b5fd4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
-<meta property="article:published_time" content="2021-12-12T15:05:00.000Z">
-<meta property="article:modified_time" content="2021-12-12T15:06:15.705Z">
+<meta property="article:published_time" content="2022-02-20T10:13:00.000Z">
+<meta property="article:modified_time" content="2022-02-20T10:14:06.231Z">
 <meta property="article:author" content="zju_cbw">
-<meta property="article:tag" content="深度学习">
-<meta property="article:tag" content="CNN">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="Web前端">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://img-blog.csdnimg.cn/1d9d72bf6cfc417ea1ba2feb7dc1379c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16">
 
-<link rel="canonical" href="http://example.com/2021/12/12/DL1_CNN/">
+<link rel="canonical" href="http://example.com/2022/02/20/JS_basic1/">
 
 
 <script id="page-configurations">
@@ -72,7 +52,7 @@
   };
 </script>
 
-  <title>深度学习(一)——CNN卷积神经网络 | cbw</title>
+  <title>JavaScript杂谈(一)——箭头函数没有this | cbw</title>
   
 
 
@@ -226,7 +206,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/DL1_CNN/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/20/JS_basic1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -239,7 +219,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          深度学习(一)——CNN卷积神经网络
+          JavaScript杂谈(一)——箭头函数没有this
         </h1>
 
         <div class="post-meta">
@@ -251,7 +231,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-12-12 23:05:00 / 修改时间：23:06:15" itemprop="dateCreated datePublished" datetime="2021-12-12T23:05:00+08:00">2021-12-12</time>
+              <time title="创建时间：2022-02-20 18:13:00 / 修改时间：18:14:06" itemprop="dateCreated datePublished" datetime="2022-02-20T18:13:00+08:00">2022-02-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -259,7 +239,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
                 </span>
             </span>
 
@@ -281,20 +261,28 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>我们知道，如果将全连接的神经网络应用到图像上是非常困难的，因为如果是 1000x1000 像素的图片，参数量可能就上亿了。<br>我们能否能设计一种网络，可以减少我们的参数量。<br><img src="https://img-blog.csdnimg.cn/1d9d72bf6cfc417ea1ba2feb7dc1379c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+        <p>每个函数在定义被 ECMAScript 解析器解析时，都会创建两个特殊的变量：<code>this</code> 和 <code>arguments</code>,换句话说，每个函数都有属于自己的 <code>this</code> 对象；</p>
 <span id="more"></span>
-<p>实际上，我们的眼睛是先找出图像的特征，再根据特征分辨图像到底是什么的，我们也可以设计网络去识别特征，再根据特征识别图像。如果可以这样，就能大大减少参数量，因为特征比整个图像小得多。<br><img src="https://img-blog.csdnimg.cn/e54b339751bd4582b385a2396a5f3e5f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>并且，无论这个特征出现在什么地方，我们都可以使用一个神经元来完成这个工作，这样就可以减少参数量。<br><img src="https://img-blog.csdnimg.cn/b80b44fc6d51417ea2159e2fc66a6c4d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>图像还有个特点就是，假如我们把奇数像素点提取出来，而删去偶数像素点，其实对我们识别图像是没有什么太大的影响的。</p>
-<p><strong>CNN就是利用图像的这些特定来简化参数量的。</strong></p>
-<hr>
-<h1 id="网络结构"><a href="#网络结构" class="headerlink" title="网络结构"></a>网络结构</h1><p>CNN整个网络结构如下<br><img src="https://img-blog.csdnimg.cn/f2bb7fa7531944c4a403fb70526c5a74.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<h2 id="Convolution-卷积层"><a href="#Convolution-卷积层" class="headerlink" title="Convolution 卷积层"></a>Convolution 卷积层</h2><p><img src="https://img-blog.csdnimg.cn/e44e9038bffd41cd93f0ae828fb2eeff.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>卷积层简单来说就是通过多个卷积核（过滤器）来提取特征。<br><img src="https://img-blog.csdnimg.cn/9e228f2f5fff4345883e55e6dc98aefa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>卷积过程就是设定一个 stride(步长)，然后每次和过滤器内积完之后，移动 stride。<br><img src="https://img-blog.csdnimg.cn/d9b535a9a2ac40909ee547e9c476032d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>从下图可以看出，无论特征在哪，都可以通过一个过滤器提取出来。<br><img src="https://img-blog.csdnimg.cn/ed9377d48d86488e8d69f504461c4e8c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>之后，每个过滤器重复上面的操作即可。<br><img src="https://img-blog.csdnimg.cn/0872bfd96fa1447bb9369ee0b97802a3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>对于RGB图像，我们设计三层的过滤器即可。<br><img src="https://img-blog.csdnimg.cn/98cc85c338fc4d47b913ba2973e6b4d7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>有人可能会有疑问，滤波器和神经元有什么关系，看着一点都不像啊？其实过滤器就是神经元。<br>如果我们将图像展平，是不是就和神经元的连接差不多了。<br><img src="https://img-blog.csdnimg.cn/c9f49b2d9d2f4452899a2e7262a3191a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>而且神经元和神经元之间还是权值共享的，这样做既可以省好多参数，还可以避免过拟合。<br><img src="https://img-blog.csdnimg.cn/6cbdad7175874787a8b4ae8ba98e878a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<h2 id="池化层"><a href="#池化层" class="headerlink" title="池化层"></a>池化层</h2><p>我们以最大池化为例。<br><img src="https://img-blog.csdnimg.cn/f73a0084fe124fcbac657b074a95e560.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>最大池化就是在卷积之后，从每个块中提取出最大的，这就和提取奇数像素点一样，即使少了这些像素也对我们识别图像产生不了太大影响，这既可以减少参数，也可以防止过拟合。<br><img src="https://img-blog.csdnimg.cn/fd192a2eab9e4c3287239ef3f965f64d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<hr>
-<h1 id="全连接层"><a href="#全连接层" class="headerlink" title="全连接层"></a>全连接层</h1><p>我们在经过多次卷积池化这样操作后，需要将提取到的特征展平，放入全连接层。<br><img src="https://img-blog.csdnimg.cn/83422a736a2845b8bdce3e5b13a48a17.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>Flatten操作可以根据下面的图，很方便地理解。<br><img src="https://img-blog.csdnimg.cn/c52adc8c80dd45d18f3ee256c092963e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<hr>
-<h1 id="使用Keras设计CNN"><a href="#使用Keras设计CNN" class="headerlink" title="使用Keras设计CNN"></a>使用Keras设计CNN</h1><p><img src="https://img-blog.csdnimg.cn/ed6cc2151db24606a6fb7e77f77b82b9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>需要注意的是，从第二卷积层开始，每一个过滤器的深度都是上一层过滤器的个数。<br><img src="https://img-blog.csdnimg.cn/1fd502b01ed340dcb8cb172935d11162.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/2f1354230903476c8d60847aaa1b5fd4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemp1X2Nidw==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
-<hr>
-<h1 id="Pytorch搭建CNN"><a href="#Pytorch搭建CNN" class="headerlink" title="Pytorch搭建CNN"></a>Pytorch搭建CNN</h1><p>可以看我的这篇文章，<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44491423/article/details/121892838">CNN图片分类(Pytorch)</a>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">      <span class="built_in">window</span>.a = <span class="string">&#x27;windous&#x27;</span></span><br><span class="line">      <span class="built_in">window</span>.b = <span class="string">&#x27;bbbbwindous&#x27;</span></span><br><span class="line">      <span class="built_in">window</span>.name = <span class="string">&#x27;lisi&#x27;</span></span><br><span class="line">      <span class="comment">//1.块级作用域下不会被创建this；this只有全局对象window和常规函数才会创建</span></span><br><span class="line">      &#123;</span><br><span class="line">        <span class="keyword">let</span> a = <span class="string">&#x27;aaaa&#x27;</span>;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">this</span>.a);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//2对象下也不会被创建this；都只能去外层寻找</span></span><br><span class="line">      <span class="keyword">let</span> obj1 = &#123;</span><br><span class="line">        <span class="attr">name</span>:<span class="string">&#x27;lihua&#x27;</span>,</span><br><span class="line">        <span class="attr">nicheng</span>:<span class="built_in">this</span>.name,</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">console</span>.log(obj1.nicheng); <span class="comment">//打印的windou的namelisi，所以对象也没有this</span></span><br><span class="line">      <span class="built_in">console</span>.log(obj1.name);</span><br><span class="line"></span><br><span class="line">      <span class="comment">//3.自定义常规函数的this，ECMAScript解析器会帮助我们自动创建并指向函数本身</span></span><br><span class="line">      <span class="function"><span class="keyword">function</span> <span class="title">f1</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">this</span>);<span class="comment">//ECMAScript解析器会帮助我们自动创建，打印是fi（）&#123;&#125;</span></span><br><span class="line">        <span class="built_in">this</span>.b = <span class="string">&#x27;bbbbb&#x27;</span>; <span class="comment">//我们可以调用它，做一些赋值</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">this</span>.b);<span class="comment">//结果是‘bbb’</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">let</span> ff = <span class="keyword">new</span> f1();<span class="comment">//当我们初始化实例的时候，this就会指向实例ff</span></span><br><span class="line">      <span class="built_in">console</span>.log(ff.b);<span class="comment">//因此我们可以通过实例名.属性名的方式调用this.b，打印是‘bbb’</span></span><br><span class="line">      <span class="comment">//4.常规函数作为对象的方法时,ECMAScript解析器会帮助我们自动创建，并指向对象</span></span><br><span class="line">      <span class="keyword">let</span> obj2 = &#123;</span><br><span class="line">        <span class="attr">name</span>:<span class="string">&#x27;lihua&#x27;</span>,</span><br><span class="line">        <span class="function"><span class="title">nicheng</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">          <span class="keyword">let</span> name = <span class="string">&#x27;xiaoming&#x27;</span>;</span><br><span class="line">          <span class="built_in">console</span>.log(<span class="built_in">this</span>);<span class="comment">//指向的是obj2</span></span><br><span class="line">          <span class="keyword">return</span> <span class="built_in">this</span>.name;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">console</span>.log(obj2.nicheng());<span class="comment">//打印lihua</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">//5.自定义箭头函数时，我们知道箭头函数和无论如何都不会被ECMAScript解析器创建this，</span></span><br><span class="line">      <span class="comment">//所以虽然也可以用this但是都是调用外层的this，所以这里直接调用window</span></span><br><span class="line">      <span class="keyword">let</span> f2 = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">this</span>); <span class="comment">//打印window</span></span><br><span class="line">      &#125;</span><br><span class="line">      f2();</span><br><span class="line">      <span class="comment">//6.箭头函数作为对象方法时，仍然需要调用外层的this，</span></span><br><span class="line">      <span class="comment">//对象也没有this，所以只能调用对象外面的this，那还是this</span></span><br><span class="line">      <span class="comment">//注意和常规函数做方法时区别，常规函数是由this，并被编译器指向了对象，而箭头函数是直接就没有this，只能去外面找；</span></span><br><span class="line">      <span class="keyword">let</span> obj3 = &#123;</span><br><span class="line">        <span class="attr">name</span>:<span class="string">&#x27;lihua&#x27;</span>,</span><br><span class="line">        <span class="attr">nicheng</span>:<span class="function">() =&gt;</span> &#123;</span><br><span class="line">          <span class="built_in">console</span>.log(<span class="built_in">this</span>);<span class="comment">//打印window</span></span><br><span class="line">          <span class="keyword">return</span> <span class="built_in">this</span>.name</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">console</span>.log(obj3.nicheng());<span class="comment">//打印lisi</span></span><br><span class="line"></span><br><span class="line">    &lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>总结</strong></p>
+<ol>
+<li>只有 <code>window</code> 和常规函数会被编译器创建 <code>this</code> 对象，块级作用域、对象{}、箭头函数都不会，他们只能去外面寻找。</li>
+<li>常规函数的 <code>this</code> 在自定义时指向自己或实例，在对象做方法时指向对象； </li>
+</ol>
+<p><strong>特性</strong></p>
+<ul>
+<li>特性一：<code>this</code> 是静态的，<code>this</code> 始终指向函数申明时外层作用域下的 <code>this</code> 值；而非箭头函数 <code>this</code> 会随着 <code>call</code> 和  <code>apply</code> 而改变；</li>
+<li>特性二：箭头函数不能作为构造函数，去实例化对象；</li>
+<li>特性三:  不可以使用 <code>aruguments</code> 变量</li>
+<li>特性四：箭头函数在符合条件的情况下，还可以简写，更少书写代码；</li>
+</ul>
+<p><strong>使用</strong>使用：</p>
+<ol>
+<li><p>对于需要使用 <code>object.method()</code> 方式调用的函数，使用普通函数定义，不要使用箭头函数。对象方法中所使用的 <code>this</code> 值有确定的含义，指的就是 <code>object</code> 本身。</p>
+</li>
+<li><p>其他情况下，全部使用箭头函数。</p>
+</li>
+</ol>
 
     </div>
 
@@ -320,7 +308,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2021/12/12/DL1_CNN/" title="深度学习(一)——CNN卷积神经网络">http://example.com/2021/12/12/DL1_CNN/</a>
+    <a href="http://example.com/2022/02/20/JS_basic1/" title="JavaScript杂谈(一)——箭头函数没有this">http://example.com/2022/02/20/JS_basic1/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -331,8 +319,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
-              <a href="/tags/CNN/" rel="tag"># CNN</a>
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+              <a href="/tags/Web%E5%89%8D%E7%AB%AF/" rel="tag"># Web前端</a>
           </div>
 
         
@@ -341,12 +329,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/12/09/ML13_%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="prev" title="机器学习(十三)——神经网络">
-      <i class="fa fa-chevron-left"></i> 机器学习(十三)——神经网络
+    <a href="/2022/02/17/JSWebApi2/" rel="prev" title="客户端网页API(二)——从服务器获取数据">
+      <i class="fa fa-chevron-left"></i> 客户端网页API(二)——从服务器获取数据
     </a></div>
       <div class="post-nav-item">
-    <a href="/2021/12/12/DLPJ_CNN%E9%A3%9F%E7%89%A9%E5%9B%BE%E7%89%87%E5%88%86%E7%B1%BB/" rel="next" title="CNN图片分类(Pytorch)">
-      CNN图片分类(Pytorch) <i class="fa fa-chevron-right"></i>
+    <a href="/2022/02/20/JS_basic2/" rel="next" title="JavaScript杂谈(二)——箭头函数和匿名函数的区别">
+      JavaScript杂谈(二)——箭头函数和匿名函数的区别 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -411,7 +399,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">网络结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Convolution-%E5%8D%B7%E7%A7%AF%E5%B1%82"><span class="nav-number">2.1.</span> <span class="nav-text">Convolution 卷积层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%A0%E5%8C%96%E5%B1%82"><span class="nav-number">2.2.</span> <span class="nav-text">池化层</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%A8%E8%BF%9E%E6%8E%A5%E5%B1%82"><span class="nav-number">3.</span> <span class="nav-text">全连接层</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Keras%E8%AE%BE%E8%AE%A1CNN"><span class="nav-number">4.</span> <span class="nav-text">使用Keras设计CNN</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pytorch%E6%90%AD%E5%BB%BACNN"><span class="nav-number">5.</span> <span class="nav-text">Pytorch搭建CNN</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
